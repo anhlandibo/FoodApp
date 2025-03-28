@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">FoodApp</string>
+    <string name="title_splash">Welcome to your <font color="#FC5835">food </font>\n<font color="#FC5835">paradis</font> experience food\nperfection delivered</string>
+    <string name="subtitile_splash">Shared and delightful, for an easy and enjoyable food ordering experience.</string>
+    <string name="login">Login</string>
+    <string name="remember_password">Don\'t remember password? Recovery it</string>
+    <string name="sign_up">Sign up</string>
+    <string name="star">*********</string>
+    <string name="example_gmail_com">example@gmail.com</string>
+    <string name="fast_delivery_food"> <font color="#FF0000">Fast Delivery</font> Food</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
