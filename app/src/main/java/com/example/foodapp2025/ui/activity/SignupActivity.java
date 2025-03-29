@@ -13,7 +13,6 @@ import com.example.foodapp2025.data.remote.AuthRemoteDataSource;
 import com.example.foodapp2025.data.repository.AuthRepository;
 import com.example.foodapp2025.databinding.ActivitySignupBinding;
 import com.example.foodapp2025.viewmodel.AuthViewModel;
-import com.example.foodapp2025.viewmodel.RegisterViewModel;
 
 public class SignupActivity extends AppCompatActivity {
     private ActivitySignupBinding binding;

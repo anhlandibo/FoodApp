@@ -8,15 +8,12 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.test.runner.permission.RequestPermissionCallable;
 
 import com.example.foodapp2025.data.model.UserModel;
 import com.example.foodapp2025.data.remote.AuthRemoteDataSource;
 import com.example.foodapp2025.data.repository.AuthRepository;
 import com.example.foodapp2025.databinding.ActivityLoginBinding;
-import com.example.foodapp2025.utils.Result;
 import com.example.foodapp2025.viewmodel.AuthViewModel;
-import com.example.foodapp2025.viewmodel.LoginViewModel;
 
 public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding binding;
