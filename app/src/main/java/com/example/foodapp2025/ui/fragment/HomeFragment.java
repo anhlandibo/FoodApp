@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
@@ -18,8 +19,10 @@ import android.view.ViewGroup;
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.BannerModel;
 import com.example.foodapp2025.databinding.FragmentHomeBinding;
+import com.example.foodapp2025.ui.adapter.CategoryAdapter;
 import com.example.foodapp2025.ui.adapter.SliderAdapter;
 import com.example.foodapp2025.viewmodel.BannerViewModel;
+import com.example.foodapp2025.viewmodel.CategoryViewModel;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -34,6 +37,8 @@ public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private BannerViewModel bannerViewModel;
+    private CategoryViewModel categoryViewModel;
+    private CategoryAdapter categoryAdapter;
     private Handler handler = new Handler();
     private Runnable runnable;
 
@@ -89,8 +94,22 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         bannerViewModel = new ViewModelProvider(this).get(BannerViewModel.class);
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         initBanner();
+        initCategory();
     }
+
+    private void initCategory() {
+
+        categoryViewModel.getCategories().observe(getViewLifecycleOwner(), categoryModels -> {
+            if (categoryModels != null && !categoryModels.isEmpty()) {
+                categoryAdapter = new CategoryAdapter(categoryModels);
+                binding.categoryRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),3));
+                binding.categoryRecyclerView.setAdapter(categoryAdapter);
+            }
+        });
+    }
+
     private void initBanner() {
         binding.progressBarSlider.setVisibility(View.VISIBLE);
         bannerViewModel.loadBanner().observe(getViewLifecycleOwner(), bannerModels -> {

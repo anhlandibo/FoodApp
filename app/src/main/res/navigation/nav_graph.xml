@@ -29,4 +29,15 @@
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
 
+    <fragment
+        android:id="@+id/categoryDetailFragment"
+        android:name="com.example.foodapp2025.ui.fragment.CategoryDetailFragment"
+        android:label="Category Detail">
+        <argument
+            android:name="categoryName"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+
 </navigation>
