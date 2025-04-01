@@ -1,5 +1,6 @@
 package com.example.foodapp2025.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         this.categoryList = categoryList;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setCategoryList(ArrayList<CategoryModel> newList){
         this.categoryList = newList;
         notifyDataSetChanged(); //cap nhat du lieu
@@ -40,7 +42,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     @Override
     public void onBindViewHolder(@NonNull CategoryAdapter.CategoryViewHolder holder, int position) {
         CategoryModel categoryModel = categoryList.get(position);
-        holder.categoryName.setText(categoryModel.getName());
+        holder.categoryName.setText(categoryModel.getName().toUpperCase());
         //Load anh tu Firestore vao Glide
         Glide.with(holder.itemView.getContext())
                 .load(categoryModel.getImageUrl())

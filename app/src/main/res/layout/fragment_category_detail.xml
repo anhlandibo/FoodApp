@@ -6,20 +6,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragment.CategoryDetailFragment">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/categoryDetailToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Toolbar.Primary"
-        app:navigationIcon="@drawable/back"
-        app:title="Category Details"
-        android:layout_marginTop="16dp"
-        app:titleTextColor="@android:color/white"/>
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:orientation="vertical">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/categoryDetailToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/toolbar_gradient"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Toolbar.Primary"
+            app:navigationIcon="@drawable/back"
+            app:navigationIconTint="@color/white"
+            app:title="Category Details"
+            android:layout_marginTop="16dp"
+            app:titleTextColor="@android:color/white"/>
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/foodRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            />
+    </LinearLayout>
 </FrameLayout>

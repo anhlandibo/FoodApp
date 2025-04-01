@@ -14,4 +14,6 @@
     <color name="darkPurple">#2E4058</color>
     <color name="lightOrange">#FEF4E5</color>
     <color name="darkGrey">#4A494E</color>
+    <color name="red_accent">#FFFF5252</color>
+    <color name="yellow_accent">#FFFFEB3B</color>
 </resources>
