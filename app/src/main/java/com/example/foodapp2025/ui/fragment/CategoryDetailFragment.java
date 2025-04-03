@@ -82,7 +82,7 @@ public class CategoryDetailFragment extends Fragment {
     private void initToolbar(View view, String categoryName){
         MaterialToolbar toolbar = view.findViewById(R.id.categoryDetailToolbar);
 
-        toolbar.setTitle(categoryName.toUpperCase());
+        toolbar.setTitle(categoryName);
 
         toolbar.setNavigationOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
@@ -107,7 +107,7 @@ public class CategoryDetailFragment extends Fragment {
         }
 
         // Back button
-        initToolbar(view, categoryName );
+        initToolbar(view, categoryName);
 
 
         //Cai dat RecyclerView voi FoodAdapter va GridLayoutManager
@@ -125,6 +125,9 @@ public class CategoryDetailFragment extends Fragment {
                 Toast.makeText(getContext(), "No food item found", Toast.LENGTH_SHORT).show();
             }
         });
+
+
+
 
     }
 }

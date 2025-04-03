@@ -15,4 +15,7 @@ public class FoodViewModel extends ViewModel {
     public LiveData<ArrayList<FoodModel>> getMenuItems(String categoryName){
         return foodRepository.getMenuItems(categoryName);
     }
+    public LiveData<ArrayList<FoodModel>> getPopularFood(){
+        return foodRepository.getPopularFood();
+    }
 }

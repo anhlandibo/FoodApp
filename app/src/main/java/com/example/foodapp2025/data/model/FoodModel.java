@@ -1,6 +1,8 @@
 package com.example.foodapp2025.data.model;
 
-public class FoodModel {
+import java.io.Serializable;
+
+public class FoodModel implements Serializable {
     private String id;
     private String name;
     private String imageUrl;
@@ -10,6 +12,16 @@ public class FoodModel {
     private String time;
 
     private String star;
+
+    private boolean isPopular;
+
+    public boolean isPopular() {
+        return isPopular;
+    }
+
+    public void setPopular(boolean popular) {
+        isPopular = popular;
+    }
 
     public FoodModel() {}
 

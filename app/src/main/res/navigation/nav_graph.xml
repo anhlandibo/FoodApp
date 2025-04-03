@@ -39,5 +39,15 @@
             android:defaultValue="" />
     </fragment>
 
+    <fragment
+        android:id="@+id/foodDetailFragment"
+        android:name="com.example.foodapp2025.ui.fragment.FoodDetailFragment"
+        android:label="Food Detail">
+        <argument
+            android:name="name"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
 
 </navigation>

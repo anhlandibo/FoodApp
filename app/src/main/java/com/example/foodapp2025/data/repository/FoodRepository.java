@@ -17,4 +17,8 @@ public class FoodRepository {
     public LiveData<ArrayList<FoodModel>> getMenuItems(String category){
         return foodRemoteDataSource.getMenuItems(category);
     }
+
+    public LiveData<ArrayList<FoodModel>> getPopularFood(){
+        return foodRemoteDataSource.getPopularFood();
+    }
 }

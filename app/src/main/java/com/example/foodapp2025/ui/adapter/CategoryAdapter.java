@@ -42,7 +42,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     @Override
     public void onBindViewHolder(@NonNull CategoryAdapter.CategoryViewHolder holder, int position) {
         CategoryModel categoryModel = categoryList.get(position);
-        holder.categoryName.setText(categoryModel.getName().toUpperCase());
+        holder.categoryName.setText(categoryModel.getName());
         //Load anh tu Firestore vao Glide
         Glide.with(holder.itemView.getContext())
                 .load(categoryModel.getImageUrl())
