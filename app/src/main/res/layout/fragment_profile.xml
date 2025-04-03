@@ -46,7 +46,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/imageView7"
+                        android:id="@+id/profileAvt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/profile"
@@ -57,7 +57,7 @@
                         app:layout_constraintVertical_bias="0.25" />
 
                     <TextView
-                        android:id="@+id/textView10"
+                        android:id="@+id/fullName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
@@ -65,21 +65,21 @@
                         android:textColor="#ffffff"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="@+id/imageView7"
-                        app:layout_constraintStart_toStartOf="@+id/imageView7"
-                        app:layout_constraintTop_toBottomOf="@+id/imageView7" />
+                        app:layout_constraintEnd_toEndOf="@+id/profileAvt"
+                        app:layout_constraintStart_toStartOf="@+id/profileAvt"
+                        app:layout_constraintTop_toBottomOf="@+id/profileAvt" />
 
                     <TextView
-                        android:id="@+id/textView11"
+                        android:id="@+id/emailText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="quangtienngo661@gmail.com"
                         android:textColor="#ffffff"
                         android:textSize="18sp"
-                        app:layout_constraintEnd_toEndOf="@+id/textView10"
+                        app:layout_constraintEnd_toEndOf="@+id/fullName"
                         app:layout_constraintHorizontal_bias="0.458"
-                        app:layout_constraintStart_toStartOf="@+id/textView10"
-                        app:layout_constraintTop_toBottomOf="@+id/textView10" />
+                        app:layout_constraintStart_toStartOf="@+id/fullName"
+                        app:layout_constraintTop_toBottomOf="@+id/fullName" />
 
 
                     <LinearLayout
@@ -97,7 +97,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textView11">
+                        app:layout_constraintTop_toBottomOf="@+id/emailText">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -121,7 +121,7 @@
                                     android:background="@drawable/oval_background">
 
                                     <ImageView
-                                        android:id="@+id/imageView10"
+                                        android:id="@+id/walletIcon"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:src="@drawable/wallet"
@@ -132,7 +132,7 @@
                                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                                 <TextView
-                                    android:id="@+id/textView12"
+                                    android:id="@+id/paymentText"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="8dp"
@@ -159,7 +159,7 @@
                                     android:background="@drawable/oval_background">
 
                                     <ImageView
-                                        android:id="@+id/imageView10"
+                                        android:id="@+id/settingsIcon"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:src="@drawable/settings_icon"
@@ -170,7 +170,7 @@
                                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                                 <TextView
-                                    android:id="@+id/textView12"
+                                    android:id="@+id/settingsText"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="8dp"
@@ -197,7 +197,7 @@
                                     android:background="@drawable/oval_background">
 
                                     <ImageView
-                                        android:id="@+id/imageView10"
+                                        android:id="@+id/notiIcon"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:src="@drawable/bell_icon"
@@ -208,7 +208,7 @@
                                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                                 <TextView
-                                    android:id="@+id/textView12"
+                                    android:id="@+id/notiText"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="8dp"
@@ -230,7 +230,6 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/textView14"
                                 android:layout_width="280dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -239,7 +238,7 @@
                                 android:textSize="18dp" />
 
                             <TextView
-                                android:id="@+id/textView15"
+                                android:id="@+id/changeButton"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Change"
@@ -253,7 +252,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
                             android:layout_marginHorizontal="10dp"
-                            android:layout_marginVertical=""
                             android:background="#d9d9d9" />
 
                         <LinearLayout
@@ -266,7 +264,6 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/textView14"
                                 android:layout_width="280dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -275,11 +272,11 @@
                                 android:textSize="18dp" />
 
                             <TextView
-                                android:id="@+id/textView15"
+                                android:id="@+id/phoneNumber"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="123-456-789"
-                                android:textAlignment="textEnd "
+                                android:textAlignment="textEnd"
                                 android:textSize="16sp" />
 
                         </LinearLayout>
@@ -289,7 +286,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
                             android:layout_marginHorizontal="10dp"
-                            android:layout_marginVertical=""
                             android:background="#d9d9d9" />
 
                         <LinearLayout
@@ -302,7 +298,6 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/textView14"
                                 android:layout_width="280dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -311,11 +306,11 @@
                                 android:textSize="18dp" />
 
                             <TextView
-                                android:id="@+id/textView15"
+                                android:id="@+id/address"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="32 Down Street"
-                                android:textAlignment="textEnd "
+                                android:textAlignment="textEnd"
                                 android:textSize="16sp" />
 
                         </LinearLayout>
@@ -325,7 +320,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
                             android:layout_marginHorizontal="10dp"
-                            android:layout_marginVertical=""
                             android:background="#d9d9d9" />
 
                         <LinearLayout
@@ -338,7 +332,6 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/textView14"
                                 android:layout_width="280dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -347,11 +340,11 @@
                                 android:textSize="18dp" />
 
                             <TextView
-                                android:id="@+id/textView15"
+                                android:id="@+id/dateOfBirth"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="05-03-2005"
-                                android:textAlignment="textEnd "
+                                android:textAlignment="textEnd"
                                 android:textSize="16sp" />
 
                         </LinearLayout>
@@ -361,7 +354,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
                             android:layout_marginHorizontal="10dp"
-                            android:layout_marginVertical=""
                             android:background="#d9d9d9" />
 
                         <LinearLayout
@@ -383,11 +375,11 @@
                                 android:textSize="18dp" />
 
                             <TextView
-                                android:id="@+id/textView15"
+                                android:id="@+id/gender"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Male"
-                                android:textAlignment="textEnd "
+                                android:textAlignment="textEnd"
                                 android:textSize="16sp" />
 
                         </LinearLayout>
@@ -397,7 +389,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
                             android:layout_marginHorizontal="10dp"
-                            android:layout_marginVertical=""
                             android:background="#d9d9d9" />
 
                     </LinearLayout>
