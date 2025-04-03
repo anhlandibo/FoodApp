@@ -1,6 +1,7 @@
 package com.example.foodapp2025.ui.adapter;
 
 import android.annotation.SuppressLint;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -44,6 +47,16 @@ public class PopularFoodAdapter extends RecyclerView.Adapter<PopularFoodAdapter.
         Glide.with(holder.itemView.getContext())
                 .load(popularFood.getImageUrl())
                 .into(holder.popularFoodImage);
+
+        //navigate to food detail fragment to add to cart
+        holder.itemView.setOnClickListener(v -> {
+            FoodModel selectedFood = popularFoodList.get(position);
+            NavController navController = Navigation.findNavController(v);
+            Bundle bundle = new Bundle();
+            bundle.putString("foodName", selectedFood.getName());
+            bundle.putSerializable("food", selectedFood);
+            navController.navigate(R.id.foodDetailFragment, bundle);
+        });
     }
 
     @Override
