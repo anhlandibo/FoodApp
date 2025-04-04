@@ -1,5 +1,6 @@
 package com.example.foodapp2025.ui.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.BannerModel;
 import com.example.foodapp2025.databinding.FragmentHomeBinding;
+import com.example.foodapp2025.ui.activity.SplashActivity;
 import com.example.foodapp2025.ui.adapter.CategoryAdapter;
 import com.example.foodapp2025.ui.adapter.FoodAdapter;
 import com.example.foodapp2025.ui.adapter.PopularFoodAdapter;
@@ -27,6 +29,9 @@ import com.example.foodapp2025.ui.adapter.SliderAdapter;
 import com.example.foodapp2025.viewmodel.BannerViewModel;
 import com.example.foodapp2025.viewmodel.CategoryViewModel;
 import com.example.foodapp2025.viewmodel.FoodViewModel;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -106,6 +111,16 @@ public class HomeFragment extends Fragment {
         initBanner();
         initCategory();
         initPopular();
+
+        binding.logoutBtn.setOnClickListener(v -> {
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            if (auth.getCurrentUser() != null){
+                auth.signOut();
+                GoogleSignIn.getClient(requireContext(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut();
+                startActivity(new Intent(requireActivity(), SplashActivity.class));
+                requireActivity().finish();
+            }
+        });
     }
 
     private void initPopular() {
