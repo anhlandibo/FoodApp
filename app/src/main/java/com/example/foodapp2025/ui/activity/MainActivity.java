@@ -25,6 +25,7 @@ import com.example.foodapp2025.ui.fragment.FavoriteFragment;
 import com.example.foodapp2025.ui.fragment.HomeFragment;
 import com.example.foodapp2025.ui.fragment.ProfileFragment;
 import com.example.foodapp2025.viewmodel.BannerViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -45,6 +46,14 @@ public class MainActivity extends AppCompatActivity {
         if (navHostFragment != null){
             NavController navController = navHostFragment.getNavController();
             NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
+        }
+    }
+    public void setBottomNavigationVisibility(boolean isVisible) {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
+        if (isVisible) {
+            bottomNavigationView.setVisibility(View.VISIBLE);
+        } else {
+            bottomNavigationView.setVisibility(View.GONE);
         }
     }
 

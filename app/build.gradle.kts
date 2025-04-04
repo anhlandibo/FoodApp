@@ -26,7 +26,6 @@ android {
             )
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -65,6 +64,11 @@ dependencies {
 
     // UI components and additional libraries
     implementation("com.github.bumptech.glide:glide:4.16.0") // Avoid duplicating Glide versions
+    implementation(libs.firebase.storage)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+    implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.github.ismaeldivita:chip-navigation-bar:1.4.0")
     implementation("com.google.code.gson:gson:2.9.1")
     implementation("com.google.android.material:material:1.13.0-alpha11")
@@ -77,4 +81,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation("androidx.navigation:navigation-fragment-ktx:2.8.9")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
+
 }
