@@ -26,37 +26,55 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    buildFeatures{
+
+    buildFeatures {
         viewBinding = true
     }
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
+    // Firebase libraries
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+
+    // Google Sign-In libraries
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation ("com.google.android.gms:play-services-auth:20.7.0") // Explicit version for Play Services
+
+    // Other libraries
     implementation(libs.runner)
     implementation(libs.legacy.support.v4)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-    implementation("com.github.bumptech.glide:glide:4.12.0")
+
+    // Navigation components
+    implementation("androidx.navigation:navigation-fragment-ktx:2.8.9")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
+
+    // UI components and additional libraries
+    implementation("com.github.bumptech.glide:glide:4.16.0") // Avoid duplicating Glide versions
     implementation("com.github.ismaeldivita:chip-navigation-bar:1.4.0")
     implementation("com.google.code.gson:gson:2.9.1")
     implementation("com.google.android.material:material:1.13.0-alpha11")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.8.9")
-    implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
+    implementation ("com.google.android.gms:play-services-auth:21.3.0")
+    implementation ("com.google.firebase:firebase-auth:21.0.3")
+    implementation ("com.google.firebase:firebase-firestore:24.8.1")
+
+
+    // Unit and UI tests
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }

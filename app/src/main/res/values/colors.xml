@@ -13,5 +13,6 @@
     <color name="lightGrey">#F5F5F5</color>
     <color name="darkPurple">#2E4058</color>
     <color name="lightOrange">#FEF4E5</color>
+    <color name="buttonOrange">#f06e2e</color>
     <color name="darkGrey">#4A494E</color>
 </resources>
