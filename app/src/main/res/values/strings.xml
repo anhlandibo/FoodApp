@@ -10,4 +10,5 @@
     <string name="fast_delivery_food"> <font color="#FF0000">Fast Delivery</font> Food</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="default_web_client_id">78981881798-780ejmmf1i5h6otal5p5ftl0qnd1rg6g.apps.googleusercontent.com</string>
 </resources>
