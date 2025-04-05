@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -27,6 +28,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -184,6 +186,14 @@ public class HomeFragment extends Fragment {
             // Cho phép popup đóng khi bấm ngoài khu vực
             popupWindow.setOutsideTouchable(true);
             popupWindow.setFocusable(true);
+
+            //Đặt animation
+            popupWindow.setAnimationStyle(android.R.style.Animation_Toast);
+
+            //Đặt chiều rộng, chiều cao
+            popupWindow.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
+            popupWindow.setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
+
             // Hiển thị PopupWindow tại vị trí của nút filter
             popupWindow.showAsDropDown(binding.filterBtn, 0, 0);
         });
