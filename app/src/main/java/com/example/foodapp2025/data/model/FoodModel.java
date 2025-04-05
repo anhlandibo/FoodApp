@@ -1,5 +1,7 @@
 package com.example.foodapp2025.data.model;
 
+import com.google.firebase.firestore.PropertyName;
+
 import java.io.Serializable;
 
 public class FoodModel implements Serializable {
@@ -14,11 +16,12 @@ public class FoodModel implements Serializable {
     private String star;
 
     private boolean isPopular;
+    @PropertyName("isPopular")
 
-    public boolean isPopular() {
+    public boolean getIsPopular() {
         return isPopular;
     }
-
+    @PropertyName("isPopular")
     public void setPopular(boolean popular) {
         isPopular = popular;
     }
@@ -89,12 +92,15 @@ public class FoodModel implements Serializable {
         this.price = price;
     }
 
-    public FoodModel(String id, String name, String imageUrl, int price, String categoryName, String description) {
-        this.id = id;
+    public FoodModel(String name, String id, String imageUrl, int price, String categoryName, String description, String time, String star, boolean isPopular) {
         this.name = name;
+        this.id = id;
         this.imageUrl = imageUrl;
         this.price = price;
         this.categoryName = categoryName;
         this.description = description;
+        this.time = time;
+        this.star = star;
+        this.isPopular = isPopular;
     }
 }

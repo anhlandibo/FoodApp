@@ -21,4 +21,16 @@ public class FoodRepository {
     public LiveData<ArrayList<FoodModel>> getPopularFood(){
         return foodRemoteDataSource.getPopularFood();
     }
+
+    public LiveData<ArrayList<FoodModel>> getFoodByKeyword(String keyword){
+        return foodRemoteDataSource.getFoodByKeyword(keyword);
+    }
+
+    public LiveData<FoodModel> getMinPriceFood(){
+        return foodRemoteDataSource.getMinPriceFood();
+    }
+
+    public LiveData<FoodModel> getMaxPriceFood(){
+        return foodRemoteDataSource.getMaxPriceFood();
+    }
 }

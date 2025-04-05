@@ -1,10 +1,13 @@
 package com.example.foodapp2025.data.remote;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.foodapp2025.data.model.FoodModel;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -54,4 +57,70 @@ public class FoodRemoteDataSource {
         });
         return listMutableLiveData;
     }
+
+    public LiveData<ArrayList<FoodModel>> getFoodByKeyword(String keyword) {
+        MutableLiveData<ArrayList<FoodModel>> resultLiveData = new MutableLiveData<>();
+
+        foodCollection.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            ArrayList<FoodModel> filteredList = new ArrayList<>();
+
+            for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                FoodModel food = doc.toObject(FoodModel.class);
+                if (food != null && food.getName().toLowerCase().contains(keyword.toLowerCase())) {
+                    filteredList.add(food);
+                }
+            }
+
+            resultLiveData.setValue(filteredList);
+        }).addOnFailureListener(e -> {
+            resultLiveData.setValue(new ArrayList<>());
+            Log.e("RemoteDataSource", "Error getting food: ", e);
+        });
+
+        return resultLiveData;
+    }
+
+    public LiveData<FoodModel> getMinPriceFood(){
+        MutableLiveData<FoodModel> mutableLiveData = new MutableLiveData<>();
+
+        foodCollection.get().addOnSuccessListener(queryDocumentSnapshots -> {
+           FoodModel minFood = null;
+
+           for (DocumentSnapshot doc:queryDocumentSnapshots){
+               FoodModel foodModel = doc.toObject(FoodModel.class);
+               if (foodModel != null){
+                   if (minFood == null || foodModel.getPrice() < minFood.getPrice())
+                       minFood = foodModel;
+               }
+           }
+           mutableLiveData.setValue(minFood);
+        }).addOnFailureListener(e ->{
+            mutableLiveData.setValue(null);
+            Log.e("RemoteDataSource", "Error getting min price food: ", e);
+        });
+        return mutableLiveData;
+    }
+
+    public LiveData<FoodModel> getMaxPriceFood(){
+        MutableLiveData<FoodModel> mutableLiveData = new MutableLiveData<>();
+
+        foodCollection.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            FoodModel maxFood = null;
+
+            for (DocumentSnapshot doc:queryDocumentSnapshots){
+                FoodModel foodModel = doc.toObject(FoodModel.class);
+                if (foodModel != null){
+                    if (maxFood == null || foodModel.getPrice() > maxFood.getPrice())
+                        maxFood = foodModel;
+                }
+            }
+            mutableLiveData.setValue(maxFood);
+        }).addOnFailureListener(e ->{
+            mutableLiveData.setValue(null);
+            Log.e("RemoteDataSource", "Error getting min price food: ", e);
+        });
+        return mutableLiveData;
+    }
+
+
 }

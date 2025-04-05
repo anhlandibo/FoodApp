@@ -10,16 +10,20 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.foodapp2025.R;
+import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.databinding.FragmentCategoryDetailBinding;
 import com.example.foodapp2025.ui.adapter.FoodAdapter;
 import com.example.foodapp2025.viewmodel.FoodViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -79,7 +83,7 @@ public class CategoryDetailFragment extends Fragment {
         return binding.getRoot();
     }
 
-    private void initToolbar(View view, String categoryName){
+    private void initToolbar(View view, String categoryName) {
         MaterialToolbar toolbar = view.findViewById(R.id.categoryDetailToolbar);
 
         toolbar.setTitle(categoryName);
@@ -95,16 +99,26 @@ public class CategoryDetailFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-        //Lay categoryName tu Bundle arguments
+        //Lay args tu Bundle arguments
         String categoryName = null;
+        int minPrice = 0;
+        boolean isPopular = false;
+
+
         if (getArguments() != null) {
             categoryName = getArguments().getString("categoryName");
+            minPrice = getArguments().getInt("minPrice"); // default = 0
+            isPopular = getArguments().getBoolean("isPopular");
+        } else {
+            isPopular = false;
+            minPrice = 0;
         }
 
         if (categoryName == null || categoryName.isEmpty()) {
             Toast.makeText(getContext(), "Category not found", Toast.LENGTH_SHORT).show();
             return;
         }
+        Log.e("IsPopular", "ispopular: "+ isPopular);
 
         // Back button
         initToolbar(view, categoryName);
@@ -113,20 +127,35 @@ public class CategoryDetailFragment extends Fragment {
         //Cai dat RecyclerView voi FoodAdapter va GridLayoutManager
         foodAdapter = new FoodAdapter();
         binding.foodRecyclerView.setAdapter(foodAdapter);
-        binding.foodRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),2));
+        binding.foodRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
 
         //Khoi tao ViewModel va quan sat LiveData tu repository
         foodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
+        int finalMinPrice = minPrice;
+        boolean finalIsPopular = isPopular;
         foodViewModel.getMenuItems(categoryName).observe(getViewLifecycleOwner(), foodList -> {
             if (foodList != null && !foodList.isEmpty()) {
-                foodAdapter.setFoodList(foodList);
+                ArrayList<FoodModel> filteredList = new ArrayList<>();
+                for (FoodModel food : foodList) {
+                    Log.d("FoodItem", food.getName() + ": " + food.getPrice() + " - Popular: " + food.getIsPopular() + " min price: " + finalMinPrice);
+                    boolean matchesFilter = food.getPrice() >= finalMinPrice;
+                    if (finalIsPopular) {
+                        matchesFilter = matchesFilter && food.getIsPopular();
+                    }
+                    if (matchesFilter) {
+                        filteredList.add(food);
+                    }
+                }
+                foodAdapter.setFoodList(filteredList);
+
+                if (filteredList.isEmpty()) {
+                    Toast.makeText(getContext(), "No food items match your filter", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(getContext(), "No food item found", Toast.LENGTH_SHORT).show();
             }
         });
-
-
 
 
     }

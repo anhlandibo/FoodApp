@@ -135,10 +135,10 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-//        FirebaseUser user = auth.getCurrentUser();
-//        if (user != null) {
-//            navigateToMainActivity();
-//        }
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            navigateToMainActivity();
+        }
     }
 
     private void navigateToMainActivity() {

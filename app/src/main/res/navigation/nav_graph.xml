@@ -49,5 +49,24 @@
             android:defaultValue="" />
     </fragment>
 
+    <fragment
+        android:id="@+id/searchResultFragment"
+        android:name="com.example.foodapp2025.ui.fragment.SearchResultFragment"
+        android:label="Search Result"
+        >
+        <argument
+            android:name="search_keyword"
+            app:argType="string"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/foodFilterBottomSheetFragment"
+        android:name="com.example.foodapp2025.ui.fragment.FoodFilterBottomSheet"
+        android:label="Filter"
+        tools:layout="@layout/fragment_food_filter_bottom_sheet"
+        >
+    </fragment>
+
 
 </navigation>

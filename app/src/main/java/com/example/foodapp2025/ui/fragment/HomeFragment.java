@@ -1,12 +1,18 @@
 package com.example.foodapp2025.ui.fragment;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,9 +20,16 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.PopupWindow;
+import android.widget.SeekBar;
+import android.widget.Spinner;
 
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.BannerModel;
@@ -102,6 +115,7 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -112,23 +126,84 @@ public class HomeFragment extends Fragment {
         initCategory();
         initPopular();
 
+        //logout
         binding.logoutBtn.setOnClickListener(v -> {
             FirebaseAuth auth = FirebaseAuth.getInstance();
-            if (auth.getCurrentUser() != null){
+            if (auth.getCurrentUser() != null) {
                 auth.signOut();
                 GoogleSignIn.getClient(requireContext(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut();
                 startActivity(new Intent(requireActivity(), SplashActivity.class));
                 requireActivity().finish();
             }
         });
+
+        //search
+        binding.searchEdt.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                String keyword = binding.searchEdt.getText().toString().trim();
+                if (!keyword.isEmpty()) {
+                    goToSearchResultFragment(keyword, view);
+                }
+                binding.searchEdt.setText("");
+                return true;
+            }
+            return false;
+        });
+
+        //filter
+//        binding.filterBtn.setOnClickListener(v -> {
+//            FoodFilterBottomSheet bottomSheet = new FoodFilterBottomSheet();
+//
+//            bottomSheet.setOnFilterApplyListener(new FoodFilterBottomSheet.OnFilterApplyListener() {
+//                @Override
+//                public void onFilterApplied(String category, int minPrice, boolean isPopular) {
+//                    Bundle bundle = new Bundle();
+//                    bundle.putString("categoryName", category);
+//                    bundle.putInt("minPrice", minPrice);
+//                    bundle.putBoolean("isPopular", isPopular);
+//                    NavController navController = NavHostFragment.findNavController(HomeFragment.this);
+//                    navController.navigate(R.id.categoryDetailFragment, bundle);
+//                }
+//            });
+//            bottomSheet.show(getParentFragmentManager(), bottomSheet.getTag());
+//        });
+        binding.filterBtn.setOnClickListener(v -> {
+            FoodFilterPopupWindow popupWindow = new FoodFilterPopupWindow(requireContext(), (category, minPrice, isPopular) -> {
+                // Xử lý khi áp dụng bộ lọc
+                Bundle bundle = new Bundle();
+                bundle.putString("categoryName", category);
+                bundle.putInt("minPrice", minPrice);
+                bundle.putBoolean("isPopular", isPopular);
+                NavController navController = NavHostFragment.findNavController(HomeFragment.this);
+                navController.navigate(R.id.categoryDetailFragment, bundle);
+            });
+
+            // Đặt nền màu trắng cho PopupWindow
+            popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+
+            // Cho phép popup đóng khi bấm ngoài khu vực
+            popupWindow.setOutsideTouchable(true);
+            popupWindow.setFocusable(true);
+            // Hiển thị PopupWindow tại vị trí của nút filter
+            popupWindow.showAsDropDown(binding.filterBtn, 0, 0);
+        });
+
+    }
+
+    private void goToSearchResultFragment(String keyword, View v) {
+        Bundle bundle = new Bundle();
+        bundle.putString("search_keyword", keyword);
+
+        NavController navController = Navigation.findNavController(v);
+        navController.navigate(R.id.searchResultFragment, bundle);
     }
 
     private void initPopular() {
         binding.popularProgressbar.setVisibility(View.VISIBLE);
         foodViewModel.getPopularFood().observe(getViewLifecycleOwner(), popularFoodModels -> {
-            if (popularFoodModels != null && !popularFoodModels.isEmpty()){
+            if (popularFoodModels != null && !popularFoodModels.isEmpty()) {
                 popularFoodAdapter = new PopularFoodAdapter(popularFoodModels);
-                binding.popularFoodView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL, false));
+                binding.popularFoodView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
                 binding.popularFoodView.setAdapter(popularFoodAdapter);
                 binding.popularProgressbar.setVisibility(View.GONE);
             }
@@ -140,7 +215,7 @@ public class HomeFragment extends Fragment {
         categoryViewModel.getCategories().observe(getViewLifecycleOwner(), categoryModels -> {
             if (categoryModels != null && !categoryModels.isEmpty()) {
                 categoryAdapter = new CategoryAdapter(categoryModels);
-                binding.categoryRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),4));
+                binding.categoryRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
                 binding.categoryRecyclerView.setAdapter(categoryAdapter);
                 binding.categoryProgressbar.setVisibility(View.GONE);
             }
@@ -150,7 +225,7 @@ public class HomeFragment extends Fragment {
     private void initBanner() {
         binding.progressBarSlider.setVisibility(View.VISIBLE);
         bannerViewModel.loadBanner().observe(getViewLifecycleOwner(), bannerModels -> {
-            if (bannerModels != null && !bannerModels.isEmpty()){
+            if (bannerModels != null && !bannerModels.isEmpty()) {
                 banners(bannerModels);
                 binding.progressBarSlider.setVisibility(View.GONE);
                 autoImageSlide();

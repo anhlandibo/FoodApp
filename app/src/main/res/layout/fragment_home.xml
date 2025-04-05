@@ -69,6 +69,16 @@
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
 
+
+                <ImageView
+                    android:id="@+id/filterBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="12dp"
+                    android:src="@drawable/settings_icon" />
+
                 <EditText
                     android:id="@+id/searchEdt"
                     android:layout_width="0dp"
