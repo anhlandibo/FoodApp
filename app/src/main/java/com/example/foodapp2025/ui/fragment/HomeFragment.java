@@ -1,44 +1,45 @@
 package com.example.foodapp2025.ui.fragment;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
 import android.os.Handler;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.SeekBar;
-import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.BannerModel;
 import com.example.foodapp2025.databinding.FragmentHomeBinding;
 import com.example.foodapp2025.ui.activity.SplashActivity;
 import com.example.foodapp2025.ui.adapter.CategoryAdapter;
-import com.example.foodapp2025.ui.adapter.FoodAdapter;
 import com.example.foodapp2025.ui.adapter.PopularFoodAdapter;
 import com.example.foodapp2025.ui.adapter.SliderAdapter;
 import com.example.foodapp2025.viewmodel.BannerViewModel;
@@ -46,11 +47,14 @@ import com.example.foodapp2025.viewmodel.CategoryViewModel;
 import com.example.foodapp2025.viewmodel.FoodViewModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -69,13 +73,13 @@ public class HomeFragment extends Fragment {
     private Handler handler = new Handler();
     private Runnable runnable;
 
+    private SpeechRecognizer speechRecognizer;
+    private Intent speechRecognizerIntent;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -83,15 +87,7 @@ public class HomeFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
+
     public static HomeFragment newInstance(String param1, String param2) {
         HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
@@ -152,23 +148,6 @@ public class HomeFragment extends Fragment {
             return false;
         });
 
-        //filter
-//        binding.filterBtn.setOnClickListener(v -> {
-//            FoodFilterBottomSheet bottomSheet = new FoodFilterBottomSheet();
-//
-//            bottomSheet.setOnFilterApplyListener(new FoodFilterBottomSheet.OnFilterApplyListener() {
-//                @Override
-//                public void onFilterApplied(String category, int minPrice, boolean isPopular) {
-//                    Bundle bundle = new Bundle();
-//                    bundle.putString("categoryName", category);
-//                    bundle.putInt("minPrice", minPrice);
-//                    bundle.putBoolean("isPopular", isPopular);
-//                    NavController navController = NavHostFragment.findNavController(HomeFragment.this);
-//                    navController.navigate(R.id.categoryDetailFragment, bundle);
-//                }
-//            });
-//            bottomSheet.show(getParentFragmentManager(), bottomSheet.getTag());
-//        });
         binding.filterBtn.setOnClickListener(v -> {
             FoodFilterPopupWindow popupWindow = new FoodFilterPopupWindow(requireContext(), (category, minPrice, isPopular) -> {
                 // Xử lý khi áp dụng bộ lọc
@@ -198,8 +177,76 @@ public class HomeFragment extends Fragment {
             popupWindow.showAsDropDown(binding.filterBtn, 0, 0);
         });
 
+        AtomicBoolean isListening = new AtomicBoolean(false);
+        binding.voiceBtn.setOnClickListener(v -> {
+//            // Kiểm tra quyền ghi âm
+//            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+//                // Nếu chưa có quyền, yêu cầu quyền
+//                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+//            } else {
+//                // Nếu đã có quyền, khởi tạo SpeechRecognizer
+//                initializeSpeechRecognizer(view);
+//                // Bắt đầu nhận diện giọng nói
+//                speechRecognizer.startListening(speechRecognizerIntent);
+//            }
+            if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
+                // Nếu chưa có quyền, yêu cầu quyền
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+            else {
+                if (!isListening.get()){
+                    isListening.set(true);
+                    initializeSpeechRecognizer(view);
+                    speechRecognizer.startListening(speechRecognizerIntent);
+                    Toast.makeText(getContext(), "Is listening...", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    isListening.set(false);
+                    if (speechRecognizer != null){
+                        speechRecognizer.stopListening();
+                        speechRecognizer.destroy();
+                    }
+                    Toast.makeText(getContext(), "Stop listening", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
+    private void initializeSpeechRecognizer(View view) {
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getContext());
+        speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN");
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {}
+            @Override
+            public void onBeginningOfSpeech() {}
+            @Override
+            public void onRmsChanged(float rmsdB) {}
+            @Override
+            public void onBufferReceived(byte[] buffer) {}
+            @Override
+            public void onEndOfSpeech() {}
+            @Override
+            public void onError(int error) {
+                Toast.makeText(getContext(), "Speech recognition error: " + error, Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> recognizedWords = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (recognizedWords != null && !recognizedWords.isEmpty()) {
+                    String spokenText = recognizedWords.get(0); // Lấy kết quả đầu tiên từ danh sách nhận diện
+                    binding.searchEdt.setText(spokenText); // Đặt kết quả vào ô tìm kiếm
+                }
+            }
+            @Override
+            public void onPartialResults(Bundle partialResults) {}
+            @Override
+            public void onEvent(int eventType, Bundle params) {}
+        });
+    }
     private void goToSearchResultFragment(String keyword, View v) {
         Bundle bundle = new Bundle();
         bundle.putString("search_keyword", keyword);
@@ -244,32 +291,59 @@ public class HomeFragment extends Fragment {
     }
 
     private void autoImageSlide() {
-        final long SLIDE_DELAY = 3000; // 3 giây chuyển ảnh
+//        final long SLIDE_DELAY = 3000; // 3 giây chuyển ảnh
+//
+//        if (runnable != null) {
+//            handler.removeCallbacks(runnable); // Xóa runnable cũ nếu có
+//        }
+//
+//        runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                if (binding != null && binding.viewPagerSlider.getAdapter() != null) {
+//                    int currentItem = binding.viewPagerSlider.getCurrentItem();
+//                    int itemCount = binding.viewPagerSlider.getAdapter().getItemCount();
+//
+//                    if (itemCount > 0) {
+//                        int nextItem = (currentItem + 1) % itemCount; // Chuyển ảnh và quay lại đầu khi hết
+//                        binding.viewPagerSlider.setCurrentItem(nextItem, true);
+//                    }
+//                }
+//                handler.postDelayed(this, SLIDE_DELAY);
+//            }
+//        };
+//
+//        handler.postDelayed(runnable, SLIDE_DELAY);
 
-        if (runnable != null) {
-            handler.removeCallbacks(runnable); // Xóa runnable cũ nếu có
-        }
-
-        runnable = new Runnable() {
+        final long DELAY_MS = 3000;
+        final long PERIOD_MS = 3000;
+        int n = binding.viewPagerSlider.getAdapter().getItemCount();
+        final  Handler handler1 = new Handler();
+        final Runnable runnable1 = new Runnable() {
             @Override
             public void run() {
-                if (binding != null && binding.viewPagerSlider.getAdapter() != null) {
-                    int currentItem = binding.viewPagerSlider.getCurrentItem();
-                    int itemCount = binding.viewPagerSlider.getAdapter().getItemCount();
-
-                    if (itemCount > 0) {
-                        int nextItem = (currentItem + 1) % itemCount; // Chuyển ảnh và quay lại đầu khi hết
-                        binding.viewPagerSlider.setCurrentItem(nextItem, true);
-                    }
+                if (binding.viewPagerSlider.getCurrentItem() == n-1){
+                    binding.viewPagerSlider.setCurrentItem(0);
                 }
-                handler.postDelayed(this, SLIDE_DELAY);
+                else{
+                    binding.viewPagerSlider.setCurrentItem(binding.viewPagerSlider.getCurrentItem()+1, true);
+                }
             }
         };
 
-        handler.postDelayed(runnable, SLIDE_DELAY);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler1.post(runnable1);
+            }
+        }, DELAY_MS, PERIOD_MS);
+
     }
 
     private void banners(ArrayList<BannerModel> bannerModels) {
+
+
         binding.viewPagerSlider.setAdapter(new SliderAdapter(bannerModels, binding.viewPagerSlider));
         binding.viewPagerSlider.setClipToPadding(false);
         binding.viewPagerSlider.setClipChildren(false);
@@ -279,6 +353,16 @@ public class HomeFragment extends Fragment {
         CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
         compositePageTransformer.addTransformer(new MarginPageTransformer(40));
         binding.viewPagerSlider.setPageTransformer(compositePageTransformer);
+
+
+        new TabLayoutMediator(binding.tabLayout, binding.viewPagerSlider,
+                new TabLayoutMediator.TabConfigurationStrategy() {
+                    @Override
+                    public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+
+                    }
+                }).attach();
+
     }
 
     @Override

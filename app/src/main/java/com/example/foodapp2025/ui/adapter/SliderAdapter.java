@@ -20,13 +20,13 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
     private ArrayList<BannerModel> sliderItems;
     private ViewPager2 viewPager2;
     private Context context;
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            sliderItems.addAll(sliderItems);
-            notifyDataSetChanged();
-        }
-    };
+//    private Runnable runnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            sliderItems.addAll(sliderItems);
+//            notifyDataSetChanged();
+//        }
+//    };
 
 
     public SliderAdapter(ArrayList<BannerModel> sliderItems, ViewPager2 viewPager2) {
@@ -45,9 +45,9 @@ public class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderView
     public void onBindViewHolder(@NonNull SliderAdapter.SliderViewholder holder, int position) {
 
         holder.setImage(sliderItems.get(position));
-        if (position == sliderItems.size()-2){
-            viewPager2.post(runnable);
-        }
+//        if (position == sliderItems.size()-2){
+//            viewPager2.post(runnable);
+//        }
 
     }
 
