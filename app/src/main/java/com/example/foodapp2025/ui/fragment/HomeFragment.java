@@ -291,53 +291,53 @@ public class HomeFragment extends Fragment {
     }
 
     private void autoImageSlide() {
-//        final long SLIDE_DELAY = 3000; // 3 giây chuyển ảnh
-//
-//        if (runnable != null) {
-//            handler.removeCallbacks(runnable); // Xóa runnable cũ nếu có
-//        }
-//
-//        runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                if (binding != null && binding.viewPagerSlider.getAdapter() != null) {
-//                    int currentItem = binding.viewPagerSlider.getCurrentItem();
-//                    int itemCount = binding.viewPagerSlider.getAdapter().getItemCount();
-//
-//                    if (itemCount > 0) {
-//                        int nextItem = (currentItem + 1) % itemCount; // Chuyển ảnh và quay lại đầu khi hết
-//                        binding.viewPagerSlider.setCurrentItem(nextItem, true);
-//                    }
-//                }
-//                handler.postDelayed(this, SLIDE_DELAY);
-//            }
-//        };
-//
-//        handler.postDelayed(runnable, SLIDE_DELAY);
+        final long SLIDE_DELAY = 3000; // 3 giây chuyển ảnh
 
-        final long DELAY_MS = 3000;
-        final long PERIOD_MS = 3000;
-        int n = binding.viewPagerSlider.getAdapter().getItemCount();
-        final  Handler handler1 = new Handler();
-        final Runnable runnable1 = new Runnable() {
+        if (runnable != null) {
+            handler.removeCallbacks(runnable); // Xóa runnable cũ nếu có
+        }
+
+        runnable = new Runnable() {
             @Override
             public void run() {
-                if (binding.viewPagerSlider.getCurrentItem() == n-1){
-                    binding.viewPagerSlider.setCurrentItem(0);
+                if (binding != null && binding.viewPagerSlider.getAdapter() != null) {
+                    int currentItem = binding.viewPagerSlider.getCurrentItem();
+                    int itemCount = binding.viewPagerSlider.getAdapter().getItemCount();
+
+                    if (itemCount > 0) {
+                        int nextItem = (currentItem + 1) % itemCount; // Chuyển ảnh và quay lại đầu khi hết
+                        binding.viewPagerSlider.setCurrentItem(nextItem, true);
+                    }
                 }
-                else{
-                    binding.viewPagerSlider.setCurrentItem(binding.viewPagerSlider.getCurrentItem()+1, true);
-                }
+                handler.postDelayed(this, SLIDE_DELAY);
             }
         };
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                handler1.post(runnable1);
-            }
-        }, DELAY_MS, PERIOD_MS);
+        handler.postDelayed(runnable, SLIDE_DELAY);
+
+//        final long DELAY_MS = 3000;
+//        final long PERIOD_MS = 3000;
+//        int n = binding.viewPagerSlider.getAdapter().getItemCount();
+//        final  Handler handler1 = new Handler();
+//        final Runnable runnable1 = new Runnable() {
+//            @Override
+//            public void run() {
+//                if (binding.viewPagerSlider.getCurrentItem() == n-1){
+//                    binding.viewPagerSlider.setCurrentItem(0);
+//                }
+//                else{
+//                    binding.viewPagerSlider.setCurrentItem(binding.viewPagerSlider.getCurrentItem()+1, true);
+//                }
+//            }
+//        };
+//
+//        Timer timer = new Timer();
+//        timer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                handler1.post(runnable1);
+//            }
+//        }, DELAY_MS, PERIOD_MS);
 
     }
 
