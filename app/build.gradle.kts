@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -65,6 +66,7 @@ dependencies {
     // UI components and additional libraries
     implementation("com.github.bumptech.glide:glide:4.16.0") // Avoid duplicating Glide versions
     implementation(libs.firebase.storage)
+    implementation(libs.play.services.maps)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -83,4 +85,8 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.9")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.9")
+
+    //OpenStreetMap
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }

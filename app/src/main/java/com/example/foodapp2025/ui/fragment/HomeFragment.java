@@ -1,6 +1,7 @@
 package com.example.foodapp2025.ui.fragment;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -27,6 +28,7 @@ import android.os.Handler;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +40,7 @@ import android.widget.Toast;
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.BannerModel;
 import com.example.foodapp2025.databinding.FragmentHomeBinding;
+import com.example.foodapp2025.ui.activity.SelectLocationActivity;
 import com.example.foodapp2025.ui.activity.SplashActivity;
 import com.example.foodapp2025.ui.adapter.CategoryAdapter;
 import com.example.foodapp2025.ui.adapter.PopularFoodAdapter;
@@ -45,6 +48,7 @@ import com.example.foodapp2025.ui.adapter.SliderAdapter;
 import com.example.foodapp2025.viewmodel.BannerViewModel;
 import com.example.foodapp2025.viewmodel.CategoryViewModel;
 import com.example.foodapp2025.viewmodel.FoodViewModel;
+import com.example.foodapp2025.viewmodel.UserViewModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.tabs.TabLayout;
@@ -73,8 +77,12 @@ public class HomeFragment extends Fragment {
     private Handler handler = new Handler();
     private Runnable runnable;
 
+    // Khai báo cho tìm kiếm bằng giọng nói
     private SpeechRecognizer speechRecognizer;
     private Intent speechRecognizerIntent;
+
+    // Khai báo cho set địa chỉ giao hàng
+    private UserViewModel userViewModel;
 
 
     private static final String ARG_PARAM1 = "param1";
@@ -120,6 +128,7 @@ public class HomeFragment extends Fragment {
         bannerViewModel = new ViewModelProvider(this).get(BannerViewModel.class);
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         foodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         initBanner();
         initCategory();
         initPopular();
@@ -179,29 +188,18 @@ public class HomeFragment extends Fragment {
 
         AtomicBoolean isListening = new AtomicBoolean(false);
         binding.voiceBtn.setOnClickListener(v -> {
-//            // Kiểm tra quyền ghi âm
-//            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-//                // Nếu chưa có quyền, yêu cầu quyền
-//                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-//            } else {
-//                // Nếu đã có quyền, khởi tạo SpeechRecognizer
-//                initializeSpeechRecognizer(view);
-//                // Bắt đầu nhận diện giọng nói
-//                speechRecognizer.startListening(speechRecognizerIntent);
-//            }
             if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
                 // Nếu chưa có quyền, yêu cầu quyền
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 1);
             else {
-                if (!isListening.get()){
+                if (!isListening.get()) {
                     isListening.set(true);
                     initializeSpeechRecognizer(view);
                     speechRecognizer.startListening(speechRecognizerIntent);
                     Toast.makeText(getContext(), "Is listening...", Toast.LENGTH_SHORT).show();
-                }
-                else{
+                } else {
                     isListening.set(false);
-                    if (speechRecognizer != null){
+                    if (speechRecognizer != null) {
                         speechRecognizer.stopListening();
                         speechRecognizer.destroy();
                     }
@@ -210,6 +208,29 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        //Hiển thị map
+        binding.locationBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SelectLocationActivity.class);
+            startActivityForResult(intent, REQUEST_LOCATION);
+        });
+
+    }
+
+    private static final int REQUEST_LOCATION = 1001;
+
+    // Nhận kết quả trả về
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_LOCATION && resultCode == Activity.RESULT_OK) {
+            double lat = data.getDoubleExtra("lat", 0);
+            double lon = data.getDoubleExtra("lon", 0);
+
+            // Check
+            Log.e("Location", "Toa do: " + lat + ", " + lon);
+            userViewModel.updateUserLocation(userViewModel.getUserID(), lat, lon);
+            Toast.makeText(getContext(), "Set location successfully", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void initializeSpeechRecognizer(View view) {
@@ -220,19 +241,30 @@ public class HomeFragment extends Fragment {
 
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
-            public void onReadyForSpeech(Bundle params) {}
+            public void onReadyForSpeech(Bundle params) {
+            }
+
             @Override
-            public void onBeginningOfSpeech() {}
+            public void onBeginningOfSpeech() {
+            }
+
             @Override
-            public void onRmsChanged(float rmsdB) {}
+            public void onRmsChanged(float rmsdB) {
+            }
+
             @Override
-            public void onBufferReceived(byte[] buffer) {}
+            public void onBufferReceived(byte[] buffer) {
+            }
+
             @Override
-            public void onEndOfSpeech() {}
+            public void onEndOfSpeech() {
+            }
+
             @Override
             public void onError(int error) {
                 Toast.makeText(getContext(), "Speech recognition error: " + error, Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public void onResults(Bundle results) {
                 ArrayList<String> recognizedWords = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -241,12 +273,17 @@ public class HomeFragment extends Fragment {
                     binding.searchEdt.setText(spokenText); // Đặt kết quả vào ô tìm kiếm
                 }
             }
+
             @Override
-            public void onPartialResults(Bundle partialResults) {}
+            public void onPartialResults(Bundle partialResults) {
+            }
+
             @Override
-            public void onEvent(int eventType, Bundle params) {}
+            public void onEvent(int eventType, Bundle params) {
+            }
         });
     }
+
     private void goToSearchResultFragment(String keyword, View v) {
         Bundle bundle = new Bundle();
         bundle.putString("search_keyword", keyword);

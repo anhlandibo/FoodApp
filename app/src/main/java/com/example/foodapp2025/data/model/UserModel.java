@@ -1,9 +1,12 @@
 package com.example.foodapp2025.data.model;
 
+import com.google.firebase.firestore.GeoPoint;
+
 public class UserModel {
     private String email;
     private String name;
     private String uid;
+    private GeoPoint location;
 
     public UserModel() {}
 
@@ -13,6 +16,12 @@ public class UserModel {
         this.uid = uid;
     }
 
+    public GeoPoint getLocation(){
+        return location;
+    }
+    public void setLocation(GeoPoint location){
+        this.location = location;
+    }
     public String getEmail() {
         return email;
     }

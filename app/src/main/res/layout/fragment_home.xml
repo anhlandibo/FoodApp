@@ -57,10 +57,10 @@
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/imageView5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/bell_icon" />
+                    android:id="@+id/locationBtn"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    app:srcCompat="@drawable/map_24px" />
 
             </LinearLayout>
 
@@ -139,18 +139,18 @@
                     android:id="@+id/tabLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:ignore="MissingConstraints"
-                    app:tabBackground="@drawable/indicator"
-                    app:tabGravity="center"
-                    app:tabIndicator="@null"
                     android:background="@android:color/transparent"
+                    android:contentDescription="@string/app_name"
                     android:elevation="0dp"
-                    app:tabIndicatorHeight="0dp"
-                    app:tabIndicatorGravity="center"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/viewPagerSlider"
-                    />
+                    app:tabBackground="@drawable/indicator"
+                    app:tabGravity="center"
+                    app:tabIndicator="@null"
+                    app:tabIndicatorGravity="center"
+                    app:tabIndicatorHeight="0dp"
+                    tools:ignore="MissingConstraints" />
                 <ProgressBar
                     android:id="@+id/progressBarSlider"
                     style="?android:attr/progressBarStyle"

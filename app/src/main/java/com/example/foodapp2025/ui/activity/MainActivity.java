@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.view.View;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
@@ -25,6 +26,13 @@ import com.example.foodapp2025.ui.fragment.FavoriteFragment;
 import com.example.foodapp2025.ui.fragment.HomeFragment;
 import com.example.foodapp2025.ui.fragment.ProfileFragment;
 import com.example.foodapp2025.viewmodel.BannerViewModel;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -47,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
             NavController navController = navHostFragment.getNavController();
             NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
         }
+
+
     }
     public void setBottomNavigationVisibility(boolean isVisible) {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
@@ -57,55 +67,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void initBanner() {
-//        binding.progressBarSlider.setVisibility(View.VISIBLE);
-//        bannerViewModel.loadBanner().observeForever(bannerModels -> {
-//            if (bannerModels != null && !bannerModels.isEmpty()){
-//                banners(bannerModels);
-//                binding.progressBarSlider.setVisibility(View.GONE);
-//            }
-//        });
-//    }
-//
-//    private void autoImageSlide() {
-//        final long DELAY_MS = 3000;
-//        final long PERIOD_MS = 3000;
-//        final Handler handler = new Handler();
-//        final Runnable runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                int currentItem = binding.viewPagerSlider.getCurrentItem();
-//                int itemCount = binding.viewPagerSlider.getAdapter().getItemCount();
-//
-//                if (currentItem < itemCount - 1) {
-//                    binding.viewPagerSlider.setCurrentItem(currentItem + 1, true);
-//                } else {
-//                    binding.viewPagerSlider.setCurrentItem(0, true); // Quay lại slide đầu tiên
-//                }
-//
-//                handler.postDelayed(this, PERIOD_MS);            }
-//        };
-//        Timer timer = new Timer();
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                handler.post(runnable);
-//            }
-//        }, DELAY_MS, PERIOD_MS);
-//    }
-//
-//    private void banners(ArrayList<BannerModel> bannerModels) {
-//        binding.viewPagerSlider.setAdapter(new SliderAdapter(bannerModels, binding.viewPagerSlider));
-//        binding.viewPagerSlider.setClipToPadding(false);
-//        binding.viewPagerSlider.setClipChildren(false);
-//        binding.viewPagerSlider.setOffscreenPageLimit(3);
-//        binding.viewPagerSlider.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
-//
-//        CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
-//        compositePageTransformer.addTransformer(new MarginPageTransformer(40));
-//
-//        binding.viewPagerSlider.setPageTransformer(compositePageTransformer);
-//    }
 
 
 }
