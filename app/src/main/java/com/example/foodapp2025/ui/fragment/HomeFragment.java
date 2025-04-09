@@ -201,7 +201,6 @@ public class HomeFragment extends Fragment {
                     isListening.set(false);
                     if (speechRecognizer != null) {
                         speechRecognizer.stopListening();
-                        speechRecognizer.destroy();
                     }
                     Toast.makeText(getContext(), "Stop listening", Toast.LENGTH_SHORT).show();
                 }
@@ -351,31 +350,6 @@ public class HomeFragment extends Fragment {
         };
 
         handler.postDelayed(runnable, SLIDE_DELAY);
-
-//        final long DELAY_MS = 3000;
-//        final long PERIOD_MS = 3000;
-//        int n = binding.viewPagerSlider.getAdapter().getItemCount();
-//        final  Handler handler1 = new Handler();
-//        final Runnable runnable1 = new Runnable() {
-//            @Override
-//            public void run() {
-//                if (binding.viewPagerSlider.getCurrentItem() == n-1){
-//                    binding.viewPagerSlider.setCurrentItem(0);
-//                }
-//                else{
-//                    binding.viewPagerSlider.setCurrentItem(binding.viewPagerSlider.getCurrentItem()+1, true);
-//                }
-//            }
-//        };
-//
-//        Timer timer = new Timer();
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                handler1.post(runnable1);
-//            }
-//        }, DELAY_MS, PERIOD_MS);
-
     }
 
     private void banners(ArrayList<BannerModel> bannerModels) {
@@ -409,6 +383,10 @@ public class HomeFragment extends Fragment {
             handler.removeCallbacks(runnable);
         }
         binding = null;
+        if (speechRecognizer != null){
+            speechRecognizer.destroy();
+            speechRecognizer = null;
+        }
     }
 
 }
