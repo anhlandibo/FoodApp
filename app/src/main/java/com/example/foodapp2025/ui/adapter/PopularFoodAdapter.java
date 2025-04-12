@@ -29,16 +29,15 @@ public class PopularFoodAdapter extends RecyclerView.Adapter<PopularFoodAdapter.
 
     @NonNull
     @Override
-    public PopularFoodAdapter.PopularFoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public PopularFoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.popular_food, parent, false);
         return new PopularFoodViewHolder(view);
     }
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(@NonNull PopularFoodAdapter.PopularFoodViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull PopularFoodViewHolder holder, int position) {
         FoodModel popularFood = popularFoodList.get(position);
-
         holder.popularFoodName.setText(popularFood.getName());
         holder.popularFoodPrice.setText(popularFood.getPrice() + " VND");
         holder.popularFoodTime.setText(popularFood.getTime());
