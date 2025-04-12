@@ -125,7 +125,7 @@ public class FoodDetailFragment extends Fragment {
         binding.priceTxt.setText(selectedFood.getPrice() + " VND");
         binding.descriptionTxt.setText(selectedFood.getDescription());
         binding.rateTxt.setText(selectedFood.getStar() + " Rating");
-        binding.ratingBar.setRating(selectedFood.getStar().floatValue());
+        binding.ratingBar.setRating(Float.parseFloat(String.valueOf(selectedFood.getStar())));
         binding.totalTxt.setText(quantity * selectedFood.getPrice() + " VND");
 
         initBackBtn(view, foodName);
