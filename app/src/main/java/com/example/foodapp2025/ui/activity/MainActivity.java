@@ -66,7 +66,4 @@ public class MainActivity extends AppCompatActivity {
             bottomNavigationView.setVisibility(View.GONE);
         }
     }
-
-
-
 }

@@ -84,13 +84,10 @@ public class FoodDetailFragment extends Fragment {
     private void initBackBtn(View view, String foodName){
         ImageView temp = view.findViewById(R.id.backBtn);
 
-
         temp.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
             navController.popBackStack(); // return category detail fragment
         });
-
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -128,13 +125,10 @@ public class FoodDetailFragment extends Fragment {
         binding.priceTxt.setText(selectedFood.getPrice() + " VND");
         binding.descriptionTxt.setText(selectedFood.getDescription());
         binding.rateTxt.setText(selectedFood.getStar() + " Rating");
-        binding.ratingBar.setRating(Float.parseFloat(selectedFood.getStar()));
+        binding.ratingBar.setRating(selectedFood.getStar().floatValue());
         binding.totalTxt.setText(quantity * selectedFood.getPrice() + " VND");
 
-
         initBackBtn(view, foodName);
-
-
     }
 
     @Override

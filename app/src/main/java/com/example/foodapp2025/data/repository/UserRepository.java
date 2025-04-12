@@ -26,4 +26,7 @@ public class UserRepository {
     public String getUserID(){
         return userRemoteDataSource.getUserID();
     }
+    public LiveData<UserModel> getUserInformation(String userId) {
+        return userRemoteDataSource.getUserInformation(userId);
+    }
 }
