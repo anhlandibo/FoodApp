@@ -76,7 +76,7 @@
 
                     <!-- Status Badge -->
                     <TextView
-                        android:id="@+id/txt_status1"
+                        android:id="@+id/orderStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/badge_background"
@@ -110,7 +110,7 @@
                         android:text="Mã đơn hàng:  "
                         android:textColor="#4B5563" />
                     <TextView
-                        android:id="@+id/txt_order_code2"
+                        android:id="@+id/orderId"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@orderId"
@@ -131,10 +131,10 @@
                         android:text="Thời gian đặt hàng:   "
                         android:textColor="#4B5563" />
                         <TextView
-                            android:id="@+id/txt_order_time2"
+                            android:id="@+id/orderTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="16:51 - 09/04/2025"
+                            android:text="@orderTime"
                             android:textColor="#4B5563" />
                     </LinearLayout>
                 </LinearLayout>
@@ -143,22 +143,22 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                 <!-- Points Earned -->
-                <TextView
-                    android:id="@+id/txt_points1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Điểm tích lũy:    "
-                    android:textColor="#2563EB"
-                    android:textSize="14sp"/>
-                    <TextView
-                        android:id="@+id/txt_points2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="+2.888"
-                        android:textColor="#2563EB"
-                        android:textSize="14sp"/>
+<!--                <TextView-->
+<!--                    android:id="@+id/txt_points1"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="8dp"-->
+<!--                    android:text="Điểm tích lũy:    "-->
+<!--                    android:textColor="#2563EB"-->
+<!--                    android:textSize="14sp"/>-->
+<!--                    <TextView-->
+<!--                        android:id="@+id/order"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginTop="8dp"-->
+<!--                        android:text="+2.888"-->
+<!--                        android:textColor="#2563EB"-->
+<!--                        android:textSize="14sp"/>-->
 
                     <!-- blue-600 -->
             </LinearLayout>
