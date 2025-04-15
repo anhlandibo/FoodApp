@@ -3,9 +3,8 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    card_view:cardElevation="4dp">
-    <?xml version="1.0" encoding="utf-8"?>
+    android:layout_height="wrap_content"
+    card_view:cardElevation="16dp">
     <!-- activity_main.xml -->
 
     <!-- Container for centering content -->
@@ -48,9 +47,10 @@
                         android:id="@+id/img_logo1"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="@drawable/circular_image"
                         android:scaleType="centerCrop"
-                        android:src="https://placehold.co/40x40" />
+                        />
+                    <!--                        android:background="@drawable/circular_image"-->
+                    <!--                        android:src="https://placehold.co/40x40" -->
 
                     <!-- Business Name -->
                     <LinearLayout
@@ -79,7 +79,6 @@
                         android:id="@+id/orderStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/badge_background"
                         android:paddingStart="8dp"
                         android:paddingTop="4dp"
                         android:paddingEnd="8dp"
@@ -88,6 +87,7 @@
                         android:textColor="#059669"
                         android:textSize="12sp" />
                     <!-- green-600 approx -->
+<!--                    android:background="@drawable/badge_background"-->
 
                 </LinearLayout>
 

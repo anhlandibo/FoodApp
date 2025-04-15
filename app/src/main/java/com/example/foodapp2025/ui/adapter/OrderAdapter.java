@@ -45,7 +45,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         OrderModel orderModel = orderModels.get(position);
         holder.orderId.setText(orderModel.getId());
         holder.orderTime.setText(String.valueOf(orderModel.getTimestamp()));
-        holder.orderStatus.setText(String.valueOf(orderModel.getStatus()));
+//        holder.orderStatus.setText(String.valueOf(orderModel.getStatus()));
 
 
 //        holder.itemView.setOnClickListener(v -> {

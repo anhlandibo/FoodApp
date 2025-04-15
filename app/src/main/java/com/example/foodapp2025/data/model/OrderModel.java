@@ -5,19 +5,34 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class OrderModel implements Serializable {
+
+    //Constants for Firebase Firestore
+    //Keys for an item's value
+    //Vouchers are a mystery for now, since it stores another array, not a string
+//    private static final String DELIVERY_FEE = "deliveryFee";
+//    private static final String IMAGE_URL = "imageUrl";
+//    private static final String NAME = "name";
+//    private static final String PRICE = "price";
+//    private static final String QUANTITY = "quantity";
+//    private static final String SUBTOTAL = "subtotal";
+//    private static final String TAX_AMOUNT = "taxAmount";
+//    private static final String TOTAL = "total";
+//    private static final String VOUCHER_CODE = "voucherCode";
     private String id;
-    private ArrayList<Map<String, String>> items;
+    private ArrayList<Map<String, Object>> items;
     private int subtotal;
     private int tax;
     private long timestamp;
     private int total;
     private String userId;
 
+    //not on database yet
+//    private Status status;
     public OrderModel() {
         items = new ArrayList<>();
     }
 
-    public OrderModel(String id, ArrayList<Map<String, String>> items, int subtotal, int tax, long timestamp, int total, String userId) {
+    public OrderModel(String id, ArrayList<Map<String, Object>> items, int subtotal, int tax, long timestamp, int total, String userId) {
         //initializing items as an empty ArrayList
         items = new ArrayList<>();
         this.id = id;
@@ -40,11 +55,11 @@ public class OrderModel implements Serializable {
     }
 
     // Getter and Setter for items
-    public ArrayList<Map<String, String>> getItems() {
+    public ArrayList<Map<String, Object>> getItems() {
         return items;
     }
 
-    public void setItems(ArrayList<Map<String, String>> items) {
+    public void setItems(ArrayList<Map<String, Object>> items) {
         this.items = items;
     }
 
@@ -93,4 +108,13 @@ public class OrderModel implements Serializable {
         this.userId = userId;
     }
 
+//    public Status getStatus() {
+//        return status;
+//    }
+    enum Status {
+        PENDING,
+        PROCESSING,
+        DELIVERED,
+        CANCELLED
+    }
 }
