@@ -42,7 +42,7 @@ public class PopularFoodAdapter extends RecyclerView.Adapter<PopularFoodAdapter.
         holder.popularFoodName.setText(popularFood.getName());
         holder.popularFoodPrice.setText(popularFood.getPrice() + " VND");
         holder.popularFoodTime.setText(popularFood.getTime());
-        holder.popularFoodStar.setText(popularFood.getStar());
+        holder.popularFoodStar.setText(popularFood.getStar().toString());
 
         Glide.with(holder.itemView.getContext())
                 .load(popularFood.getImageUrl())

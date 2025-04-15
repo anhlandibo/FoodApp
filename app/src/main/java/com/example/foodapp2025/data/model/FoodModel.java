@@ -13,7 +13,7 @@ public class FoodModel implements Serializable {
     private String description;
     private String time;
 
-    private String star;
+    private Double star;
 
     private boolean isPopular;
     @PropertyName("isPopular")
@@ -28,11 +28,11 @@ public class FoodModel implements Serializable {
 
     public FoodModel() {}
 
-    public String getStar() {
+    public Double getStar() {
         return star;
     }
 
-    public void setStar(String star) {
+    public void setStar(Double star) {
         this.star = star;
     }
 
@@ -92,7 +92,7 @@ public class FoodModel implements Serializable {
         this.price = price;
     }
 
-    public FoodModel(String name, String id, String imageUrl, int price, String categoryName, String description, String time, String star, boolean isPopular) {
+    public FoodModel(String name, String id, String imageUrl, int price, String categoryName, String description, String time, Double star, boolean isPopular) {
         this.name = name;
         this.id = id;
         this.imageUrl = imageUrl;
