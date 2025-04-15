@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@android:color/background_dark"> <!-- Explicitly setting tint to white -->
+
+    <path
+        android:fillColor="@android:color/background_dark"
+        android:pathData="M6,9 L18,9 L17,19 L7,19 Z M8,5 L16,5 L16,7 L8,7 Z"/>
+</vector>

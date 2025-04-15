@@ -18,7 +18,18 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/imageView8"
+            android:id="@+id/deleteBtn"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/delete"
+            android:layout_marginRight="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/productName_textView"
+            android:onClick="removeItem"
+            />
+
+        <ImageView
+            android:id="@+id/cartView"
             android:layout_width="123dp"
             android:layout_height="96dp"
             android:layout_marginStart="8dp"
@@ -33,7 +44,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="productName"
-            app:layout_constraintStart_toEndOf="@+id/imageView8"
+            app:layout_constraintStart_toEndOf="@+id/cartView"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -43,7 +54,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="Price"
-            app:layout_constraintStart_toEndOf="@+id/imageView8"
+            app:layout_constraintStart_toEndOf="@+id/cartView"
             app:layout_constraintTop_toBottomOf="@+id/productName_textView" />
 
         <TextView
@@ -85,7 +96,7 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
-                android:id="@+id/minusCartBtn"
+                android:id="@+id/decreaseButton"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:background="@drawable/circle_button"
@@ -97,7 +108,7 @@
                 tools:layout_editor_absoluteY="0dp" />
 
             <TextView
-                android:id="@+id/plusCartBtn"
+                android:id="@+id/increaseButton"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_marginStart="28dp"
@@ -108,7 +119,7 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="@id/minusCartBtn"
+                app:layout_constraintStart_toStartOf="@id/decreaseButton"
                 tools:layout_editor_absoluteY="0dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
