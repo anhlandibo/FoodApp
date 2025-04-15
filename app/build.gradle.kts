@@ -89,4 +89,9 @@ dependencies {
     //OpenStreetMap
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Load img from url
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    // Circle img view
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
 }

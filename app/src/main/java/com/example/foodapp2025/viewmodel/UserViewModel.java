@@ -31,4 +31,7 @@ public class UserViewModel extends ViewModel {
     public String getUserID(){
         return userRepository.getUserID();
     }
+    public LiveData<UserModel> getUserInformation(String userId) {
+        return userRepository.getUserInformation(userId);
+    }
 }

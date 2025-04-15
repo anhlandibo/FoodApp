@@ -41,11 +41,11 @@
                         android:scaleType="centerCrop"
                         android:src="@drawable/circles"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <ImageView
+                    <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/profileAvt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -56,12 +56,10 @@
                         app:layout_constraintTop_toTopOf="@+id/view4"
                         app:layout_constraintVertical_bias="0.25" />
 
-                    <TextView
+                    <EditText
                         android:id="@+id/fullName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="Tien Ngo"
                         android:textColor="#ffffff"
                         android:textSize="20sp"
                         android:textStyle="bold"
@@ -73,7 +71,6 @@
                         android:id="@+id/emailText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="quangtienngo661@gmail.com"
                         android:textColor="#ffffff"
                         android:textSize="18sp"
                         app:layout_constraintEnd_toEndOf="@+id/fullName"
@@ -87,9 +84,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
-                        android:layout_marginTop="60dp"
+                        android:layout_marginTop="20dp"
                         android:layout_marginEnd="24dp"
-                        android:layout_marginBottom="15dp"
+                        android:layout_marginBottom="10dp"
                         android:background="@drawable/white_background"
                         android:elevation="5dp"
                         android:orientation="vertical"
@@ -105,6 +102,7 @@
                             android:orientation="horizontal">
 
                             <LinearLayout
+                                android:id="@+id/paymentButton"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="10dp"
@@ -143,6 +141,7 @@
                             </LinearLayout>
 
                             <LinearLayout
+                                android:id="@+id/settingButton"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="10dp"
@@ -181,6 +180,7 @@
                             </LinearLayout>
 
                             <LinearLayout
+                                android:id="@+id/notificationButton"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="10dp"
@@ -224,9 +224,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:layout_marginTop="20dp"
+                            android:layout_marginTop="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="8dp"
+                            android:layout_marginBottom="3dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -242,6 +242,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Change"
+                                android:layout_marginBottom="12dp"
                                 android:textAlignment="textEnd"
                                 android:textSize="16sp" />
 
@@ -258,9 +259,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:layout_marginTop="20dp"
+                            android:layout_marginTop="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="8dp"
+                            android:layout_marginBottom="3dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -271,13 +272,13 @@
                                 android:textColor="#B1873E"
                                 android:textSize="18dp" />
 
-                            <TextView
+                            <EditText
                                 android:id="@+id/phoneNumber"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="123-456-789"
+                                android:layout_height="42dp"
                                 android:textAlignment="textEnd"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:enabled="false"/>
 
                         </LinearLayout>
 
@@ -292,9 +293,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:layout_marginTop="20dp"
+                            android:layout_marginTop="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="8dp"
+                            android:layout_marginBottom="3dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -305,13 +306,13 @@
                                 android:textColor="#B1873E"
                                 android:textSize="18dp" />
 
-                            <TextView
+                            <EditText
                                 android:id="@+id/address"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="32 Down Street"
+                                android:layout_height="42dp"
                                 android:textAlignment="textEnd"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:enabled="false"/>
 
                         </LinearLayout>
 
@@ -326,9 +327,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:layout_marginTop="20dp"
+                            android:layout_marginTop="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="8dp"
+                            android:layout_marginBottom="3dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -339,13 +340,14 @@
                                 android:textColor="#B1873E"
                                 android:textSize="18dp" />
 
-                            <TextView
+                            <EditText
+                                android:hint="Date of birth"
                                 android:id="@+id/dateOfBirth"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="05-03-2005"
+                                android:layout_height="42dp"
                                 android:textAlignment="textEnd"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:enabled="false"/>
 
                         </LinearLayout>
 
@@ -360,9 +362,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="10dp"
-                            android:layout_marginTop="20dp"
+                            android:layout_marginTop="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="8dp"
+                            android:layout_marginBottom="3dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -374,13 +376,16 @@
                                 android:textColor="#B1873E"
                                 android:textSize="18dp" />
 
-                            <TextView
+                            <Spinner
+                                android:spinnerMode="dropdown"
                                 android:id="@+id/gender"
+                                android:prompt="@string/gender_prompt"
                                 android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Male"
+                                android:layout_height="42dp"
+                                android:entries="@array/gender_array"
                                 android:textAlignment="textEnd"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:enabled="false"/>
 
                         </LinearLayout>
 
@@ -396,11 +401,10 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <Button
-                    android:id="@+id/button5"
+                    android:id="@+id/editBtn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="24dp"
-
                     android:background="@drawable/toolbar_gradient"
                     android:text="Edit Profile" />
             </LinearLayout>

@@ -1,15 +1,35 @@
 package com.example.foodapp2025.ui.fragment;
 
+import android.app.DatePickerDialog;
+import android.net.wifi.hotspot2.pps.Credential;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Process;
+import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.databinding.FragmentProfileBinding;
+import com.example.foodapp2025.viewmodel.UserViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -24,6 +44,8 @@ public class ProfileFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     private FragmentProfileBinding binding;
+    private UserViewModel userViewModel;
+    private boolean isEditBtnPressed = false;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -64,8 +86,131 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         binding = FragmentProfileBinding.inflate(inflater, container, false);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        userViewModel = new UserViewModel();
+
+        init(view);
+        loadUserInformation(userId);
+    }
+
+    // Load user information
+    public void loadUserInformation(String userId) {
+        userViewModel.getUserInformation(userId).observe(getViewLifecycleOwner(), user -> {
+            binding.fullName.setText(user.getName());
+            binding.emailText.setText(user.getEmail());
+            binding.phoneNumber.setText(user.getPhoneNumber());
+            binding.address.setText(user.getAddress());
+            binding.dateOfBirth.setText(user.getDateOfBirth());
+
+            ArrayAdapter<String> adapter = (ArrayAdapter<String>) binding.gender.getAdapter();
+            int position = adapter.getPosition(user.getGender());
+            if (position >= 0) {
+                binding.gender.setSelection(position);
+            }
+        });
+    }
+
+    // Init components
+    public void init(View view) {
+        binding.fullName.setEnabled(false);
+        binding.phoneNumber.setEnabled(false);
+        binding.address.setEnabled(false);
+        binding.gender.setEnabled(false);
+
+        datePickerDropDown();
+        binding.dateOfBirth.setEnabled(false);
+
+        initEditButton(view);
+    }
+
+    public void initEditButton(View view) {
+        Button editBtn = view.findViewById(R.id.editBtn);
+        editBtn.setOnClickListener(v -> {
+            handleEditBtn(view);
+        });
+    }
+
+    public void datePickerDropDown() {
+        binding.dateOfBirth.setInputType(InputType.TYPE_NULL);
+        binding.dateOfBirth.setFocusable(false);
+
+        binding.dateOfBirth.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog dpDialog = new DatePickerDialog(requireContext(),
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        String date = String.format(Locale.getDefault(), "%02d/%02d/%04d",
+                                selectedDay, selectedMonth + 1, selectedYear);
+
+                        binding.dateOfBirth.setText(date);
+                    },
+                    year, month, day);
+
+            dpDialog.show();
+
+
+        });
+    }
+
+    public void handleEditBtn(View view) {
+        if (!isEditBtnPressed) {
+            isEditBtnPressed = true;
+            binding.fullName.setEnabled(true);
+            binding.phoneNumber.setEnabled(true);
+            binding.address.setEnabled(true);
+            binding.dateOfBirth.setEnabled(true);
+            binding.gender.setEnabled(true);
+            binding.editBtn.setText("Save");
+        } else {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+            DocumentReference userRef = db.collection("users").document(userId);
+
+            Map<String, Object> updates = new HashMap<>();
+
+            updates.put("name", binding.fullName.getText().toString());
+            String phoneNumber = binding.phoneNumber.getText().toString();
+            if (!isValidPhoneNumber(phoneNumber)) {
+                Toast.makeText(getContext(), "Invalid phone number", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            updates.put("phoneNumber", phoneNumber);
+            updates.put("address", binding.address.getText().toString());
+            updates.put("dateOfBirth", binding.dateOfBirth.getText().toString());
+            updates.put("gender", binding.gender.getSelectedItem().toString());
+
+            userRef.update(updates)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(getContext(), "Updated profile successfully", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(getContext(), "Error updating profile", Toast.LENGTH_SHORT).show();
+                    });
+
+            isEditBtnPressed = false;
+            binding.fullName.setEnabled(false);
+            binding.phoneNumber.setEnabled(false);
+            binding.address.setEnabled(false);
+            binding.dateOfBirth.setEnabled(false);
+            binding.gender.setEnabled(false);
+            binding.editBtn.setText("Edit Profile");
+
+            loadUserInformation(userId);
+        }
+    }
+    public boolean isValidPhoneNumber(String phone) {
+        return phone.matches("^\\d{10}$");
     }
 }
