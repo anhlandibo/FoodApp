@@ -70,7 +70,7 @@
                 app:srcCompat="@drawable/star" />
 
             <TextView
-                android:id="@+id/textView15"
+                android:id="@+id/subtotalView"
                 android:layout_width="44dp"
                 android:layout_height="39dp"
                 android:text="+"
@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:text="time"
                 app:layout_constraintBottom_toBottomOf="@+id/popularFoodStar"
-                app:layout_constraintEnd_toStartOf="@+id/textView15"
+                app:layout_constraintEnd_toStartOf="@+id/subtotalView"
                 app:layout_constraintStart_toEndOf="@+id/imageView10"
                 app:layout_constraintTop_toTopOf="@+id/popularFoodStar" />
 
@@ -100,7 +100,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/popularFoodTime"
                 app:layout_constraintStart_toEndOf="@+id/popularFoodTime"
                 app:layout_constraintTop_toTopOf="@+id/popularFoodTime"
-                app:srcCompat="@drawable/time" />
+                app:srcCompat="@drawable/time_24px" />
 
             <TextView
                 android:id="@+id/popularFoodPrice"

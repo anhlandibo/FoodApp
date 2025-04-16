@@ -22,9 +22,12 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
-
     private ActivityLoginBinding binding;
     private FirebaseAuth auth;
     private GoogleSignInClient googleSignInClient;
@@ -43,7 +46,18 @@ public class LoginActivity extends AppCompatActivity {
         // Initialize FirebaseAuth
         auth = FirebaseAuth.getInstance();
 
-        // Validate and configure Google Sign-In options
+        configureGoogleSignIn();
+
+        // Email login
+        binding.loginBtn.setOnClickListener(v -> handleEmailLogin());
+
+        // Google Sign-In button
+        binding.googleBtn.setOnClickListener(v -> signInWithGoogle());
+
+        binding.progressBar.setVisibility(View.GONE);
+    }
+
+    private void configureGoogleSignIn() {
         String clientId = getString(R.string.default_web_client_id);
         if (clientId == null || clientId.isEmpty()) {
             Log.e(TAG, "Google client ID is missing or empty");
@@ -57,14 +71,6 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
-
-        // Email login
-        binding.loginBtn.setOnClickListener(v -> handleEmailLogin());
-
-        // Google Sign-In button
-        binding.googleBtn.setOnClickListener(v -> signInWithGoogle());
-
-        binding.progressBar.setVisibility(View.GONE);
     }
 
     private void handleEmailLogin() {
@@ -72,22 +78,19 @@ public class LoginActivity extends AppCompatActivity {
         String password = binding.passwordEdt.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Please enter complete information", Toast.LENGTH_SHORT).show();
+            showToast("Please enter complete information");
             return;
         }
 
-        binding.progressBar.setVisibility(View.VISIBLE);
-        binding.loginBtn.setEnabled(true);
-
+        showLoading(true);
         auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
-                    binding.progressBar.setVisibility(View.GONE);
-                    binding.loginBtn.setEnabled(true);
+                    showLoading(false);
                     if (task.isSuccessful()) {
                         navigateToMainActivity();
                     } else {
                         Log.e(TAG, "Email login failed: ", task.getException());
-                        Toast.makeText(getApplicationContext(), "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        showToast("Error: " + task.getException().getMessage());
                     }
                 });
     }
@@ -115,21 +118,56 @@ public class LoginActivity extends AppCompatActivity {
             }
         } catch (ApiException e) {
             Log.e(TAG, "Google sign-in failed", e);
-            Toast.makeText(LoginActivity.this, "Google Sign-In Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            showToast("Google Sign-In Error: " + e.getMessage());
         }
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
+        showLoading(true);
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(task -> {
+                    showLoading(false);
                     if (task.isSuccessful()) {
-                        navigateToMainActivity();
+                        FirebaseUser user = auth.getCurrentUser();
+                        checkAndCreateUser(user);
                     } else {
                         Log.e(TAG, "Google sign-in with Firebase failed: ", task.getException());
-                        Toast.makeText(LoginActivity.this, "Google Sign-In Failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        showToast("Google Sign-In Failed: " + task.getException().getMessage());
                     }
                 });
+    }
+
+    private void checkAndCreateUser(FirebaseUser user) {
+        if (user == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String userId = user.getUid();
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        createUserInFirestore(user, db);
+                    } else {
+                        Log.d(TAG, "User already exists. No new record added.");
+                        navigateToMainActivity();
+                    }
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Error checking user existence", e));
+    }
+
+    private void createUserInFirestore(FirebaseUser user, FirebaseFirestore db) {
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("userId", user.getUid());
+        userData.put("email", user.getEmail());
+        userData.put("name", user.getDisplayName());
+        userData.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
+
+        db.collection("users").document(user.getUid()).set(userData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "New user created in Firestore");
+                    navigateToMainActivity();
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Error creating user", e));
     }
 
     @Override
@@ -142,8 +180,16 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, MainActivity.class));
         finish();
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showLoading(boolean isLoading) {
+        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.loginBtn.setEnabled(!isLoading);
     }
 }

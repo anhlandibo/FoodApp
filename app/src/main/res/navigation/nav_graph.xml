@@ -12,10 +12,10 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_favorites"
-        android:name="com.example.foodapp2025.ui.fragment.FavoriteFragment"
-        android:label="Favorites"
-        tools:layout="@layout/fragment_favorite" />
+        android:id="@+id/nav_history"
+        android:name="com.example.foodapp2025.ui.fragment.HistoryFragment"
+        android:label="History"
+        tools:layout="@layout/fragment_history" />
 
     <fragment
         android:id="@+id/nav_cart"

@@ -22,7 +22,7 @@ import com.example.foodapp2025.data.model.BannerModel;
 import com.example.foodapp2025.databinding.ActivityMainBinding;
 import com.example.foodapp2025.ui.adapter.SliderAdapter;
 import com.example.foodapp2025.ui.fragment.CartFragment;
-import com.example.foodapp2025.ui.fragment.FavoriteFragment;
+import com.example.foodapp2025.ui.fragment.HistoryFragment;
 import com.example.foodapp2025.ui.fragment.HomeFragment;
 import com.example.foodapp2025.ui.fragment.ProfileFragment;
 import com.example.foodapp2025.viewmodel.BannerViewModel;
