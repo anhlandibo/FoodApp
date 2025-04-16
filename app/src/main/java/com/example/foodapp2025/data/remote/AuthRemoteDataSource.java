@@ -83,5 +83,4 @@ public class AuthRemoteDataSource {
     public void logout() {
         firebaseAuth.signOut();
     }
-
 }

@@ -158,59 +158,18 @@ public class ProfileFragment extends Fragment {
                     year, month, day);
 
             dpDialog.show();
-
-
         });
     }
-
     public void handleEditBtn(View view) {
         if (!isEditBtnPressed) {
+            userViewModel.handleEditBtn(view, binding, isEditBtnPressed);
             isEditBtnPressed = true;
-            binding.fullName.setEnabled(true);
-            binding.phoneNumber.setEnabled(true);
-            binding.address.setEnabled(true);
-            binding.dateOfBirth.setEnabled(true);
-            binding.gender.setEnabled(true);
-            binding.editBtn.setText("Save");
         } else {
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-            DocumentReference userRef = db.collection("users").document(userId);
-
-            Map<String, Object> updates = new HashMap<>();
-
-            updates.put("name", binding.fullName.getText().toString());
-            String phoneNumber = binding.phoneNumber.getText().toString();
-            if (!isValidPhoneNumber(phoneNumber)) {
-                Toast.makeText(getContext(), "Invalid phone number", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            updates.put("phoneNumber", phoneNumber);
-            updates.put("address", binding.address.getText().toString());
-            updates.put("dateOfBirth", binding.dateOfBirth.getText().toString());
-            updates.put("gender", binding.gender.getSelectedItem().toString());
-
-            userRef.update(updates)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(getContext(), "Updated profile successfully", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error updating profile", Toast.LENGTH_SHORT).show();
-                    });
-
+            userViewModel.handleEditBtn(view, binding, isEditBtnPressed);
             isEditBtnPressed = false;
-            binding.fullName.setEnabled(false);
-            binding.phoneNumber.setEnabled(false);
-            binding.address.setEnabled(false);
-            binding.dateOfBirth.setEnabled(false);
-            binding.gender.setEnabled(false);
-            binding.editBtn.setText("Edit Profile");
-
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
             loadUserInformation(userId);
         }
     }
-    public boolean isValidPhoneNumber(String phone) {
-        return phone.matches("^\\d{10}$");
-    }
+
 }

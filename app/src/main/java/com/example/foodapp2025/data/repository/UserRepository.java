@@ -1,9 +1,12 @@
 package com.example.foodapp2025.data.repository;
 
+import android.view.View;
+
 import androidx.lifecycle.LiveData;
 
 import com.example.foodapp2025.data.model.UserModel;
 import com.example.foodapp2025.data.remote.UserRemoteDataSource;
+import com.example.foodapp2025.databinding.FragmentProfileBinding;
 
 public class UserRepository {
     private final UserRemoteDataSource userRemoteDataSource;
@@ -28,5 +31,9 @@ public class UserRepository {
     }
     public LiveData<UserModel> getUserInformation(String userId) {
         return userRemoteDataSource.getUserInformation(userId);
+    }
+
+    public void handleEditBtn(View view, FragmentProfileBinding binding, boolean isEditBtnPressed) {
+        userRemoteDataSource.handleEditBtn(view, binding, isEditBtnPressed);
     }
 }
