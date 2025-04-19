@@ -48,6 +48,8 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:scaleType="centerCrop"
+                        android:background="@android:color/darker_gray"
+
                         />
                     <!--                        android:background="@drawable/circular_image"-->
                     <!--                        android:src="https://placehold.co/40x40" -->
