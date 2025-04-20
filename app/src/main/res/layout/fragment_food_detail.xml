@@ -122,7 +122,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="@color/red_accent"
-                    tools:src="@drawable/time" />
+                    tools:src="@drawable/time_24px" />
 
                 <TextView
                     android:id="@+id/popularFoodTime"
