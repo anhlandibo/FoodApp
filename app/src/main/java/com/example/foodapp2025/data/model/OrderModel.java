@@ -25,6 +25,15 @@ public class OrderModel implements Serializable {
     private long timestamp;
     private int total;
     private String userId;
+    private String status;
+
+    public void setStatus(String status){
+        this.status = status;
+    }
+
+    public String getStatus(){
+        return this.status;
+    }
 
     //not on database yet
 //    private Status status;

@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.foodapp2025.data.model.CartModel;
 import com.example.foodapp2025.data.model.OrderModel;
 import com.example.foodapp2025.data.model.UserModel;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
 
@@ -103,6 +104,12 @@ public class OrderRemoteDataSource {
                     }
                 });
         return listMutableLiveData;
+    }
+
+    public Task<Void> updateOrderStatus(String orderId, String status){
+        Log.d("OrderRemoteDataSource", "Attempting to update status for order ID: " + orderId + " to: " + status);
+        return orderCollection.document(orderId)
+                .update("status", status);
     }
 
 }
