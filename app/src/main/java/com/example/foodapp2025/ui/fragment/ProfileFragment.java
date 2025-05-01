@@ -1,14 +1,27 @@
 package com.example.foodapp2025.ui.fragment;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.DatePickerDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
+import android.net.Uri;
 import android.net.wifi.hotspot2.pps.Credential;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import android.os.Process;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.foodapp2025.R;
@@ -26,6 +41,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -135,6 +151,11 @@ public class ProfileFragment extends Fragment {
         editBtn.setOnClickListener(v -> {
             handleEditBtn(view);
         });
+
+        LinearLayout settingLayout = view.findViewById(R.id.settingButton);
+        settingLayout.setOnClickListener(v -> {
+            handleSettingButton(view);
+        });
     }
 
     public void datePickerDropDown() {
@@ -172,4 +193,8 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    public void handleSettingButton(View view) {
+        NavController navController = Navigation.findNavController(view);
+        navController.navigate(R.id.profileToSetting);
+    }
 }

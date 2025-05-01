@@ -1,6 +1,7 @@
 package com.example.foodapp2025.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,10 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import com.bumptech.glide.Glide;
-import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.CartModel;
 import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.databinding.FragmentFoodDetailBinding;
+import com.example.foodapp2025.ui.activity.CommentActivity;
 import com.example.foodapp2025.ui.activity.MainActivity;
 import com.example.foodapp2025.viewmodel.CartViewModel;
 
@@ -50,6 +51,14 @@ public class FoodDetailFragment extends Fragment {
             Toast.makeText(getContext(), "Food not found", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // Handle Comment Button click
+        binding.commentBtn.setOnClickListener(v -> {
+            Intent i = new Intent(requireContext(), CommentActivity.class);
+            i.putExtra("FOOD_ID", selectedFood.getId());
+            startActivity(i);
+        });
+
 
         // Load food details
         Glide.with(this).load(selectedFood.getImageUrl()).into(binding.imageView7);

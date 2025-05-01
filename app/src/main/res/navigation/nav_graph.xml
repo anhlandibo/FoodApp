@@ -24,19 +24,13 @@
         tools:layout="@layout/fragment_cart" />
 
     <fragment
-        android:id="@+id/nav_profile"
-        android:name="com.example.foodapp2025.ui.fragment.ProfileFragment"
-        android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
-
-    <fragment
         android:id="@+id/categoryDetailFragment"
         android:name="com.example.foodapp2025.ui.fragment.CategoryDetailFragment"
         android:label="Category Detail">
         <argument
             android:name="categoryName"
-            app:argType="string"
-            android:defaultValue="" />
+            android:defaultValue=""
+            app:argType="string" />
     </fragment>
 
     <fragment
@@ -45,28 +39,44 @@
         android:label="Food Detail">
         <argument
             android:name="name"
-            app:argType="string"
-            android:defaultValue="" />
+            android:defaultValue=""
+            app:argType="string" />
+
     </fragment>
 
     <fragment
         android:id="@+id/searchResultFragment"
         android:name="com.example.foodapp2025.ui.fragment.SearchResultFragment"
-        android:label="Search Result"
-        >
+        android:label="Search Result">
         <argument
             android:name="search_keyword"
-            app:argType="string"
-            />
+            app:argType="string" />
     </fragment>
 
     <fragment
         android:id="@+id/foodFilterBottomSheetFragment"
         android:name="com.example.foodapp2025.ui.fragment.FoodFilterBottomSheet"
         android:label="Filter"
-        tools:layout="@layout/fragment_food_filter_bottom_sheet"
-        >
+        tools:layout="@layout/fragment_food_filter_bottom_sheet"/>
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.foodapp2025.ui.fragment.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/profileToSetting"
+            app:destination="@id/settingActivity"/>
     </fragment>
+
+
+    <activity
+        android:id="@+id/settingActivity"
+        android:name="com.example.foodapp2025.ui.activity.SettingActivity"
+        android:label="Setting"
+        tools:layout="@layout/activity_setting"/>
+
+
 
 
 </navigation>
