@@ -3,6 +3,7 @@ package com.example.foodapp2025.data.remote;
 import static android.app.Activity.RESULT_OK;
 import static androidx.activity.result.ActivityResultCallerKt.registerForActivityResult;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -128,6 +129,33 @@ public class UserRemoteDataSource {
             binding.dateOfBirth.setEnabled(false);
             binding.gender.setEnabled(false);
             binding.editBtn.setText("Edit Profile");
+        }
+    }
+
+    public void handleResetPassword(Context context) {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        // Lấy thông tin người dùng hiện tại
+        FirebaseUser currentUser = auth.getCurrentUser();
+
+        if (currentUser != null) {
+            String email = currentUser.getEmail();
+
+            if (email != null && !email.isEmpty()) {
+                // Gửi email đặt lại mật khẩu
+                auth.sendPasswordResetEmail(email)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(context, "Reset link sent to your email", Toast.LENGTH_SHORT).show();
+                            } else {
+                                String errorMessage = task.getException() != null ? task.getException().getMessage() : "Failed to send reset email";
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            } else {
+                Toast.makeText(context, "No email associated with this account", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(context, "User is not logged in", Toast.LENGTH_SHORT).show();
         }
     }
     public boolean isValidPhoneNumber(String phone) {

@@ -1,5 +1,6 @@
 package com.example.foodapp2025.data.repository;
 
+import android.content.Context;
 import android.view.View;
 
 import androidx.lifecycle.LiveData;
@@ -35,5 +36,9 @@ public class UserRepository {
 
     public void handleEditBtn(View view, FragmentProfileBinding binding, boolean isEditBtnPressed) {
         userRemoteDataSource.handleEditBtn(view, binding, isEditBtnPressed);
+    }
+
+    public void handleResetPassword(Context context) {
+        userRemoteDataSource.handleResetPassword(context);
     }
 }
