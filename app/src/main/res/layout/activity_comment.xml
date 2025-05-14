@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/backBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:src="@drawable/back_grey"
+        app:layout_constraintBottom_toTopOf="@+id/rvComments"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Food Review"
+        app:layout_constraintBottom_toTopOf="@+id/rvComments"
+        app:layout_constraintStart_toEndOf="@+id/backBtn"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginHorizontal="20dp"
+        android:textStyle="bold"
+        android:textSize="20dp"/>
+
+    <!-- RecyclerView hiển thị danh sách comment -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvComments"
+        android:scrollbars="vertical"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        android:elevation="5dp"
+        android:layout_marginTop="13mm"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/commentInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Khu vực nhập comment và chọn sao -->
+    <LinearLayout
+        android:id="@+id/commentInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <EditText
+            android:id="@+id/etComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter comment..."
+            android:background="@color/white"
+            android:padding="10dp" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:rating="0"
+            android:stepSize="1.0"
+            android:layout_gravity="center_horizontal"
+            android:isIndicator="false"
+            style="?android:attr/ratingBarStyleIndicator"
+            android:progressTint="@android:color/holo_orange_light"/>
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send"
+            android:layout_gravity="center_horizontal"
+            android:backgroundTint="@android:color/holo_orange_light" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

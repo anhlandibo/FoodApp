@@ -8,9 +8,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.foodapp2025.databinding.FragmentHistoryBinding;
 import com.example.foodapp2025.ui.adapter.OrderAdapter;
@@ -21,7 +23,7 @@ import com.example.foodapp2025.viewmodel.OrderViewModel;
  * Use the {@link HistoryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderActionListener {
     private FragmentHistoryBinding binding;
     private OrderViewModel orderViewModel;
     private OrderAdapter orderAdapter;
@@ -80,6 +82,7 @@ public class HistoryFragment extends Fragment {
 
         //Cai dat RecyclerView voi OrderAdapter
         orderAdapter = new OrderAdapter();
+        orderAdapter.setOnOrderActionListener(this);
         binding.orderRecyclerView.setAdapter(orderAdapter);
         binding.orderRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
 
@@ -89,6 +92,27 @@ public class HistoryFragment extends Fragment {
             if (orderList != null && !orderList.isEmpty()) {
                 orderAdapter.setOrderList(orderList);
             }
+            Log.d("HistoryFragment", "Received updated order list with size: " + (orderList != null ? orderList.size() : 0));
+            if (orderList != null) {
+                for (int i = 0; i < orderList.size(); i++) {
+                    // Đảm bảo OrderModel có getId() và getStatus()
+                    Log.d("HistoryFragment", "Order " + i + " ID: " + orderList.get(i).getId() + ", Status: " + orderList.get(i).getStatus());
+                }
+            }
         });
+
+
+    }
+
+    @Override
+    public void onConfirmReceivedClick(String orderId) {
+        Log.d("HistoryFragment", "Confirm received button clicked for Order ID: " + orderId);
+        if (orderViewModel != null && getContext() != null){
+            Toast.makeText(getContext(), "Đang xác nhận đơn hàng...", Toast.LENGTH_SHORT).show();
+            orderViewModel.confirmOrderReceived(orderId);
+        }
+        else{
+            Log.e("HistoryFragment", "ViewModel or Context is null, cannot confirm order.");
+        }
     }
 }
