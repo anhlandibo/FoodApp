@@ -67,6 +67,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0") // Avoid duplicating Glide versions
     implementation(libs.firebase.storage)
     implementation(libs.play.services.maps)
+    implementation(libs.core.animation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
