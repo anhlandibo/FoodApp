@@ -1,10 +1,15 @@
 package com.example.foodapp2025.data.remote;
 
 import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+
 import com.example.foodapp2025.data.model.CartModel;
+import com.example.foodapp2025.data.model.OrderModel;
 import com.example.foodapp2025.data.model.UserModel;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
 
 import java.util.ArrayList;
@@ -16,7 +21,7 @@ public class OrderRemoteDataSource {
     private final CollectionReference orderCollection;
 
     public OrderRemoteDataSource() {
-        orderCollection = FirebaseFirestore.getInstance().collection("orders");
+        orderCollection = FirebaseService.getInstance().getFirestore().collection("orders");
     }
 
     // Place an order
@@ -52,24 +57,59 @@ public class OrderRemoteDataSource {
     }
 
     // Get orders for a specific user
-    public LiveData<List<Map<String, Object>>> getOrders(String userId) {
-        MutableLiveData<List<Map<String, Object>>> liveData = new MutableLiveData<>();
+//    public LiveData<List<Map<String, Object>>> getOrders(String userId) {
+//        MutableLiveData<List<Map<String, Object>>> liveData = new MutableLiveData<>();
+//
+//        orderCollection.whereEqualTo("userId", userId)
+//                .orderBy("timestamp", Query.Direction.DESCENDING)
+//                .get()
+//                .addOnSuccessListener(queryDocumentSnapshots -> {
+//                    List<Map<String, Object>> orders = new ArrayList<>();
+//                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+//                        orders.add(doc.getData());
+//                    }
+//                    liveData.setValue(orders);
+//                })
+//                .addOnFailureListener(e -> {
+//                    liveData.setValue(new ArrayList<>());
+//                    Log.e("OrderRemoteDataSource", "Error getting orders", e);
+//                });
+//
+//        return liveData;
+//    }
 
-        orderCollection.whereEqualTo("userId", userId)
+    public LiveData<ArrayList<OrderModel>> getCurrentUsersOrders() {
+        MutableLiveData<ArrayList<OrderModel>> listMutableLiveData = new MutableLiveData<>();
+
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+                : null;
+        orderCollection.whereEqualTo("userId", currentUserId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Map<String, Object>> orders = new ArrayList<>();
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        orders.add(doc.getData());
-                    }
-                    liveData.setValue(orders);
-                })
-                .addOnFailureListener(e -> {
-                    liveData.setValue(new ArrayList<>());
-                    Log.e("OrderRemoteDataSource", "Error getting orders", e);
-                });
+                .get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        ArrayList<OrderModel> orderModelArrayList = new ArrayList<>();
 
-        return liveData;
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            OrderModel orderModel = queryDocumentSnapshot.toObject(OrderModel.class);
+                            orderModel.setId(queryDocumentSnapshot.getId());
+                            orderModelArrayList.add(orderModel);
+                        }
+                        listMutableLiveData.setValue(orderModelArrayList);
+                    } else {
+                        listMutableLiveData.setValue(new ArrayList<>());
+
+                        Log.e("FirestoreError", "Error getting documents: ", task.getException());
+
+                    }
+                });
+        return listMutableLiveData;
     }
+
+    public Task<Void> updateOrderStatus(String orderId, String status){
+        Log.d("OrderRemoteDataSource", "Attempting to update status for order ID: " + orderId + " to: " + status);
+        return orderCollection.document(orderId)
+                .update("status", status);
+    }
+
 }

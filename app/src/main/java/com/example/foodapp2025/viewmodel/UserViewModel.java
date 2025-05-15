@@ -1,10 +1,14 @@
 package com.example.foodapp2025.viewmodel;
 
+import android.content.Context;
+import android.view.View;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.foodapp2025.data.model.UserModel;
 import com.example.foodapp2025.data.repository.UserRepository;
+import com.example.foodapp2025.databinding.FragmentProfileBinding;
 
 public class UserViewModel extends ViewModel {
     private UserRepository userRepository;
@@ -33,5 +37,13 @@ public class UserViewModel extends ViewModel {
     }
     public LiveData<UserModel> getUserInformation(String userId) {
         return userRepository.getUserInformation(userId);
+    }
+
+    public void handleEditBtn(View view, FragmentProfileBinding binding, boolean isEditBtnPressed) {
+        userRepository.handleEditBtn(view, binding, isEditBtnPressed);
+    }
+
+    public void handleResetPassword(Context context) {
+        userRepository.handleResetPassword(context);
     }
 }

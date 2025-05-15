@@ -104,7 +104,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/popularFoodTime"
                 app:layout_constraintStart_toEndOf="@+id/popularFoodTime"
                 app:layout_constraintTop_toTopOf="@+id/popularFoodTime"
-                app:srcCompat="@drawable/time" />
+                app:srcCompat="@drawable/time_24px" />
 
             <TextView
                 android:id="@+id/foodPrice"

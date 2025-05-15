@@ -1,6 +1,8 @@
 package com.example.foodapp2025.data.model;
 
 public class CategoryModel {
+
+
     private String name;
     private String imageUrl;
     public CategoryModel(){}
