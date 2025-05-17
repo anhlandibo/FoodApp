@@ -18,6 +18,13 @@
         tools:layout="@layout/fragment_history" />
 
     <fragment
+        android:id="@+id/nav_favourite"
+        android:name="com.example.foodapp2025.ui.fragment.FavouriteFragment"
+        android:label="Favourtite"
+        tools:layout="@layout/fragment_favourite"
+        />
+
+    <fragment
         android:id="@+id/nav_cart"
         android:name="com.example.foodapp2025.ui.fragment.CartFragment"
         android:label="Cart"
