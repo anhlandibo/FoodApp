@@ -76,6 +76,21 @@
             app:destination="@id/settingActivity"/>
     </fragment>
 
+    <fragment
+        android:id="@+id/ChatFragment"
+        android:name="com.example.foodapp2025.ui.fragment.ChatFragment"
+        android:label="ChatFragment"
+        tools:layout="@layout/fragment_chatbox">
+        <action
+            android:id="@+id/action_to_chatFragment"
+            app:destination="@id/ChatFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+
 
     <activity
         android:id="@+id/settingActivity"
