@@ -99,4 +99,7 @@ dependencies {
     // Toast
     implementation("com.github.GrenderG:Toasty:1.5.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+    implementation("com.google.firebase:firebase-messaging")
 }

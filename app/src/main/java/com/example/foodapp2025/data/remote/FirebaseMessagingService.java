@@ -53,7 +53,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         createNotificationChannel();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "order_channel")
-                .setSmallIcon(R.drawable.ic_launcher_foreground) // đổi thành icon bạn có
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
