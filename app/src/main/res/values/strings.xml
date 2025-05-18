@@ -13,6 +13,8 @@
     <string name="default_web_client_id">78981881798-780ejmmf1i5h6otal5p5ftl0qnd1rg6g.apps.googleusercontent.com</string>
     <string name="title_activity_test">test</string>
     <string name="gender_prompt">Gender</string>
+    <string name="no_favourite_items_message">No favourite food found.\n</string>
+    <string name="no_favourite_items_message_enhanced" />
     <string-array name="gender_array">
         <item>Male</item>
         <item>Female</item>

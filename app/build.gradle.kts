@@ -46,7 +46,6 @@ dependencies {
     // Firebase libraries
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
-    implementation(libs.firebase.messaging)
 
     // Google Sign-In libraries
     implementation(libs.credentials)
@@ -68,7 +67,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0") // Avoid duplicating Glide versions
     implementation(libs.firebase.storage)
     implementation(libs.play.services.maps)
-    implementation(libs.firebase.messaging)
+    implementation(libs.core.animation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -96,4 +95,11 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     // Circle img view
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+
+    // Toast
+    implementation("com.github.GrenderG:Toasty:1.5.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+    implementation("com.google.firebase:firebase-messaging")
 }
