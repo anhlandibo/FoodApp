@@ -9,7 +9,7 @@
     <!-- TODO: Update blank fragment layout -->
 
     <ImageView
-        android:id="@+id/imageView6"
+        android:id="@+id/backArrowOrderDetail"
         android:layout_width="25dp"
         android:layout_height="35dp"
         android:layout_marginStart="10dp"

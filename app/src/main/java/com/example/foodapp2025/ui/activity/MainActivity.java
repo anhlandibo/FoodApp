@@ -118,15 +118,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 
-        if (navHostFragment != null){
-            NavController navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-        }
+        // 1) Grab your NavController exactly once
+        NavHostFragment navHostFragment = (NavHostFragment)
+                getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+        NavController navController = navHostFragment.getNavController();
+
+        // 2) Wire up NavigationUI one time
+        NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
+
+        // 3) Always pop up to the tab’s root BEFORE any navigation
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            int destId = item.getItemId();
+            // clear any child fragments in that nav-graph
+            navController.popBackStack(destId, /* inclusive= */ false);
+            // let NavigationUI do the actual navigate & highlighting
+            return NavigationUI.onNavDestinationSelected(item, navController);
+        });
+
+        // 4) Handle “tap again” to reset to root
+        binding.bottomNavigation.setOnItemReselectedListener(item -> {
+            navController.popBackStack(item.getItemId(), /* inclusive= */ false);
+        });
         requestNotificationPermission();
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -213,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         // Set onClick listener to navigate to the ChatFragment
         messageBubble.setOnClickListener(v -> {
             Log.d("MainActivity", "Message Bubble clicked!");
-            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+//            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
 
             // Prevent duplicate navigation
             if (!(navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() == R.id.ChatFragment)) {
@@ -222,12 +237,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Setup Navigation
-        NavController navController = null;
-        if (navHostFragment != null) {
-            navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-        }
+//        // Setup Navigation
+//        NavController navController = null;
+//        if (navHostFragment != null) {
+//            navController = navHostFragment.getNavController();
+//            NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
+//        }
 
         // Manage Bottom Navigation Visibility on Fragment Change
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {

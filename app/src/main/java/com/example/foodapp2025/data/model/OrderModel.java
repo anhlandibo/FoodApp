@@ -2,7 +2,9 @@ package com.example.foodapp2025.data.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
+import com.google.firebase.Timestamp;
 
 public class OrderModel implements Serializable {
 
@@ -52,7 +54,6 @@ public class OrderModel implements Serializable {
         this.total = total;
         this.userId = userId;
     }
-
 
     // Getter and Setter for id
     public String getId() {
@@ -117,13 +118,7 @@ public class OrderModel implements Serializable {
         this.userId = userId;
     }
 
-//    public Status getStatus() {
-//        return status;
-//    }
-    enum Status {
-        PENDING,
-        PROCESSING,
-        DELIVERED,
-        CANCELLED
+    public Date getOrderedDate() {
+        return new Date(timestamp);
     }
 }

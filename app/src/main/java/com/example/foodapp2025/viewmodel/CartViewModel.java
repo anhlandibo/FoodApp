@@ -110,7 +110,7 @@ public class CartViewModel extends ViewModel {
         }
     }
 
-    public void updateQuantity(CartModel item, int quantity) {
+    public void updateQuantity(CartModel item, Long quantity) {
         if (quantity <= 0) {
             removeItem(item);
             return;
@@ -203,8 +203,8 @@ public class CartViewModel extends ViewModel {
                     for (DocumentSnapshot doc : querySnapshot) {
                         String name = doc.getString("name");
                         String imageUrl = doc.getString("imageUrl");
-                        int price = doc.getLong("price").intValue();
-                        int quantity = doc.getLong("quantity").intValue();
+                        Long price = doc.getLong("price");
+                        Long quantity = doc.getLong("quantity");
 
                         loadedItems.add(new CartModel(imageUrl, name, price, quantity));
                     }
@@ -230,6 +230,7 @@ public class CartViewModel extends ViewModel {
         orderData.put("tax", tax.getValue());
         orderData.put("total", total.getValue());
         orderData.put("timestamp", System.currentTimeMillis());
+        orderData.put("status", "Pending");
 
         db.collection("orders")
                 .add(orderData)
