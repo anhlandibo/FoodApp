@@ -8,25 +8,37 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.CommentModel;
+import com.example.foodapp2025.ui.activity.CommentActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-
-
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
 
     private List<CommentModel> commentList;
+    private OnDeleteClickListener onDeleteClickListener;
+    private FirebaseAuth firebaseAuth;
 
+    public interface OnDeleteClickListener {
+        void onDeleteClick(String userId, CommentModel comment, int position);
+    }
 
+    public void setOnDeleteClickListener(OnDeleteClickListener listener) {
+        this.onDeleteClickListener = listener;
+    }
+
+    private ImageView delBtn;
 
     public void setData(List<CommentModel> list) {
         this.commentList = list;
@@ -49,6 +61,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         holder.tvCommentText.setText(comment.getText());
         holder.ratingBar.setRating(comment.getRating());
         holder.tvCommentTime.setText(formatTime(comment.getTimestamp()));
+
+        holder.deleteBtn.setOnClickListener(v -> {
+            if (onDeleteClickListener != null) {
+                // Gọi phương thức onDeleteClick của listener, truyền comment và vị trí
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                onDeleteClickListener.onDeleteClick(userId, comment, position);
+            }
+        });
     }
 
     @Override
