@@ -27,8 +27,8 @@ public class UserViewModel extends ViewModel {
     }
 
     // Cập nhật tọa độ người dùng
-    public void updateUserLocation(String userId, double latitude, double longitude) {
-        userRepository.updateUserLocation(userId, latitude, longitude);
+    public void updateUserLocation(Context context, String userId, double latitude, double longitude) {
+        userRepository.updateUserLocation(context, userId, latitude, longitude);
     }
 
     // Lấy userID của người dùng hiện tại

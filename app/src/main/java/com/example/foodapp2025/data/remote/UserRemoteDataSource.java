@@ -5,8 +5,11 @@ import static androidx.activity.result.ActivityResultCallerKt.registerForActivit
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,11 +17,13 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.foodapp2025.data.model.UserModel;
 import com.example.foodapp2025.databinding.FragmentProfileBinding;
+import com.example.foodapp2025.utils.LocationConverter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -29,6 +34,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.auth.User;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class UserRemoteDataSource {
@@ -55,11 +62,22 @@ public class UserRemoteDataSource {
     }
 
     // Cập nhật thông tin tọa độ người dùng
-    public void updateUserLocation(String uid, double lat, double lon) {
+    public void updateUserLocation(Context context, String uid, double lat, double lon) {
         GeoPoint geoPoint = new GeoPoint(lat, lon);
         userRef.document(uid).update("location", geoPoint)
                 .addOnSuccessListener(aVoid -> {
-
+                    LocationConverter.getAddressFromCoordinatesAsync(context, geoPoint, new LocationConverter.AddressResultListener() {
+                        @Override
+                        public void onAddressReceived(String address) {
+                            userRef.document(uid).update("address", address)
+                                    .addOnSuccessListener(aVoid -> {})
+                                    .addOnFailureListener(aVoid -> {});
+                        }
+                        @Override
+                        public void onError(String errorMessage) {
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    });
                 })
                 .addOnFailureListener(e -> {
 
@@ -67,7 +85,7 @@ public class UserRemoteDataSource {
     }
 
     // Lấy userId của người dùng hiện tại
-    public String getUserID(){
+    public String getUserID() {
         return FirebaseService.getInstance().getFirebaseAuth().getCurrentUser().getUid();
     }
 
@@ -158,6 +176,7 @@ public class UserRemoteDataSource {
             Toast.makeText(context, "User is not logged in", Toast.LENGTH_SHORT).show();
         }
     }
+
     public boolean isValidPhoneNumber(String phone) {
         return phone.matches("^\\d{10}$");
     }
