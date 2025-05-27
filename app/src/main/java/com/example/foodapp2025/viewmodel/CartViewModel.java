@@ -1,5 +1,7 @@
 package com.example.foodapp2025.viewmodel;
 
+import static android.content.ContentValues.TAG;
+
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -7,61 +9,46 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.foodapp2025.data.model.CartModel;
+import com.example.foodapp2025.data.model.VoucherModel;
+import com.example.foodapp2025.utils.discount.Discount;
+import com.example.foodapp2025.utils.discount.DiscountRegistry;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch; // Import WriteBatch
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CartViewModel extends ViewModel {
-
     private static final double TAX_RATE = 0.05;
     private static final double DELIVERY_FEE = 20000.0;
+
+    private final MutableLiveData<VoucherModel> voucher = new MutableLiveData<>();
+    private final MutableLiveData<String> voucherError = new MutableLiveData<>(null);
+    private final MutableLiveData<String> appliedVoucher = new MutableLiveData<>(null);
 
     private final MutableLiveData<List<CartModel>> cartItems = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Double> subtotal = new MutableLiveData<>(0.0);
     private final MutableLiveData<Double> tax = new MutableLiveData<>(0.0);
     private final MutableLiveData<Double> total = new MutableLiveData<>(0.0);
     private final MutableLiveData<Boolean> orderPlaced = new MutableLiveData<>(false);
-    private final MutableLiveData<String> appliedVoucher = new MutableLiveData<>(null);
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String userId = FirebaseAuth.getInstance().getCurrentUser() != null
             ? FirebaseAuth.getInstance().getCurrentUser().getUid()
             : null;
 
-    private final Map<String, Double> voucherCodes = new HashMap<String, Double>() {{
-        put("SAVE10", 0.10);
-        put("DISCOUNT20", 0.20);
-        put("WELCOME5", 0.05);
-    }};
-
-    public LiveData<List<CartModel>> getCartItems() {
-        return cartItems;
-    }
-
-    public LiveData<Double> getSubtotal() {
-        return subtotal;
-    }
-
-    public LiveData<Double> getTax() {
-        return tax;
-    }
-
-    public LiveData<Double> getTotal() {
-        return total;
-    }
-
-    public LiveData<String> getAppliedVoucher() {
-        return appliedVoucher;
-    }
-
-    public LiveData<Boolean> getOrderPlaced() {
-        return orderPlaced;
-    }
+    public LiveData<List<CartModel>> getCartItems() { return cartItems; }
+    public LiveData<Double> getSubtotal()      { return subtotal;  }
+    public LiveData<Double> getTax()           { return tax;       }
+    public LiveData<Double> getTotal()         { return total;     }
+    public LiveData<Boolean> getOrderPlaced()  { return orderPlaced; }
+    public LiveData<String> getVoucherError()  { return voucherError; }
+    public LiveData<String> getAppliedVoucher(){ return appliedVoucher; }
+    public LiveData<VoucherModel> getVoucher() { return voucher;   }
 
     public CartViewModel() {
         loadCartFromFirestore();
@@ -69,44 +56,35 @@ public class CartViewModel extends ViewModel {
 
     public void addItem(CartModel item) {
         if (item.getQuantity() <= 0 || userId == null) return;
-
-        List<CartModel> updatedCart = new ArrayList<>(cartItems.getValue());
+        List<CartModel> updated = new ArrayList<>(cartItems.getValue());
         boolean found = false;
-
-        // If item exists, update quantity and save to Firestore
-        for (CartModel cartItem : updatedCart) {
-            if (cartItem.getName().equals(item.getName())) {
-                cartItem.setQuantity(cartItem.getQuantity() + item.getQuantity());
-                saveItemToFirestore(cartItem);
+        for (CartModel ci : updated) {
+            if (ci.getName().equals(item.getName())) {
+                ci.setQuantity(ci.getQuantity() + item.getQuantity());
+                saveItemToFirestore(ci);
                 found = true;
                 break;
             }
         }
-
-        // If item doesn't exist, add new item and save to Firestore
         if (!found) {
-            updatedCart.add(item);
+            updated.add(item);
             saveItemToFirestore(item);
         }
-
-        cartItems.setValue(updatedCart);
+        cartItems.setValue(updated);
         recalculatePrices();
     }
 
     public void removeItem(CartModel item) {
-        List<CartModel> updatedCart = new ArrayList<>(cartItems.getValue());
-        updatedCart.remove(item);
-        cartItems.setValue(updatedCart);
+        List<CartModel> updated = new ArrayList<>(cartItems.getValue());
+        updated.remove(item);
+        cartItems.setValue(updated);
         recalculatePrices();
-
         if (userId != null) {
             db.collection("users")
                     .document(userId)
                     .collection("cart")
                     .document(item.getName())
-                    .delete()
-                    .addOnSuccessListener(unused -> Log.d("CartViewModel", "Item deleted"))
-                    .addOnFailureListener(e -> Log.e("CartViewModel", "Item delete failed", e));
+                    .delete();
         }
     }
 
@@ -115,18 +93,15 @@ public class CartViewModel extends ViewModel {
             removeItem(item);
             return;
         }
-
-        List<CartModel> updatedCart = new ArrayList<>(cartItems.getValue());
-        for (CartModel cartItem : updatedCart) {
-            if (cartItem.getName().equals(item.getName())) {
-                cartItem.setQuantity(quantity);
+        List<CartModel> updated = new ArrayList<>(cartItems.getValue());
+        for (CartModel ci : updated) {
+            if (ci.getName().equals(item.getName())) {
+                ci.setQuantity(quantity);
                 break;
             }
         }
-
-        cartItems.setValue(updatedCart);
+        cartItems.setValue(updated);
         recalculatePrices();
-
         if (userId != null) {
             db.collection("users")
                     .document(userId)
@@ -136,144 +111,231 @@ public class CartViewModel extends ViewModel {
         }
     }
 
-    public void applyVoucher(String voucherCode) {
-        if (voucherCodes.containsKey(voucherCode)) {
-            appliedVoucher.setValue(voucherCode);
-        } else {
+    public void applyVoucher(String rawCode) {
+        if (rawCode == null || rawCode.trim().isEmpty()) {
+            voucherError.setValue("Mã voucher trống.");
             appliedVoucher.setValue(null);
+            voucher.setValue(null);
+            recalculatePrices();
+            return;
         }
-        recalculatePrices();
+
+        final String code = rawCode.trim().toUpperCase();
+        Log.d(TAG, "applyVoucher(): trying code = \"" + code + "\"");
+
+        db.collection("vouchers")
+                .whereEqualTo("code", code)
+                .get()
+                .addOnSuccessListener(qs -> {
+                    Log.d(TAG, "Firestore returned docsCount=" + qs.size());
+                    if (qs.isEmpty()) {
+                        Log.d(TAG, "No voucher found for code=" + code);
+                        voucherError.setValue("Voucher không tồn tại.");
+                        appliedVoucher.setValue(null);
+                        voucher.setValue(null);
+                    } else {
+                        VoucherModel vm = qs.getDocuments().get(0).toObject(VoucherModel.class);
+                        Log.d(TAG, String.format(
+                                "Loaded VM: code=%s, active=%b, exp=%s",
+                                vm.getCode(), vm.isActive(), vm.getExpiryDate()));
+
+                        if (!vm.isActive()) {
+                            Log.d(TAG, "Voucher isActive=false");
+                            voucherError.setValue("Voucher hiện không hoạt động.");
+                            appliedVoucher.setValue(null);
+                            voucher.setValue(null);
+                        }
+                        else if (vm.isExpired()) {
+                            Log.d(TAG, "Voucher isExpired=true (expiryDate=" + vm.getExpiryDate() + ")");
+                            voucherError.setValue("Voucher đã hết hạn.");
+                            appliedVoucher.setValue(null);
+                            voucher.setValue(null);
+                        }
+                        else {
+                            // thành công
+                            Log.d(TAG, "Voucher valid and applied!");
+                            appliedVoucher.setValue(code);
+                            voucher.setValue(vm);
+                            voucherError.setValue(null);
+                        }
+                    }
+                    recalculatePrices();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching voucher", e);
+                    voucherError.setValue("Lỗi khi kiểm tra voucher.");
+                    appliedVoucher.setValue(null);
+                    voucher.setValue(null);
+                    recalculatePrices();
+                });
     }
 
-    private void recalculatePrices() {
-        List<CartModel> currentItems = cartItems.getValue();
-        double subtotalValue = currentItems.stream().mapToDouble(CartModel::getSubtotal).sum();
-        double discount = appliedVoucher.getValue() != null ? voucherCodes.get(appliedVoucher.getValue()) : 0.0;
-        double taxValue = subtotalValue * TAX_RATE;
-        double totalValue = (subtotalValue + DELIVERY_FEE + taxValue) * (1 - discount);
 
-        subtotal.setValue(subtotalValue);
-        tax.setValue(taxValue);
-        total.setValue(totalValue);
+    private boolean isVoucherValid(VoucherModel v) {
+        Date now = new Date();
+        double curSub = subtotal.getValue() != null ? subtotal.getValue() : 0;
+        boolean valid = v.isActive()
+                && (v.getStartDate() == null || !now.before(v.getStartDate()))
+                && (v.getExpiryDate()==null || !now.after(v.getExpiryDate()))
+                && curSub >= v.getMinOrderValue();
+        Log.d("CartVM", "isVoucherValid=" + valid
+                + " subtotal=" + curSub + " minOrder=" + v.getMinOrderValue());
+        return valid;
+    }
+
+    public void recalculatePrices() {
+        List<CartModel> items = cartItems.getValue();
+        double sub = items.stream().mapToDouble(CartModel::getSubtotal).sum();
+
+        double discountAmt = 0.0;
+        VoucherModel vm = voucher.getValue();
+        if (vm != null && isVoucherValid(vm)) {
+            Discount strat = DiscountRegistry.get(vm.getDiscountType());
+            if (strat != null) {
+                discountAmt = strat.applyDiscount(sub, vm);
+            } else {
+                Log.w("CartVM", "No strategy for type=" + vm.getDiscountType());
+            }
+        }
+
+        double taxAmt   = sub * TAX_RATE;
+        double totalAmt = sub + DELIVERY_FEE + taxAmt - discountAmt;
+
+        subtotal.setValue(sub);
+        tax.setValue(taxAmt);
+        total.setValue(Math.max(totalAmt, 0));
 
         saveCartToFirestore();
     }
 
+    // Firestore helpers
     private void saveItemToFirestore(CartModel item) {
         if (userId == null) return;
-
-        Map<String, Object> itemMap = new HashMap<>();
-        itemMap.put("name", item.getName());
-        itemMap.put("imageUrl", item.getImageUrl());
-        itemMap.put("price", item.getPrice());
-        itemMap.put("quantity", item.getQuantity());
-
+        Map<String, Object> m = new HashMap<>();
+        m.put("name", item.getName());
+        m.put("imageUrl", item.getImageUrl());
+        m.put("price", item.getPrice());
+        m.put("quantity", item.getQuantity());
         db.collection("users")
                 .document(userId)
                 .collection("cart")
                 .document(item.getName())
-                .set(itemMap)
-                .addOnFailureListener(e -> Log.e("CartViewModel", "Error saving item to Firestore", e));
+                .set(m);
     }
 
     public void saveCartToFirestore() {
         if (userId == null) return;
-
-        Map<String, Object> cartData = new HashMap<>();
-        cartData.put("items", cartItems.getValue());
-        cartData.put("subtotal", subtotal.getValue());
-        cartData.put("tax", tax.getValue());
-        cartData.put("total", total.getValue());
-
+        Map<String, Object> data = new HashMap<>();
+        data.put("items", cartItems.getValue());
+        data.put("subtotal", subtotal.getValue());
+        data.put("tax", tax.getValue());
+        data.put("total", total.getValue());
         db.collection("carts")
                 .document(userId)
-                .set(cartData)
-                .addOnFailureListener(e -> Log.e("CartViewModel", "Error saving cart to Firestore", e));
+                .set(data);
     }
 
     public void loadCartFromFirestore() {
         if (userId == null) return;
-
         db.collection("users")
                 .document(userId)
                 .collection("cart")
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    List<CartModel> loadedItems = new ArrayList<>();
-                    for (DocumentSnapshot doc : querySnapshot) {
+                .addOnSuccessListener(qs -> {
+                    List<CartModel> loaded = new ArrayList<>();
+                    for (var doc: qs.getDocuments()) {
                         String name = doc.getString("name");
-                        String imageUrl = doc.getString("imageUrl");
-                        int price = doc.getLong("price").intValue();
-                        int quantity = doc.getLong("quantity").intValue();
-
-                        loadedItems.add(new CartModel(imageUrl, name, price, quantity));
+                        String url  = doc.getString("imageUrl");
+                        int price   = doc.getLong("price").intValue();
+                        int qty     = doc.getLong("quantity").intValue();
+                        loaded.add(new CartModel(url, name, price, qty));
                     }
-
-                    cartItems.setValue(loadedItems);
+                    cartItems.setValue(loaded);
                     recalculatePrices();
                 });
     }
 
     public boolean placeOrder() {
-        if (userId == null) return false;
-
-        List<CartModel> currentItems = cartItems.getValue();
-        if (currentItems == null || currentItems.isEmpty()) {
-            Log.w("CartViewModel", "Cannot place order: cart is empty.");
-            return false;
-        }
-
-        Map<String, Object> orderData = new HashMap<>();
-        orderData.put("userId", userId);
-        orderData.put("items", currentItems);
-        orderData.put("subtotal", subtotal.getValue());
-        orderData.put("tax", tax.getValue());
-        orderData.put("total", total.getValue());
-        orderData.put("timestamp", System.currentTimeMillis());
-
+        if (userId == null || cartItems.getValue().isEmpty()) return false;
+        Map<String, Object> order = new HashMap<>();
+        order.put("userId", userId);
+        order.put("items", cartItems.getValue());
+        order.put("subtotal", subtotal.getValue());
+        order.put("tax", tax.getValue());
+        order.put("total", total.getValue());
+        order.put("timestamp", System.currentTimeMillis());
         db.collection("orders")
-                .add(orderData)
-                .addOnSuccessListener(documentReference -> {
-                    clearLocalCart();
-                    removeCartItemsFromFirestore();
-                })
-                .addOnFailureListener(e -> Log.e("CartViewModel", "Order failed", e));
+                .add(order)
+                .addOnSuccessListener(ref -> {
+                    // Clear the cart in Firestore
+                    if (userId != null) {
+                        db.collection("users")
+                                .document(userId)
+                                .collection("cart")
+                                .get()
+                                .addOnSuccessListener(cartSnapshot -> {
+                                    WriteBatch batch = db.batch();
+                                    for (var doc : cartSnapshot.getDocuments()) {
+                                        batch.delete(doc.getReference());
+                                    }
+                                    batch.commit()
+                                            .addOnSuccessListener(aVoid -> {
+                                                Log.d(TAG, "Cart successfully cleared from Firestore.");
+                                                // Clear local cart data after Firestore is updated
+                                                cartItems.setValue(new ArrayList<>());
+                                                subtotal.setValue(0.0);
+                                                tax.setValue(0.0);
+                                                total.setValue(0.0);
+                                                appliedVoucher.setValue(null);
+                                            })
+                                            .addOnFailureListener(e -> Log.e(TAG, "Error clearing cart from Firestore.", e));
+                                })
+                                .addOnFailureListener(e -> Log.e(TAG, "Error fetching cart documents to clear.", e));
+                    } else {
+                        // If userId is null, just clear local data
+                        cartItems.setValue(new ArrayList<>());
+                        subtotal.setValue(0.0);
+                        tax.setValue(0.0);
+                        total.setValue(0.0);
+                        appliedVoucher.setValue(null);
+                    }
+                });
         return true;
     }
 
-    private void clearLocalCart() {
-        cartItems.setValue(new ArrayList<>());
-        subtotal.setValue(0.0);
-        tax.setValue(0.0);
-        total.setValue(0.0);
-        appliedVoucher.setValue(null);
-    }
+    public void applyVoucherObject(VoucherModel vm) {
+        if (vm == null) {
+            voucherError.setValue("Voucher không hợp lệ.");
+            appliedVoucher.setValue(null);
+            voucher.setValue(null);
+            recalculatePrices();
+            return;
+        }
 
-    private void removeCartItemsFromFirestore() {
-        db.collection("users")
-                .document(userId)
-                .collection("cart")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        doc.getReference().delete();
-                    }
-                    Log.d("CartViewModel", "Cart cleared after order");
-                })
-                .addOnFailureListener(e -> Log.e("CartViewModel", "Error clearing cart after order", e));
-    }
+        Log.d(TAG, String.format(
+                "applyVoucherObject: code=%s, active=%b, exp=%s",
+                vm.getCode(), vm.isActive(), vm.getExpiryDate()));
 
-    public void calculatePriceDetails(CartModel cartItem) {
-        List<CartModel> currentItems = cartItems.getValue();
-        double subtotalValue = currentItems.stream().mapToDouble(CartModel::getSubtotal).sum();
-        double discount = appliedVoucher.getValue() != null ? voucherCodes.get(appliedVoucher.getValue()) : 0.0;
-        double taxValue = subtotalValue * TAX_RATE;
-        double totalValue = (subtotalValue + DELIVERY_FEE + taxValue) * (1 - discount);
+        if (!vm.isActive()) {
+            Log.d(TAG, "Voucher isActive=false");
+            voucherError.setValue("Voucher hiện không hoạt động.");
+            appliedVoucher.setValue(null);
+            voucher.setValue(null);
+        }
+        else if (vm.isExpired()) {
+            Log.d(TAG, "Voucher isExpired=true (expiryDate=" + vm.getExpiryDate() + ")");
+            voucherError.setValue("Voucher đã hết hạn.");
+            appliedVoucher.setValue(null);
+            voucher.setValue(null);
+        }
+        else {
+            // Thành công
+            Log.d(TAG, "Voucher valid and applied!");
+            appliedVoucher.setValue(vm.getCode());
+            voucher.setValue(vm);
+            voucherError.setValue(null);
+        }
 
-        subtotal.setValue(subtotalValue);
-        tax.setValue(taxValue);
-        total.setValue(totalValue);
-
-        saveCartToFirestore();
+        recalculatePrices();
     }
 }
