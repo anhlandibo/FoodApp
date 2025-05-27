@@ -35,7 +35,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/imageView6"
+                        android:id="@+id/backArrowOrderDetail"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:scaleType="centerCrop"
@@ -47,9 +47,9 @@
 
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/profileAvt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/profile"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/transparent_bg"
                         app:layout_constraintBottom_toBottomOf="@+id/view4"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -308,11 +308,11 @@
 
                             <EditText
                                 android:id="@+id/address"
-                                android:layout_width="wrap_content"
-                                android:layout_height="42dp"
+                                android:layout_width="260dp"
+                                android:layout_height="wrap_content"
                                 android:textAlignment="textEnd"
                                 android:textSize="16sp"
-                                android:enabled="false"/>
+                                android:enabled="false" />
 
                         </LinearLayout>
 

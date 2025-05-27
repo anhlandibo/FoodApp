@@ -2,6 +2,8 @@ package com.example.foodapp2025.viewmodel;
 
 import static android.content.ContentValues.TAG;
 
+import static android.content.ContentValues.TAG;
+
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -14,6 +16,7 @@ import com.example.foodapp2025.utils.discount.Discount;
 import com.example.foodapp2025.utils.discount.DiscountRegistry;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.firestore.WriteBatch; // Import WriteBatch
 
 import java.util.ArrayList;
@@ -88,7 +91,7 @@ public class CartViewModel extends ViewModel {
         }
     }
 
-    public void updateQuantity(CartModel item, int quantity) {
+    public void updateQuantity(CartModel item, Long quantity) {
         if (quantity <= 0) {
             removeItem(item);
             return;
@@ -246,8 +249,8 @@ public class CartViewModel extends ViewModel {
                     for (var doc: qs.getDocuments()) {
                         String name = doc.getString("name");
                         String url  = doc.getString("imageUrl");
-                        int price   = doc.getLong("price").intValue();
-                        int qty     = doc.getLong("quantity").intValue();
+                        Long price   = (long) doc.getLong("price").intValue();
+                        Long qty     = (long) doc.getLong("quantity").intValue();
                         loaded.add(new CartModel(url, name, price, qty));
                     }
                     cartItems.setValue(loaded);

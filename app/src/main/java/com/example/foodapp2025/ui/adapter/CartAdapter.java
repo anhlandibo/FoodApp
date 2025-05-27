@@ -1,29 +1,39 @@
 package com.example.foodapp2025.ui.adapter;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.CartModel;
+import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.databinding.ViewholderCartBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
-
+// Should be order detail from the start
     private List<CartModel> cartList;
-    private final OnQuantityChangeListener quantityChangeListener;
-    private final OnDeleteClickListener deleteClickListener;
+    private OnQuantityChangeListener quantityChangeListener;
+    private OnDeleteClickListener deleteClickListener;
 
+    public  CartAdapter() {}
     public CartAdapter(List<CartModel> cartList,
                        OnQuantityChangeListener quantityChangeListener,
                        OnDeleteClickListener deleteClickListener) {
         this.cartList = cartList;
         this.quantityChangeListener = quantityChangeListener;
-        this.deleteClickListener = deleteClickListener; // ✅ Now it's properly passed in
+        this.deleteClickListener = deleteClickListener; //  Now it's properly passed in
     }
 
     public void setCartList(List<CartModel> newCartList) {
@@ -57,6 +67,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public int getItemCount() {
         return cartList != null ? cartList.size() : 0;
     }
+
 
     public class CartViewHolder extends RecyclerView.ViewHolder {
         private final ViewholderCartBinding binding;

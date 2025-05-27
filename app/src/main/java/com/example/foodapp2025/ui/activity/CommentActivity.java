@@ -34,12 +34,12 @@ public class CommentActivity extends AppCompatActivity {
     private RatingBar ratingBar;
     private Button btnSend;
     private ImageView backBtn;
-    private CommentAdapter adapter;
     private CommentViewModel viewModel;
     private UserViewModel userViewModel;
     private String userName;
     private String userId;
     private String foodId; // lấy từ intent gửi qua
+    private CommentAdapter commentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,6 @@ public class CommentActivity extends AppCompatActivity {
         btnSend = findViewById(R.id.btnSend);
         backBtn = findViewById(R.id.backBtn);
 
-
         viewModel = new ViewModelProvider(this).get(CommentViewModel.class);
         userViewModel = new UserViewModel();
 
@@ -63,17 +62,29 @@ public class CommentActivity extends AppCompatActivity {
 
         btnSend.setOnClickListener(v -> handleSendComment());
         backBtn.setOnClickListener(v -> finish());
+
     }
 
     private void setupRecyclerView() {
-        adapter = new CommentAdapter();
+        commentAdapter = new CommentAdapter();
         rvComments.setLayoutManager(new LinearLayoutManager(this));
-        rvComments.setAdapter(adapter);
+        rvComments.setAdapter(commentAdapter);
     }
 
     private void observeComments() {
         viewModel.getComments(foodId).observe(this, comments -> {
-            adapter.setData(comments);
+            commentAdapter.setData(comments);
+        });
+
+        commentAdapter.setOnDeleteClickListener(new CommentAdapter.OnDeleteClickListener() {
+            @Override
+            public void onDeleteClick(String userId, CommentModel commentToDelete, int position) {
+                if (userId != null && userId.equals(commentToDelete.getUserId())) {
+                    handleDeleteComment(userId);
+                } else {
+                    Toast.makeText(CommentActivity.this, "Bạn không có quyền xóa comment này.", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
     }
 
@@ -82,6 +93,7 @@ public class CommentActivity extends AppCompatActivity {
         float stars = ratingBar.getRating();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
         userViewModel.getUserInformation(user.getUid()).observe(this, userModel -> {
             userName = userModel.getName();
             userId = userModel.getUid();
@@ -111,5 +123,9 @@ public class CommentActivity extends AppCompatActivity {
                 }
             });
         });
+    }
+
+    private void handleDeleteComment(String userId) {
+        viewModel.deleteComment(foodId, userId);
     }
 }
