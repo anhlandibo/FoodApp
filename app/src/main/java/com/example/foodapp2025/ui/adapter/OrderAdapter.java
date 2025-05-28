@@ -20,7 +20,9 @@ import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.data.model.OrderModel;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
     private ArrayList<OrderModel> orderModels = new ArrayList<>();
@@ -45,8 +47,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @Override
     public void onBindViewHolder(@NonNull OrderAdapter.OrderViewHolder holder, int position) {
         OrderModel orderModel = orderModels.get(position);
-        holder.orderId.setText("Mã đơn: " + orderModel.getId());
-        holder.orderTime.setText("Thời gian: " + String.valueOf(orderModel.getTimestamp()));
+        holder.orderId.setText(orderModel.getId());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        holder.orderTime.setText(sdf.format(orderModel.getOrderedDate()));
         holder.orderStatus.setText(String.valueOf(orderModel.getStatus()));
 
         Button btnConfirm = holder.buttonConfirmReceived;
@@ -59,6 +62,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 btnConfirm.setOnClickListener(v -> {
                     if (listener != null){
                         listener.onConfirmReceivedClick(orderModel.getId());
+                        btnConfirm.setVisibility(View.GONE);
+                        btnConfirm.setOnClickListener(null);
                     }
                 });
             }
@@ -73,15 +78,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             }
         }
 
+        holder.itemView.setOnClickListener(v -> {
+            OrderModel selectedOrder = orderModels.get(position);
+            NavController navController = Navigation.findNavController(v);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("order", selectedOrder); // assuming OrderModel implements Serializable
+            navController.navigate(R.id.orderDetailFragment, bundle); // make sure this ID matches your nav_graph
+        });
 
-//        holder.itemView.setOnClickListener(v -> {
-//            FoodModel selectedFood = foodModels.get(position);
-//            NavController navController = Navigation.findNavController(v);
-//            Bundle bundle = new Bundle();
-//            bundle.putString("foodName", foodModel.getName());
-//            bundle.putSerializable("food", selectedFood);
-//            navController.navigate(R.id.foodDetailFragment, bundle);
-//        });
     }
 
     @Override

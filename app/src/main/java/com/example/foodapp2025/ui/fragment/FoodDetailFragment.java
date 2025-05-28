@@ -38,7 +38,7 @@ import java.util.Set; // Import Set
 public class FoodDetailFragment extends Fragment {
     private FragmentFoodDetailBinding binding;
     private CartViewModel cartViewModel;
-    private int quantity = 1;
+    private Long quantity = 1L;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;

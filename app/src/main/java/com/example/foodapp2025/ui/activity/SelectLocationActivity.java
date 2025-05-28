@@ -137,6 +137,7 @@ public class SelectLocationActivity extends AppCompatActivity {
                 handler.postDelayed(() -> searchLocationSuggestions(editable.toString()), DEBOUNCE_DELAY);
             }
         });
+
         Button searchBtn = findViewById(R.id.btnSearchLocation);
         searchBtn.setOnClickListener(v -> {
             // Khi nhấn xác nhận, di chuyển đến địa điểm đã chọn

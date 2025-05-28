@@ -34,9 +34,9 @@ public class CommentRemoteDataSource {
     // Delete comment
     public Task<Void> deleteComment(String foodId, String userId) {
         DocumentReference commentRef = FirebaseFirestore.getInstance()
-                .collection("food")
-                .document(foodId)
                 .collection("comments")
+                .document(foodId)
+                .collection("FoodComments")
                 .document(userId);  // Xóa comment của userId
 
         return commentRef.delete();  // Xóa comment

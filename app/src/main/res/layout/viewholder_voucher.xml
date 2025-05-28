@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginTop="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@android:color/white"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvVoucherCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mã: TPBT"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#E91E63"
+            android:textAllCaps="true"
+            android:letterSpacing="0.05"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvVoucherDiscount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giảm 10% cho đơn hàng từ 100K"
+            android:textSize="16sp"
+            android:textColor="#4CAF50"
+            android:textStyle="italic"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/tvVoucherDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Áp dụng cho tất cả sản phẩm. Giới hạn 1 lần sử dụng."
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvVoucherExpiry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hạn sử dụng: 31/12/2025"
+            android:textSize="13sp"
+            android:textColor="#FF9800"
+            android:drawablePadding="6dp"
+            android:gravity="center_vertical"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

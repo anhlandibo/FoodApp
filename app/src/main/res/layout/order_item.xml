@@ -13,15 +13,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:background="@color/lightOrange"
+        android:background="@drawable/arc_bg"
         android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="13dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="13dp"
             android:orientation="vertical"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toStartOf="parent"
@@ -67,8 +67,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="4dp">
+                android:layout_marginBottom="4dp"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/txt_order_code1"
@@ -88,19 +88,22 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="0dp"  android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="1"> <TextView
-                    android:id="@+id/txt_order_time1"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Thời gian đặt hàng:"
-                    android:textColor="#4B5563"
-                    android:textSize="14sp" />
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txt_order_time1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thời gian đặt hàng:"
+                        android:textColor="#4B5563"
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/orderTime"
@@ -116,15 +119,15 @@
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_confirm_order"
                     android:layout_width="wrap_content"
-                    android:background="@drawable/orange_bg"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="0"
+                    android:background="@drawable/orange_bg"
+                    android:backgroundTint="@color/buttonOrange"
                     android:text="Xác nhận"
+                    android:textColor="@android:color/black"
                     android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:backgroundTint="@color/red_accent"
-                    android:textColor="@android:color/black" />
+                    android:textStyle="bold" />
             </LinearLayout>
 
         </LinearLayout>

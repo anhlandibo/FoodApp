@@ -22,8 +22,8 @@ public class UserRepository {
     }
 
     // Cập nhật tọa độ người dùng
-    public void updateUserLocation(String userId, double lat, double lon) {
-        userRemoteDataSource.updateUserLocation(userId, lat, lon);
+    public void updateUserLocation(Context context, String userId, double lat, double lon) {
+        userRemoteDataSource.updateUserLocation(context, userId, lat, lon);
     }
 
     // Lấy userID của người dùng hiện tại

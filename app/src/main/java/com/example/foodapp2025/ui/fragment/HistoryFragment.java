@@ -14,9 +14,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.foodapp2025.data.model.OrderModel;
 import com.example.foodapp2025.databinding.FragmentHistoryBinding;
 import com.example.foodapp2025.ui.adapter.OrderAdapter;
 import com.example.foodapp2025.viewmodel.OrderViewModel;
+import com.google.android.material.tabs.TabLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,6 +32,7 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
     private FragmentHistoryBinding binding;
     private OrderViewModel orderViewModel;
     private OrderAdapter orderAdapter;
+    private ArrayList<OrderModel> allOrders = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -80,29 +86,66 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Cai dat RecyclerView voi OrderAdapter
+        // 1) RecyclerView + Adapter
         orderAdapter = new OrderAdapter();
         orderAdapter.setOnOrderActionListener(this);
         binding.orderRecyclerView.setAdapter(orderAdapter);
         binding.orderRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
 
-        //Khoi tao ViewModel va quan sat LiveData tu repository
+        // 2) ViewModel + LiveData
         orderViewModel = new ViewModelProvider(this).get(OrderViewModel.class);
         orderViewModel.getCurrentUsersOrders().observe(getViewLifecycleOwner(), orderList -> {
-            if (orderList != null && !orderList.isEmpty()) {
-                orderAdapter.setOrderList(orderList);
-            }
-            Log.d("HistoryFragment", "Received updated order list with size: " + (orderList != null ? orderList.size() : 0));
+            allOrders.clear();
             if (orderList != null) {
-                for (int i = 0; i < orderList.size(); i++) {
-                    // Đảm bảo OrderModel có getId() và getStatus()
-                    Log.d("HistoryFragment", "Order " + i + " ID: " + orderList.get(i).getId() + ", Status: " + orderList.get(i).getStatus());
-                }
+                allOrders.addAll(orderList);
+                Log.d("HistoryFragment", "Received " + orderList.size() + " orders");
             }
+            // Always show the “All” tab data by default
+            orderAdapter.setOrderList(allOrders);
         });
 
+        // 3) Tabs setup
+        TabLayout tabs = binding.tabs;
+        tabs.addTab(tabs.newTab().setText("All"));
+        tabs.addTab(tabs.newTab().setText("Pending"));
+        tabs.addTab(tabs.newTab().setText("Delivered"));
 
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                ArrayList<OrderModel> filtered;
+                switch (tab.getPosition()) {
+                    case 1: // Not Delivered
+                        filtered = filterByStatus(allOrders, "pending");
+                        break;
+                    case 2: // Delivered
+                        filtered = filterByStatus(allOrders, "completed");
+                        filtered.addAll(filterByStatus(allOrders, "delivered"));
+                        break;
+                    default: // 0: All
+                        filtered = allOrders;
+                        break;
+                }
+                orderAdapter.setOrderList(filtered);
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) { /* no-op */ }
+            @Override public void onTabReselected(TabLayout.Tab tab) {
+                binding.orderRecyclerView.scrollToPosition(0);
+            }
+        });
     }
+
+    // Helper to filter orders by status
+    private ArrayList<OrderModel> filterByStatus(List<OrderModel> source, String status) {
+        ArrayList<OrderModel> result = new ArrayList<>();
+        for (OrderModel o : source) {
+            if (status.equalsIgnoreCase(o.getStatus())) {
+                result.add(o);
+            }
+        }
+        return result;
+    }
+
 
     @Override
     public void onConfirmReceivedClick(String orderId) {

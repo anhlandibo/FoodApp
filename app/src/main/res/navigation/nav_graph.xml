@@ -99,6 +99,16 @@
         tools:layout="@layout/activity_setting"/>
 
 
+    <fragment
+        android:id="@+id/orderDetailFragment"
+        android:name="com.example.foodapp2025.ui.fragment.OrderDetailFragment"
+        android:label="Order Detail">
+        <argument
+            android:name="name"
+            android:defaultValue=""
+            app:argType="string" />
+
+    </fragment>
 
 
 </navigation>

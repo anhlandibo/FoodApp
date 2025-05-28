@@ -2,6 +2,7 @@ package com.example.foodapp2025.ui.fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -227,7 +228,8 @@ public class HomeFragment extends Fragment {
 
             // Check
             Log.e("Location", "Toa do: " + lat + ", " + lon);
-            userViewModel.updateUserLocation(userViewModel.getUserID(), lat, lon);
+            Context context = requireContext();
+            userViewModel.updateUserLocation(context, userViewModel.getUserID(), lat, lon);
             Toast.makeText(getContext(), "Set location successfully", Toast.LENGTH_SHORT).show();
         }
     }
