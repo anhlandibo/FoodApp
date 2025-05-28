@@ -230,6 +230,7 @@ public class CartViewModel extends ViewModel {
         orderData.put("tax", tax.getValue());
         orderData.put("total", total.getValue());
         orderData.put("timestamp", System.currentTimeMillis());
+        orderData.put("status", "pending");
 
         db.collection("orders")
                 .add(orderData)
