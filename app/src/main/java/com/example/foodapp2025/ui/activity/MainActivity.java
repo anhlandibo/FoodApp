@@ -2,6 +2,7 @@ package com.example.foodapp2025.ui.activity;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.content.Intent; // Import Intent
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,9 +32,14 @@ import com.google.firebase.messaging.FirebaseMessaging;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private static final int POST_NOTIFICATIONS_REQUEST_CODE = 101;
-
+    private NavController navController; // Khai báo navController ở đây
 
     private void updateFcmTokenToFirestore() {
+        // Kiểm tra xem người dùng đã đăng nhập chưa trước khi cố gắng lấy UID
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Log.w("FCM", "User not logged in, skipping token update.");
+            return;
+        }
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(task -> {
@@ -55,44 +61,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestNotificationPermission() {
-        // Chỉ cần yêu cầu quyền này từ Android 13 (API 33) trở lên
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Kiểm tra xem quyền đã được cấp chưa
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                // Quyền chưa được cấp
-
-                // Nên hiển thị lý do yêu cầu quyền không?
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.POST_NOTIFICATIONS)) {
-                    // Hiển thị giải thích tại sao cần quyền thông báo cho người dùng
-                    // Ví dụ: dùng AlertDialog hoặc Snackbar
-                    // Sau khi người dùng đọc giải thích và đồng ý, mới gọi requestPermissions
-                    // Đây là một ví dụ đơn giản (nên cải thiện UI/UX ở đây)
                     Log.d("Permission", "Showing notification permission rationale");
                     new androidx.appcompat.app.AlertDialog.Builder(this)
                             .setTitle("Cần quyền thông báo")
-                            .setMessage("Ứng dụng cần quyền gửi thông báo để báo cho bạn khi đơn hàng hoàn thành. Vui lòng cho phép quyền này.")
+                            .setMessage("Ứng dụng cần quyền gửi thông báo để báo cho bạn khi có đơn hàng hoặc ưu đãi mới. Vui lòng cho phép quyền này.") // Cập nhật nội dung thông báo
                             .setPositiveButton("OK", (dialog, which) -> {
                                 ActivityCompat.requestPermissions(this,
                                         new String[]{Manifest.permission.POST_NOTIFICATIONS},
                                         POST_NOTIFICATIONS_REQUEST_CODE);
                             })
-                            // Có thể thêm nút Cancel
                             .create()
                             .show();
-
                 } else {
-                    // Không cần hiển thị giải thích, yêu cầu quyền trực tiếp
                     Log.d("Permission", "Requesting notification permission directly");
                     ActivityCompat.requestPermissions(this,
                             new String[]{Manifest.permission.POST_NOTIFICATIONS},
                             POST_NOTIFICATIONS_REQUEST_CODE);
                 }
             } else {
-                // Quyền đã được cấp rồi
                 Log.d("Permission", "POST_NOTIFICATIONS permission already granted");
             }
         } else {
-            // Dưới Android 13, quyền thông báo được cấp mặc định khi cài app, không cần làm gì
             Log.d("Permission", "No need to request POST_NOTIFICATIONS permission below Android 13");
         }
     }
@@ -102,15 +94,11 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == POST_NOTIFICATIONS_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Quyền đã được cấp thành công!
                 Log.d("Permission", "POST_NOTIFICATIONS permission granted by user");
                 Toast.makeText(this, "Đã cho phép quyền thông báo.", Toast.LENGTH_SHORT).show();
-                // Bạn có thể làm gì đó sau khi có quyền, ví dụ: đăng ký topic FCM...
             } else {
-                // Người dùng từ chối cấp quyền
                 Log.d("Permission", "POST_NOTIFICATIONS permission denied by user");
-                Toast.makeText(this, "Ứng dụng sẽ không thể hiển thị thông báo đơn hàng.", Toast.LENGTH_LONG).show();
-                // Có thể hướng dẫn người dùng vào Cài đặt ứng dụng để cấp quyền thủ công
+                Toast.makeText(this, "Ứng dụng sẽ không thể hiển thị thông báo.", Toast.LENGTH_LONG).show(); // Cập nhật nội dung
             }
         }
     }
@@ -121,14 +109,18 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
 
         if (navHostFragment != null){
-            NavController navController = navHostFragment.getNavController();
+            navController = navHostFragment.getNavController(); // Gán navController
             NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
         }
+
+        // Yêu cầu quyền thông báo ngay khi activity được tạo
         requestNotificationPermission();
 
+        // Cập nhật FCM token nếu người dùng đã đăng nhập
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             updateFcmTokenToFirestore();
         }
@@ -146,53 +138,45 @@ public class MainActivity extends AppCompatActivity {
             float dX, dY;
             int screenHeight = getResources().getDisplayMetrics().heightPixels;
             int screenWidth = getResources().getDisplayMetrics().widthPixels;
-            boolean isDragging = false;  // Track whether we are currently dragging
+            boolean isDragging = false;
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        // Record the difference between the view's position and the touch position
                         dX = view.getX() - event.getRawX();
                         dY = view.getY() - event.getRawY();
-                        isDragging = false;  // Reset dragging state
-                        return false; // Let the click event go through
+                        isDragging = false;
+                        return false;
 
                     case MotionEvent.ACTION_MOVE:
-                        // Only handle dragging logic if the user is actually moving the bubble
                         if (!isDragging) {
-                            isDragging = true;  // Mark as dragging
+                            isDragging = true;
                         }
 
-                        // Get new X and Y positions
                         float newX = event.getRawX() + dX;
                         float newY = event.getRawY() + dY;
 
-                        // Prevent the bubble from going off-screen
                         if (newX < 0) newX = 0;
                         if (newX > screenWidth - view.getWidth()) newX = screenWidth - view.getWidth();
                         if (newY < 0) newY = 0;
                         if (newY > screenHeight - view.getHeight()) newY = screenHeight - view.getHeight();
 
-                        // Move the bubble smoothly
                         view.animate().x(newX).y(newY).setDuration(0).start();
                         return true;
 
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         if (isDragging) {
-                            // Snap to the closest edge after dragging
                             float finalX = event.getRawX() + dX;
                             float finalY = event.getRawY() + dY;
 
-                            // Snap horizontally (left or right)
                             if (finalX < screenWidth / 2) {
                                 snapToEdge(view, 0, view.getY());
                             } else {
                                 snapToEdge(view, screenWidth - view.getWidth(), view.getY());
                             }
 
-                            // Snap vertically (top or bottom)
                             if (finalY < screenHeight / 2) {
                                 snapToEdge(view, view.getX(), 0);
                             } else {
@@ -200,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
                             }
                             return true;
                         }
-                        // Allow the click event to be triggered if there was no dragging
                         return false;
 
                     default:
@@ -209,35 +192,61 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        // Set onClick listener to navigate to the ChatFragment
         messageBubble.setOnClickListener(v -> {
             Log.d("MainActivity", "Message Bubble clicked!");
-            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-
-            // Prevent duplicate navigation
-            if (!(navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() == R.id.ChatFragment)) {
-                navController.navigate(R.id.ChatFragment);
-                setBottomNavigationVisibility(false); // Hide bottom navigation
+            if (navController != null) {
+                if (!(navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() == R.id.ChatFragment)) {
+                    navController.navigate(R.id.ChatFragment);
+                    setBottomNavigationVisibility(false);
+                }
             }
         });
 
-        // Setup Navigation
-        NavController navController = null;
-        if (navHostFragment != null) {
-            navController = navHostFragment.getNavController();
-            NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
+        if (navHostFragment != null) { // Kiểm tra lại navHostFragment đã được khởi tạo
+            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                if (destination.getId() == R.id.ChatFragment) {
+                    setBottomNavigationVisibility(false);
+                } else {
+                    setBottomNavigationVisibility(true);
+                }
+            });
         }
 
-        // Manage Bottom Navigation Visibility on Fragment Change
-        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-            if (destination.getId() == R.id.ChatFragment) {
-                setBottomNavigationVisibility(false);
-            } else {
-                setBottomNavigationVisibility(true);
-            }
-        });
+        // --- Xử lý Intent khi Activity được khởi chạy từ thông báo ---
+        handleNotificationIntent(getIntent());
     }
+
+    // Phương thức này sẽ được gọi khi Activity đã chạy và một Intent mới được gửi đến (ví dụ, khi nhấn vào thông báo thứ hai)
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // Cập nhật Intent mới cho Activity
+        handleNotificationIntent(intent); // Xử lý Intent mới
+    }
+
+    private void handleNotificationIntent(Intent intent) {
+        if (intent != null && navController != null) {
+            String notificationType = intent.getStringExtra("notification_type");
+            Log.d("MainActivity", "Handling notification intent with type: " + notificationType);
+
+            if ("order_completed".equals(notificationType)) {
+                String orderId = intent.getStringExtra("order_id");
+                // TODO: Điều hướng đến màn hình chi tiết đơn hàng
+                Log.d("MainActivity", "Navigating to OrderDetails with ID: " + orderId);
+                // Ví dụ: navController.navigate(R.id.orderDetailsFragment, bundleWithOrderId);
+                Toast.makeText(this, "Đơn hàng " + orderId + " đã hoàn thành!", Toast.LENGTH_LONG).show();
+            } else if ("new_voucher".equals(notificationType)) {
+                String voucherCode = intent.getStringExtra("voucher_code");
+                // TODO: Điều hướng đến màn hình danh sách voucher hoặc chi tiết voucher
+                Log.d("MainActivity", "Navigating to VoucherList/Details with code: " + voucherCode);
+                // Ví dụ: navController.navigate(R.id.voucherListFragment, bundleWithVoucherCode);
+                Toast.makeText(this, "Bạn có voucher mới: " + voucherCode + "!", Toast.LENGTH_LONG).show();
+                // Tắt hiển thị bottom navigation nếu điều hướng sang màn hình không có bottom nav
+                // setBottomNavigationVisibility(false);
+            }
+        }
+    }
+
 
     private void snapToEdge(View view, float x, float y) {
         ValueAnimator animatorX = ValueAnimator.ofFloat(view.getX(), x);
