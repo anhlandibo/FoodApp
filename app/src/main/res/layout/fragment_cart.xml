@@ -6,8 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragment.CartFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
     <ImageView
         android:id="@+id/backArrowOrderDetail"
         android:layout_width="25dp"
@@ -199,6 +197,37 @@
                     app:layout_constraintTop_toBottomOf="@+id/view3" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Payment Method"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/paymentMethodRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/radioCod"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cash on Delivery (COD)"
+                    android:checked="true"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/radioCard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Credit/Debit Card"
+                    android:textSize="16sp"
+                    android:layout_marginTop="8dp"/>
+            </RadioGroup>
             <androidx.appcompat.widget.AppCompatButton
                 style="@android:style/Widget.Button"
                 android:layout_marginTop="16dp"

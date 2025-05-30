@@ -24,8 +24,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ui.activity.CheckoutActivity"
+            android:name=".ui.activity.PaymentActivity"
             android:exported="false" />
+
         <activity
             android:name=".ui.activity.CommentActivity"
             android:exported="false" />
