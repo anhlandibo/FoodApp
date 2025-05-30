@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class CartViewModel extends ViewModel {
     private static final double TAX_RATE = 0.05;
-    private static final double DELIVERY_FEE = 20000.0;
+    private static final double DELIVERY_FEE = 5;
 
     private final MutableLiveData<VoucherModel> voucher = new MutableLiveData<>();
     private final MutableLiveData<String> voucherError = new MutableLiveData<>(null);
@@ -37,6 +37,7 @@ public class CartViewModel extends ViewModel {
     private final MutableLiveData<Double> subtotal = new MutableLiveData<>(0.0);
     private final MutableLiveData<Double> tax = new MutableLiveData<>(0.0);
     private final MutableLiveData<Double> total = new MutableLiveData<>(0.0);
+    private final MutableLiveData<Double> delivery = new MutableLiveData<>(5.0);
     private final MutableLiveData<Boolean> orderPlaced = new MutableLiveData<>(false);
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -52,6 +53,10 @@ public class CartViewModel extends ViewModel {
     public LiveData<String> getVoucherError()  { return voucherError; }
     public LiveData<String> getAppliedVoucher(){ return appliedVoucher; }
     public LiveData<VoucherModel> getVoucher() { return voucher;   }
+    private final MutableLiveData<Double> discountAmount = new MutableLiveData<>(0.0);
+
+    public LiveData<Double> getDiscountAmount() {return discountAmount;}
+
 
     public CartViewModel() {
         loadCartFromFirestore();
@@ -187,29 +192,44 @@ public class CartViewModel extends ViewModel {
     }
 
     public void recalculatePrices() {
+        // 1. Tính tổng phụ (subtotal) từ các mặt hàng trong giỏ
         List<CartModel> items = cartItems.getValue();
         double sub = items.stream().mapToDouble(CartModel::getSubtotal).sum();
+
+        // 2. Tính thuế dựa trên subtotal
+        double taxAmt = sub * TAX_RATE;
+
+        // 3. Tính tổng số tiền TRƯỚC KHI áp dụng giảm giá,
+        // bao gồm subtotal, phí giao hàng và thuế.
+        // Đây là "total" mà bạn muốn dùng để tính discountAmt.
+        double totalBeforeDiscount = sub + DELIVERY_FEE + taxAmt;
 
         double discountAmt = 0.0;
         VoucherModel vm = voucher.getValue();
         if (vm != null && isVoucherValid(vm)) {
             Discount strat = DiscountRegistry.get(vm.getDiscountType());
             if (strat != null) {
-                discountAmt = strat.applyDiscount(sub, vm);
+                // 4. Áp dụng giảm giá dựa trên 'totalBeforeDiscount'
+                discountAmt = strat.applyDiscount(totalBeforeDiscount, vm);
             } else {
                 Log.w("CartVM", "No strategy for type=" + vm.getDiscountType());
             }
         }
 
-        double taxAmt   = sub * TAX_RATE;
-        double totalAmt = sub + DELIVERY_FEE + taxAmt - discountAmt;
+        // 5. Tính tổng số tiền cuối cùng sau khi đã áp dụng giảm giá
+        double totalAmt = totalBeforeDiscount - discountAmt;
 
+        // Cập nhật các LiveData hoặc thuộc tính
         subtotal.setValue(sub);
         tax.setValue(taxAmt);
+        // Đảm bảo tổng số tiền không âm (ví dụ: nếu giảm giá quá lớn)
         total.setValue(Math.max(totalAmt, 0));
+        discountAmount.setValue(discountAmt);
 
+        // Lưu giỏ hàng vào Firestore
         saveCartToFirestore();
     }
+
 
     // Firestore helpers
     private void saveItemToFirestore(CartModel item) {
@@ -258,6 +278,11 @@ public class CartViewModel extends ViewModel {
                 });
     }
 
+    public boolean isCartEmpty(){
+        if(cartItems.getValue().isEmpty()) return true;
+        else return false;
+    }
+
     public boolean placeOrder() {
         if (userId == null || cartItems.getValue().isEmpty()) return false;
         Map<String, Object> order = new HashMap<>();
@@ -300,6 +325,7 @@ public class CartViewModel extends ViewModel {
                         subtotal.setValue(0.0);
                         tax.setValue(0.0);
                         total.setValue(0.0);
+                        delivery.setValue(5.0);
                         appliedVoucher.setValue(null);
                     }
                 });
@@ -308,7 +334,6 @@ public class CartViewModel extends ViewModel {
 
     public void applyVoucherObject(VoucherModel vm) {
         if (vm == null) {
-            voucherError.setValue("Voucher không hợp lệ.");
             appliedVoucher.setValue(null);
             voucher.setValue(null);
             recalculatePrices();

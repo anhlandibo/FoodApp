@@ -57,8 +57,8 @@ public class OrderDetailFragment extends Fragment {
         binding.orderId.setText(order.getId());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         binding.orderedDate.setText(sdf.format(order.getOrderedDate()));
-        binding.orderTotal.setText(String.valueOf(order.getTotal())+ " VND");
-        binding.orderPaid.setText(String.valueOf(order.getTotal())+ " VND");
+        binding.orderTotal.setText(String.valueOf(order.getTotal())+ " $");
+        binding.orderPaid.setText(String.valueOf(order.getTotal())+ " $");
         binding.backArrowOrderDetail.setOnClickListener( v-> {
             requireActivity().onBackPressed();
         });

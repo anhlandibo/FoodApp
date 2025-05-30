@@ -74,7 +74,7 @@
                     android:id="@+id/txt_order_code1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mã đơn hàng:"
+                    android:text="Order ID:"
                     android:textColor="#4B5563" />
 
                 <TextView
@@ -101,7 +101,7 @@
                         android:id="@+id/txt_order_time1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Thời gian đặt hàng:"
+                        android:text="Ordered Date:"
                         android:textColor="#4B5563"
                         android:textSize="14sp" />
 
@@ -124,7 +124,7 @@
                     android:layout_weight="0"
                     android:background="@drawable/orange_bg"
                     android:backgroundTint="@color/buttonOrange"
-                    android:text="Xác nhận"
+                    android:text="Confirm"
                     android:textColor="@android:color/black"
                     android:textSize="12sp"
                     android:textStyle="bold" />
