@@ -50,6 +50,7 @@ public class OrderRemoteDataSource {
 
         orderData.put("items", itemList);
         orderData.put("totalPrice", totalPrice);
+        orderData.put("status", "pending");
 
         orderCollection.add(orderData)
                 .addOnSuccessListener(documentReference -> Log.d("OrderRemoteDataSource", "Order placed successfully!"))
