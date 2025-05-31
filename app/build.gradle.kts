@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
+
+
 android {
     namespace = "com.example.foodapp2025"
     compileSdk = 35
@@ -35,6 +37,17 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    packagingOptions {
+        // Chỉ định Gradle chỉ lấy một trong các file trùng lặp.
+        // pickFirst sẽ chọn file đầu tiên nó tìm thấy.
+        pickFirst("META-INF/DEPENDENCIES")
+        pickFirst("META-INF/LICENSE")
+        pickFirst("META-INF/LICENSE.txt")
+        pickFirst("META-INF/NOTICE")
+        pickFirst("META-INF/NOTICE.txt")
+    }
+
 }
 
 dependencies {
@@ -71,15 +84,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.github.ismaeldivita:chip-navigation-bar:1.4.0")
     implementation("com.google.code.gson:gson:2.9.1")
     implementation("com.google.android.material:material:1.13.0-alpha11")
     implementation ("com.google.android.gms:play-services-auth:21.3.0")
     implementation ("com.google.firebase:firebase-auth:21.0.3")
     implementation ("com.google.firebase:firebase-firestore:24.8.1")
-
-
     // Unit and UI tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
@@ -102,4 +112,35 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.google.firebase:firebase-messaging")
+
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.fragment:fragment-ktx:1.7.0")
+
+    // Cloudinary HTTP5 client (Thường dùng cho backend Java, không phải Android client)
+    implementation("com.cloudinary:cloudinary-http5:2.0.0")
+
+    // Cloudinary Taglib (Thường dùng cho ứng dụng web Java/JSP, không phải Android)
+    implementation("com.cloudinary:cloudinary-taglib:2.0.0")
+
+    // Dotenv Java (Thường dùng cho backend Java để quản lý biến môi trường, không phải Android client)
+    implementation("io.github.cdimascio:dotenv-java:2.2.4")
+
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+//    // Spring Boot Starter Web
+//    implementation("org.springframework.boot:spring-boot-starter-web")
+//
+//    // Spring Boot Starter Data JPA
+//    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+//
+//    // Spring Boot Starter Security
+//    implementation("org.springframework.boot:spring-boot-starter-security")
+//
+//    // Spring Boot Starter Thymeleaf
+//    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 }

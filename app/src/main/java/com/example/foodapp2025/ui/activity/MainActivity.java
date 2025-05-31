@@ -27,10 +27,21 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private static final int POST_NOTIFICATIONS_REQUEST_CODE = 101;
+
+    private static final String TAG = "CloudinaryUpload";
+    private static final String BASE_URL = "http://localhost:8080";
+
 
 
     private void updateFcmTokenToFirestore() {
@@ -252,6 +263,8 @@ public class MainActivity extends AppCompatActivity {
                 setBottomNavigationVisibility(true);
             }
         });
+
+
     }
 
     private void snapToEdge(View view, float x, float y) {

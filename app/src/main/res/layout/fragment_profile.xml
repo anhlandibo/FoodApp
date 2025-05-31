@@ -102,7 +102,7 @@
                             android:orientation="horizontal">
 
                             <LinearLayout
-                                android:id="@+id/paymentButton"
+                                android:id="@+id/changeAvtBtn"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_margin="10dp"
@@ -119,10 +119,10 @@
                                     android:background="@drawable/oval_background">
 
                                     <ImageView
-                                        android:id="@+id/walletIcon"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:src="@drawable/wallet"
+                                        android:id="@+id/changeAvtIcon"
+                                        android:layout_width="50dp"
+                                        android:layout_height="50dp"
+                                        android:src="@drawable/profile"
                                         app:layout_constraintBottom_toBottomOf="parent"
                                         app:layout_constraintEnd_toEndOf="parent"
                                         app:layout_constraintStart_toStartOf="parent"
@@ -134,7 +134,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="8dp"
-                                    android:text="Payment"
+                                    android:text="Change Avatar"
                                     android:textAlignment="center"
                                     android:textColor="#000"
                                     android:textStyle="bold" />
@@ -159,9 +159,9 @@
 
                                     <ImageView
                                         android:id="@+id/settingsIcon"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:src="@drawable/settings_icon"
+                                        android:layout_width="40dp"
+                                        android:layout_height="40dp"
+                                        android:src="@drawable/settings"
                                         app:layout_constraintBottom_toBottomOf="parent"
                                         app:layout_constraintEnd_toEndOf="parent"
                                         app:layout_constraintStart_toStartOf="parent"
@@ -270,7 +270,8 @@
                                 android:layout_weight="1"
                                 android:text="Mobile:"
                                 android:textColor="#B1873E"
-                                android:textSize="18dp" />
+                                android:textSize="18dp"
+                                />
 
                             <EditText
                                 android:id="@+id/phoneNumber"
@@ -278,7 +279,9 @@
                                 android:layout_height="42dp"
                                 android:textAlignment="textEnd"
                                 android:textSize="16sp"
-                                android:enabled="false"/>
+                                android:enabled="false"
+                                android:alpha="1.0"
+                                android:textColor="@color/black"/>
 
                         </LinearLayout>
 
@@ -308,11 +311,13 @@
 
                             <EditText
                                 android:id="@+id/address"
-                                android:layout_width="260dp"
+                                android:layout_width="240dp"
                                 android:layout_height="wrap_content"
                                 android:textAlignment="textEnd"
                                 android:textSize="16sp"
-                                android:enabled="false" />
+                                android:enabled="false"
+                                android:alpha="1.0"
+                                android:textColor="@color/black"/>
 
                         </LinearLayout>
 
@@ -346,8 +351,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="42dp"
                                 android:textAlignment="textEnd"
+                                android:textColor="@color/black"
                                 android:textSize="16sp"
-                                android:enabled="false"/>
+                                android:enabled="false"
+                                android:alpha="1.0"/>
 
                         </LinearLayout>
 
@@ -385,7 +392,8 @@
                                 android:entries="@array/gender_array"
                                 android:textAlignment="textEnd"
                                 android:textSize="16sp"
-                                android:enabled="false"/>
+                                android:enabled="false"
+                                android:alpha="1.0"/>
 
                         </LinearLayout>
 
