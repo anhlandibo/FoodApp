@@ -1,6 +1,8 @@
 package com.example.foodapp2025.viewmodel;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.view.View;
 
 import androidx.lifecycle.LiveData;
@@ -45,5 +47,13 @@ public class UserViewModel extends ViewModel {
 
     public void handleResetPassword(Context context) {
         userRepository.handleResetPassword(context);
+    }
+
+    public void uploadAvatar(Uri photoUri, Context context) {
+        userRepository.uploadAvatar(photoUri, context);
+    }
+
+    public LiveData<String> getAvatarUploadStatus() {
+        return userRepository.getAvatarUploadStatus();
     }
 }

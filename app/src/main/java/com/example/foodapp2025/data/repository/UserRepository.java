@@ -1,6 +1,8 @@
 package com.example.foodapp2025.data.repository;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.view.View;
 
 import androidx.lifecycle.LiveData;
@@ -40,5 +42,13 @@ public class UserRepository {
 
     public void handleResetPassword(Context context) {
         userRemoteDataSource.handleResetPassword(context);
+    }
+
+    public void uploadAvatar(Uri photoUri, Context context) {
+        userRemoteDataSource.uploadAvatar(photoUri, context);
+    }
+
+    public LiveData<String> getAvatarUploadStatus() {
+        return userRemoteDataSource.getAvatarUploadStatus();
     }
 }
