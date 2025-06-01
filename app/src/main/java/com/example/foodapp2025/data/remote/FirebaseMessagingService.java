@@ -101,8 +101,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
             // Đây là thông báo voucher mới
             channelId = VOUCHER_CHANNEL_ID;
             notificationId = (int) System.currentTimeMillis(); // ID duy nhất cho mỗi thông báo voucher
-            notificationTitle = title.isEmpty() ? "Voucher mới dành cho bạn!" : title; // Sử dụng title từ FCM hoặc mặc định
-            notificationBody = body.isEmpty() ? "Kiểm tra ưu đãi mới nhất!" : body; // Sử dụng body từ FCM hoặc mặc định
+            notificationTitle = title.isEmpty() ? "There is a new voucher!" : title; // Sử dụng title từ FCM hoặc mặc định
+            notificationBody = body.isEmpty() ? "Check out new voucher for you!" : body; // Sử dụng body từ FCM hoặc mặc định
 
             intent = new Intent(this, MainActivity.class);
             // Thêm dữ liệu bổ sung để MainActivity có thể xử lý khi nhấn vào thông báo
@@ -118,8 +118,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
             // Đây là thông báo đơn hàng hoàn thành (như API cũ của bạn)
             channelId = ORDER_CHANNEL_ID;
             notificationId = (int) System.currentTimeMillis(); // ID duy nhất
-            notificationTitle = title.isEmpty() ? "Đơn hàng của bạn đã hoàn thành!" : title;
-            notificationBody = body.isEmpty() ? "Chúng tôi đã làm xong đơn của bạn, vui lòng bấm “Tôi đã nhận” trong app." : body;
+            notificationTitle = title.isEmpty() ? "Your order has arrived!" : title;
+            notificationBody = body.isEmpty() ? "Your order has arrived, please press 'confirm' in the app" : body;
 
             intent = new Intent(this, MainActivity.class);
             intent.putExtra("notification_type", notificationType);
@@ -132,8 +132,8 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
             // Trường hợp thông báo không có type hoặc type không xác định
             channelId = ORDER_CHANNEL_ID; // Kênh mặc định
             notificationId = (int) System.currentTimeMillis();
-            notificationTitle = title.isEmpty() ? "Thông báo mới" : title;
-            notificationBody = body.isEmpty() ? "Bạn có một thông báo mới từ ứng dụng." : body;
+            notificationTitle = title.isEmpty() ? "New notification" : title;
+            notificationBody = body.isEmpty() ? "You got a new message." : body;
 
             intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -146,7 +146,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE); // FLAG_IMMUTABLE là bắt buộc từ Android S (API 31)
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.ic_launcher_foreground) // Đảm bảo icon này tồn tại
+                .setSmallIcon(R.drawable.app_icon) // Đảm bảo icon này tồn tại
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationBody)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -177,14 +177,14 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
                     "Order Notifications",
                     NotificationManager.IMPORTANCE_HIGH
             );
-            orderChannel.setDescription("Thông báo khi đơn hàng được hoàn thành");
+            orderChannel.setDescription("Notify when the orders are done.");
             // Kênh cho thông báo voucher
             NotificationChannel voucherChannel = new NotificationChannel(
                     VOUCHER_CHANNEL_ID,
                     "Voucher Notifications",
                     NotificationManager.IMPORTANCE_HIGH
             );
-            voucherChannel.setDescription("Thông báo về các voucher và ưu đãi mới");
+            voucherChannel.setDescription("Notify about new vouchers.");
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             if (notificationManager != null) {
