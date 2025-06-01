@@ -146,7 +146,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE); // FLAG_IMMUTABLE là bắt buộc từ Android S (API 31)
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.app_icon) // Đảm bảo icon này tồn tại
+                .setSmallIcon(R.mipmap.ic_app_icon) // Đảm bảo icon này tồn tại
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationBody)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

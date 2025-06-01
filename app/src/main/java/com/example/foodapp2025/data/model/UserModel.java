@@ -10,6 +10,7 @@ public class UserModel {
     private String address;
     private String gender;
     private String dateOfBirth;
+    private String photoUrl;
     private GeoPoint location;
 
     public UserModel() {}
@@ -20,13 +21,16 @@ public class UserModel {
         this.uid = uid;
     }
 
-    public UserModel(String email, String uid, String name, String phoneNumber, String address, String gender) {
+    public UserModel(String email, String name, String uid, String phoneNumber, String address, String gender, String dateOfBirth, String photoUrl, GeoPoint location) {
         this.email = email;
-        this.uid = uid;
         this.name = name;
+        this.uid = uid;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.gender = gender;
+        this.dateOfBirth = dateOfBirth;
+        this.photoUrl = photoUrl;
+        this.location = location;
     }
 
     public GeoPoint getLocation(){
@@ -37,6 +41,14 @@ public class UserModel {
     }
     public String getEmail() {
         return email;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void getPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     public void setEmail(String email) {
