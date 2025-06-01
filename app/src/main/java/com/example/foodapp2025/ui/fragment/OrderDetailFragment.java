@@ -50,7 +50,7 @@ public class OrderDetailFragment extends Fragment {
         for (Map<String, Object> item : items) {
             String imageUrl = (String) item.get("imageUrl");
             String name = (String) item.get("name");
-            Long price = (Long) item.get("price");
+            Double price = (Double) item.get("price");
             Long quantity = (Long) item.get("quantity");
             orderDetailAdapter.addItem(new CartModel(imageUrl, name, price, quantity));
         }

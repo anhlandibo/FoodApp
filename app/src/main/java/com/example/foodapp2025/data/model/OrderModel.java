@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+
 import com.google.firebase.Timestamp;
 
 public class OrderModel implements Serializable {
@@ -28,13 +29,15 @@ public class OrderModel implements Serializable {
     private int total;
     private String userId;
     private String status;
+    private String paymentStatus;
+    private String paymentMethod;
 
-    public void setStatus(String status){
-        this.status = status;
+    public String getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public String getStatus(){
-        return this.status;
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     //not on database yet
@@ -43,7 +46,7 @@ public class OrderModel implements Serializable {
         items = new ArrayList<>();
     }
 
-    public OrderModel(String id, ArrayList<Map<String, Object>> items, int subtotal, int tax, long timestamp, int total, String userId) {
+    public OrderModel(String id, ArrayList<Map<String, Object>> items, int subtotal, int tax, long timestamp, int total, String userId, String paymentStatus, String paymentMethod) {
         //initializing items as an empty ArrayList
         items = new ArrayList<>();
         this.id = id;
@@ -53,6 +56,8 @@ public class OrderModel implements Serializable {
         this.timestamp = timestamp;
         this.total = total;
         this.userId = userId;
+        this.paymentStatus = paymentStatus;
+        this.paymentMethod = paymentMethod;
     }
 
     // Getter and Setter for id
@@ -120,5 +125,20 @@ public class OrderModel implements Serializable {
 
     public Date getOrderedDate() {
         return new Date(timestamp);
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+    public String getPaymentStatus() {
+        return paymentStatus;
     }
 }

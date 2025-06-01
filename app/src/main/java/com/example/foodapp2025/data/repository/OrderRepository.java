@@ -21,6 +21,6 @@ public class OrderRepository {
 
     public Task<Void> updateOrderStatus(String orderId, String status){
         Log.d("OrderRemoteDataSource", "Attempting to update status for order ID: " + orderId + " to: " + status);
-        return orderRemoteDataSource.updateOrderStatus(orderId, status);
+        return orderRemoteDataSource.updateOrderAndPaymentStatus(orderId, status, "paid");
     }
 }
