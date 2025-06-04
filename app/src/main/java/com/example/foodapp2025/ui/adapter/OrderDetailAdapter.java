@@ -49,7 +49,7 @@ public class OrderDetailAdapter extends RecyclerView.Adapter<OrderDetailAdapter.
     public void onBindViewHolder(@NonNull OrderDetailAdapter.OrderDetailViewHolder holder, int position) {
         CartModel cartModel = orderDetails.get(position);
         holder.orderDetailName.setText(cartModel.getName());
-        holder.orderDetailCost.setText(cartModel.getPrice() * cartModel.getQuantity() + " VND");
+        holder.orderDetailCost.setText(cartModel.getPrice() * cartModel.getQuantity() + " $");
         holder.orderDetailQuantity.setText(String.valueOf(cartModel.getQuantity()));
 
         Glide.with(holder.itemView.getContext())

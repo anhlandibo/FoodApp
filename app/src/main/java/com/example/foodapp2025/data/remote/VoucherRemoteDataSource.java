@@ -12,7 +12,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-public class VoucherRemoteDataSource {
+public class   VoucherRemoteDataSource {
     private final CollectionReference voucherCollection;
     public VoucherRemoteDataSource(CollectionReference voucherCollection) {
         this.voucherCollection = voucherCollection;

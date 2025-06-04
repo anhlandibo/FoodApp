@@ -82,7 +82,7 @@ public class FoodFilterPopupWindow extends PopupWindow {
         seekMinPrice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                minPriceTxt.setText(progress + " VND");
+                minPriceTxt.setText(progress + " $");
             }
 
             @Override

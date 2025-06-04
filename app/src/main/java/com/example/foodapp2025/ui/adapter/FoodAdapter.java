@@ -43,7 +43,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
     public void onBindViewHolder(@NonNull FoodAdapter.FoodViewHolder holder, int position) {
         FoodModel foodModel = foodModels.get(position);
         holder.foodName.setText(foodModel.getName());
-        holder.foodPrice.setText(foodModel.getPrice() + " VND");
+        holder.foodPrice.setText(foodModel.getPrice() + " $");
         holder.foodStart.setText(String.valueOf(foodModel.getStar()));
         holder.foodTime.setText(foodModel.getTime());
 

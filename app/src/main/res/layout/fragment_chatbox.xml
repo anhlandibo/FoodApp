@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:orientation="vertical"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
     tools:context=".ui.fragment.ChatFragment">
 
     <!-- Toolbar for chat header -->

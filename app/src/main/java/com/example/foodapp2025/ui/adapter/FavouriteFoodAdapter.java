@@ -47,7 +47,7 @@ public class FavouriteFoodAdapter extends RecyclerView.Adapter<FavouriteFoodAdap
         FoodModel foodModel = foodList.get(position);
         if (foodModel == null) return;
         holder.foodName.setText(foodModel.getName());
-        holder.foodPrice.setText(foodModel.getPrice() + " VND");
+        holder.foodPrice.setText(foodModel.getPrice() + " $");
         holder.foodStart.setText(String.valueOf(foodModel.getStar()));
         holder.foodTime.setText(foodModel.getTime());
         Glide.with(holder.itemView.getContext())
