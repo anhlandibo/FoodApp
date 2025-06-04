@@ -23,7 +23,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class PaymentActivity extends AppCompatActivity {
-    private static final String BACKEND_URL = "http://10.0.2.2:8080/";
+    private static final String BACKEND_URL = "https://foodappfcm.onrender.com/";
     private final OkHttpClient httpClient = new OkHttpClient();
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private PaymentSheet paymentSheet;
