@@ -155,6 +155,10 @@ public class CartFragment extends Fragment {
         cartVM.getTotal().observe(getViewLifecycleOwner(), tot ->
                 binding.totalView.setText(formatPrice(tot))
         );
+        binding.deliveryFeeView.setText(formatPrice(5.0));
+        cartVM.getDiscountAmount().observe(getViewLifecycleOwner(), discount ->
+                binding.discountAmountView.setText(formatDiscount(discount))
+        );
         cartVM.getVoucherError().observe(getViewLifecycleOwner(), err -> {
             if (err != null) Toast.makeText(requireContext(), err, Toast.LENGTH_SHORT).show();
         });
@@ -232,6 +236,10 @@ public class CartFragment extends Fragment {
 
     private String formatPrice(double v) {
         return String.format("%,.0f $", v);
+    }
+
+    private String formatDiscount(double v) {
+        return String.format("- %,.0f $", v);
     }
 
     @Override

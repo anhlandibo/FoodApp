@@ -397,7 +397,18 @@ public class CartViewModel extends ViewModel {
         order.put("subtotal", subtotal.getValue());
         order.put("tax", tax.getValue());
         order.put("total", total.getValue());
+        order.put("discountAmount", discountAmount.getValue());
         order.put("timestamp", System.currentTimeMillis());
+
+
+        VoucherModel currentVoucher = voucher.getValue();
+        if (currentVoucher != null && appliedVoucher.getValue() != null) {
+            Map<String, Object> voucherDetails = new HashMap<>();
+            voucherDetails.put("code", currentVoucher.getCode());
+            voucherDetails.put("type", currentVoucher.getDiscountType());
+            voucherDetails.put("value", currentVoucher.getDiscountValue());
+            order.put("appliedVoucherDetails", voucherDetails);
+        }
 
         String status;
         String paymentStatus;
