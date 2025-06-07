@@ -32,6 +32,8 @@ public class PaymentActivity extends AppCompatActivity {
     private String orderId;
     private String userId;
 
+    private static final double MIN_USD_AMOUNT_FOR_STRIPE = 0.50;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,13 +44,14 @@ public class PaymentActivity extends AppCompatActivity {
             orderId = getIntent().getStringExtra("orderId");
             userId = getIntent().getStringExtra("userId");
         } else {
-            Toast.makeText(this, "Error: Payment information not received.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error: Cannot get payment information", Toast.LENGTH_LONG).show();
             setResult(RESULT_CANCELED);
             finish();
             return;
         }
-        if (totalAmount <= 0 || orderId == null || userId == null) {
-            Toast.makeText(this, "Error: Invalid payment information.", Toast.LENGTH_LONG).show();
+
+        if (totalAmount < MIN_USD_AMOUNT_FOR_STRIPE || orderId == null || userId == null) {
+            Toast.makeText(this, "Error: The payment amount is too low or the information is invalid. Please ensure the order has a minimum value of $" + String.format("%.2f", MIN_USD_AMOUNT_FOR_STRIPE) + ".", Toast.LENGTH_LONG).show();
             setResult(RESULT_CANCELED);
             finish();
             return;
@@ -61,16 +64,18 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void startCheckout() {
+        long amountInCents = (long) (totalAmount * 100);
 
         Map<String, Object> payMap = new HashMap<>();
-        payMap.put("amount", (long) totalAmount);
-        payMap.put("currency", "vnd");
+        payMap.put("amount", amountInCents);
+        payMap.put("currency", "usd");
         payMap.put("orderId", orderId);
         payMap.put("userId", userId);
 
         String json = gson.toJson(payMap);
 
         Log.d("PaymentActivity", "Requesting PaymentIntent with data: " + json);
+        Log.d("PaymentActivity", "Amount sent to backend (in cents): " + amountInCents);
 
         RequestBody requestBody = RequestBody.create(
                 json,
@@ -86,9 +91,8 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 runOnUiThread(() -> {
-                    Toast.makeText(PaymentActivity.this, "Netword error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e("PaymentActivity", "Error when calling backend", e);
-                    Log.e("ERROR", e.getMessage());
+                    Toast.makeText(PaymentActivity.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("PaymentActivity", "Error from backend", e);
                     setResult(RESULT_CANCELED);
                     finish();
                 });
@@ -98,7 +102,7 @@ public class PaymentActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
-                    Log.d("PaymentActivity", "Received PaymentIntent response: " + responseData);
+                    Log.d("PaymentActivity", "Receive response from PaymentIntent: " + responseData);
 
                     Map<String, String> responseMap = gson.fromJson(responseData, Map.class);
                     clientSecret = responseMap.get("clientSecret");
@@ -106,7 +110,7 @@ public class PaymentActivity extends AppCompatActivity {
                     String ephemeralKey = responseMap.get("ephemeralKey");
 
                     if (clientSecret != null && customerId != null && ephemeralKey != null) {
-                        Log.d("PaymentActivity", "Received clientSecret: " + clientSecret + ", CustomerId: " + customerId + ", EphemeralKey: " + ephemeralKey);
+                        Log.d("PaymentActivity", "Receive clientSecret: " + clientSecret + ", CustomerId: " + customerId + ", EphemeralKey: " + ephemeralKey);
                         runOnUiThread(() -> {
                             PaymentSheet.Configuration configuration = new PaymentSheet.Configuration(
                                     "FoodApp",
@@ -119,12 +123,12 @@ public class PaymentActivity extends AppCompatActivity {
                         });
                     } else {
                         runOnUiThread(() -> {
-                            Toast.makeText(PaymentActivity.this, "Failed to retrieve complete information from backend (client secret, customer ID, or ephemeral key).", Toast.LENGTH_LONG).show();
+                            Toast.makeText(PaymentActivity.this, "Unable to retrieve complete information from the backend (client secret, customer ID, or ephemeral key).", Toast.LENGTH_LONG).show();
                             setResultAndFinish(RESULT_CANCELED);
                         });
                     }
                 } else {
-                    final String errorBody = response.body() != null ? response.body().string() : "No error body";
+                    final String errorBody = response.body() != null ? response.body().string() : "Error dose not have body";
                     runOnUiThread(() -> {
                         Toast.makeText(PaymentActivity.this, "Error from backend: " + response.code() + " - " + errorBody, Toast.LENGTH_LONG).show();
                         Log.e("PaymentActivity", "Error from backend: " + response.code() + " - " + errorBody);
@@ -137,17 +141,14 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void onPaymentSheetResult(@NonNull final PaymentSheetResult paymentSheetResult) {
         if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
-            // Thanh toán thành công
             Toast.makeText(this, "Payment successful!", Toast.LENGTH_SHORT).show();
             Log.d("PaymentActivity", "Payment completed.");
             setResultAndFinish(RESULT_OK);
         } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
-            // Người dùng hủy thanh toán
-            Toast.makeText(this, "Payment canceled.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Payment canceled: ", Toast.LENGTH_SHORT).show();
             Log.d("PaymentActivity", "Payment canceled.");
             setResultAndFinish(RESULT_CANCELED);
         } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
-            // Thanh toán thất bại
             Toast.makeText(this, "Payment failed: " + ((PaymentSheetResult.Failed) paymentSheetResult).getError().getMessage(), Toast.LENGTH_LONG).show();
             Log.e("PaymentActivity", "Payment failed", ((PaymentSheetResult.Failed) paymentSheetResult).getError());
             setResultAndFinish(RESULT_CANCELED);
