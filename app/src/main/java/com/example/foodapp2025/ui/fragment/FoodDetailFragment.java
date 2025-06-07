@@ -39,15 +39,12 @@ public class FoodDetailFragment extends Fragment {
     private FragmentFoodDetailBinding binding;
     private CartViewModel cartViewModel;
     private Long quantity = 1L;
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
     private boolean isFavourite = false;
 
-    // Tên cho SharedPreferences file và key
     private static final String PREFS_NAME = "FoodAppPrefs";
-    private static final String FAV_PREFS_KEY_PREFIX = "user_favorites_"; // Sẽ ghép với userId
+    private static final String FAV_PREFS_KEY_PREFIX = "user_favorites_";
 
 
     @Override
@@ -63,14 +60,12 @@ public class FoodDetailFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Initialize ViewModel
         cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
 
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setBottomNavigationVisibility(false);
         }
 
-        // Get selected food item
         FoodModel selectedFood = (FoodModel) getArguments().getSerializable("food");
 
         if (selectedFood == null) {
@@ -80,15 +75,10 @@ public class FoodDetailFragment extends Fragment {
             return;
         }
 
-        // --- Kiểm tra trạng thái yêu thích ban đầu (SỬA ĐỔI) ---
-        // Kiểm tra SharedPreferences trước để hiển thị icon tức thời
         checkFavouriteStatusLocal(selectedFood.getId());
-        // Sau đó, kiểm tra Firestore trong nền để đảm bảo đồng bộ
         checkFavouriteStatusFirestore(selectedFood.getId());
-        // --------------------------------------------------------
 
 
-        // Handle Comment Button click (Đã có)
         binding.commentBtn.setOnClickListener(v -> {
             Intent i = new Intent(requireContext(), CommentActivity.class);
             if (selectedFood.getId() != null && !selectedFood.getId().isEmpty()) {
@@ -100,7 +90,6 @@ public class FoodDetailFragment extends Fragment {
         });
 
 
-        // Load food details (Đã có)
         Glide.with(this).load(selectedFood.getImageUrl()).into(binding.imageView7);
         binding.titleTxt.setText(selectedFood.getName());
         binding.priceTxt.setText(selectedFood.getPrice() + " $");
@@ -110,7 +99,6 @@ public class FoodDetailFragment extends Fragment {
         binding.totalTxt.setText(quantity * selectedFood.getPrice() + " $");
         binding.numTxt.setText(String.valueOf(quantity));
 
-        // Handle Add to Cart button click (Đã có)
         binding.addCartBtn.setOnClickListener(v -> {
             CartModel newItem = new CartModel(selectedFood.getImageUrl(), selectedFood.getName(), selectedFood.getPrice(), quantity);
             cartViewModel.addItem(newItem);
@@ -118,8 +106,6 @@ public class FoodDetailFragment extends Fragment {
             cartViewModel.saveCartToFirestore();
         });
 
-        // Handle Increase and Decrease Quantity (Đã sửa lỗi ở lần trước)
-        // Giả sử bạn có nút plusBtn
         binding.plusBtn.setOnClickListener(v -> {
             quantity++;
             binding.numTxt.setText(String.valueOf(quantity));
@@ -137,13 +123,11 @@ public class FoodDetailFragment extends Fragment {
         });
 
 
-        // Handle Back Button (Đã có)
         binding.backBtn.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
             navController.popBackStack();
         });
 
-        // --- Handle favourite icon click  ---
         binding.favBtn.setOnClickListener(v -> {
             FirebaseUser currentUser = mAuth.getCurrentUser();
             if (currentUser == null) {
@@ -154,7 +138,7 @@ public class FoodDetailFragment extends Fragment {
             String foodId = selectedFood.getId();
 
             if (foodId == null || foodId.isEmpty()) {
-                Toast.makeText(getContext(), "ID món ăn không hợp lệ.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "ID is invalid.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -170,7 +154,7 @@ public class FoodDetailFragment extends Fragment {
                         .addOnSuccessListener(aVoid -> {
                             Toast.makeText(getContext(), "Deleted from favourite!", Toast.LENGTH_SHORT).show();
                             binding.favBtn.setImageResource(R.drawable.favorite_white);
-                            isFavourite = false; // Cập nhật trạng thái
+                            isFavourite = false;
                             removeFavouriteIdLocal(userId, foodId);
                             binding.favBtn.setEnabled(true);
                         })
@@ -225,7 +209,6 @@ public class FoodDetailFragment extends Fragment {
         }
     }
 
-    // check status local với trên remote
     private void checkFavouriteStatusFirestore(String foodId) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
@@ -245,11 +228,11 @@ public class FoodDetailFragment extends Fragment {
                         if (existsInFirestore) {
                             binding.favBtn.setImageResource(R.drawable.fav_filled);
                             isFavourite = true;
-                            addFavouriteIdLocal(userId, foodId); // Đồng bộ cache
+                            addFavouriteIdLocal(userId, foodId);
                         } else {
                             binding.favBtn.setImageResource(R.drawable.favorite_white);
                             isFavourite = false;
-                            removeFavouriteIdLocal(userId, foodId); // Đồng bộ cache
+                            removeFavouriteIdLocal(userId, foodId);
                         }
                     }
                 } else {
@@ -260,7 +243,6 @@ public class FoodDetailFragment extends Fragment {
             binding.favBtn.setEnabled(true);
         }
     }
-    // ----------------------------------------------------------------------------------
 
     // SharedPreferences
     private SharedPreferences getPrefs(String userId) {
@@ -275,7 +257,7 @@ public class FoodDetailFragment extends Fragment {
     private void addFavouriteIdLocal(String userId, String foodId) {
         SharedPreferences prefs = getPrefs(userId);
         Set<String> favouriteIds = new HashSet<>(getFavouriteIdsLocal(userId));
-        if (favouriteIds.add(foodId)) { // Thử thêm ID mới
+        if (favouriteIds.add(foodId)) {
             prefs.edit().putStringSet("foodIds", favouriteIds).apply();
         }
     }
