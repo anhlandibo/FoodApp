@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -35,6 +37,21 @@ public class CartFragment extends Fragment {
     private String pendingUserId;
     private String currentPaymentMethod = null;
     private static final int CARD_PAYMENT_REQUEST_CODE = 1002;
+
+    // ActivityResultLauncher thay thế onActivityResult
+    private final ActivityResultLauncher<Intent> voucherLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
+                            VoucherModel selectedVoucher = (VoucherModel) result.getData().getSerializableExtra("selectedVoucher");
+                            if (selectedVoucher != null) {
+                                cartVM.applyVoucherObject(selectedVoucher);
+                                //showVoucherBottomSheet(selectedVoucher);
+                            }
+                        }
+                    }
+            );
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup parent, Bundle s) {
@@ -74,8 +91,14 @@ public class CartFragment extends Fragment {
 
     private void setupListeners() {
         binding.voucherButton.setOnClickListener(btn -> {
-            Intent intent = new Intent(requireContext(), VoucherSelectionActivity.class);
-            startActivityForResult(intent, 1001);
+            boolean isCartEmpty = cartVM.isCartEmpty();
+            if(isCartEmpty) {
+                Toast.makeText(requireContext(), "Please order before choosing coupons.", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Intent intent = new Intent(requireContext(), VoucherSelectionActivity.class);
+                voucherLauncher.launch(intent);
+            }
         });
         binding.button2.setOnClickListener(btn -> {
             int selectedPaymentMethodId = binding.paymentMethodRadioGroup.getCheckedRadioButtonId();
@@ -90,7 +113,7 @@ public class CartFragment extends Fragment {
             }
 
             Double totalAmount = cartVM.getTotal().getValue();
-            if (totalAmount == null || totalAmount <= 0) {
+            if (totalAmount == null || totalAmount < 0) {
                 Toast.makeText(requireContext(), "Invalid total amount. Please check your cart again.", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -98,16 +121,24 @@ public class CartFragment extends Fragment {
             if (selectedPaymentMethodId == R.id.radioCod) {
                 currentPaymentMethod = "cod";
                 cartVM.placeOrder("cod");
+                binding.voucherBanner.setVisibility(View.GONE);
+                cartVM.applyVoucherObject(null);
                 Toast.makeText(requireContext(), "Placing order (COD)...", Toast.LENGTH_SHORT).show();
             } else if (selectedPaymentMethodId == R.id.radioCard) {
                 currentPaymentMethod = "card";
                 pendingTotalAmount = totalAmount;
                 pendingUserId = currentUserId;
                 cartVM.placeOrder("card");
+                binding.voucherBanner.setVisibility(View.GONE);
+                cartVM.applyVoucherObject(null);
                 Toast.makeText(requireContext(), "Processing your order for payment...", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(requireContext(), "Please select a payment method.", Toast.LENGTH_SHORT).show();
             }
+        });
+        binding.btnRemoveVoucher.setOnClickListener(v -> {
+            cartVM.applyVoucherObject(null);
+            Toast.makeText(requireContext(), "Voucher removed!", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -124,6 +155,10 @@ public class CartFragment extends Fragment {
         cartVM.getTotal().observe(getViewLifecycleOwner(), tot ->
                 binding.totalView.setText(formatPrice(tot))
         );
+        binding.deliveryFeeView.setText(formatPrice(5.0));
+        cartVM.getDiscountAmount().observe(getViewLifecycleOwner(), discount ->
+                binding.discountAmountView.setText(formatDiscount(discount))
+        );
         cartVM.getVoucherError().observe(getViewLifecycleOwner(), err -> {
             if (err != null) Toast.makeText(requireContext(), err, Toast.LENGTH_SHORT).show();
         });
@@ -132,6 +167,24 @@ public class CartFragment extends Fragment {
                 Toast.makeText(requireContext(),
                         "Voucher " + code + " applied!",
                         Toast.LENGTH_SHORT).show();
+            }
+        });
+        cartVM.getVoucher().observe(getViewLifecycleOwner(), voucher -> {
+            if (voucher != null) {
+                binding.voucherBanner.setVisibility(View.VISIBLE);
+                // Khi voucher thay đổi, cập nhật mã và tên
+                binding.tvVoucherSelected.setText("Voucher: " + voucher.getCode() + "- saved " + voucher.getDescription());
+            } else {
+                binding.voucherBanner.setVisibility(View.GONE);
+            }
+        });
+
+        cartVM.getDiscountAmount().observe(getViewLifecycleOwner(), discount -> {
+            if (discount != null && discount > 0) {
+                binding.tvDiscountAmount.setVisibility(View.VISIBLE);
+                binding.tvDiscountAmount.setText(String.format("Giảm: %.0f$", discount));
+            } else {
+                binding.tvDiscountAmount.setVisibility(View.GONE);
             }
         });
 
@@ -183,6 +236,10 @@ public class CartFragment extends Fragment {
 
     private String formatPrice(double v) {
         return String.format("%,.0f $", v);
+    }
+
+    private String formatDiscount(double v) {
+        return String.format("- %,.0f $", v);
     }
 
     @Override

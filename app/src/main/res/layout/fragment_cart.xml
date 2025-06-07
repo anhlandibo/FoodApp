@@ -74,7 +74,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/grey_bg">
+                android:background="@drawable/grey_bg"
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:id="@+id/textView12"
@@ -111,8 +112,11 @@
                     android:id="@+id/subtotalView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
                     android:text="$-"
                     android:textSize="18sp"
+                    android:gravity="end"
+                    android:textAlignment="viewEnd"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/textView12" />
 
@@ -120,9 +124,12 @@
                     android:id="@+id/deliveryFeeView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
                     android:layout_marginTop="8dp"
                     android:text="$-"
                     android:textSize="18sp"
+                    android:gravity="end"
+                    android:textAlignment="viewEnd"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/taxView" />
 
@@ -133,8 +140,36 @@
                     android:layout_marginTop="8dp"
                     android:text="$-"
                     android:textSize="18sp"
+                    android:gravity="end"
+                    android:textAlignment="viewEnd"
                     app:layout_constraintEnd_toEndOf="@+id/subtotalView"
                     app:layout_constraintTop_toBottomOf="@+id/subtotalView" />
+
+                <TextView
+                    android:id="@+id/discountLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Discount"
+                    android:textSize="18sp"
+                    android:textColor="#E91E63"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView14" />
+
+                <TextView
+                    android:id="@+id/discountAmountView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="$-"
+                    android:textSize="18sp"
+                    android:textColor="#E91E63"
+                    android:gravity="end"
+                    android:textAlignment="viewEnd"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/deliveryFeeView" />
 
                 <View
                     android:id="@+id/view3"
@@ -146,19 +181,18 @@
                     android:background="#ABABAB"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView14" />
+                    app:layout_constraintTop_toBottomOf="@+id/discountLabel" />
 
                 <TextView
-                    android:id="@+id/textView18"
+                    android:id="@+id/totalLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
                     android:text="Total"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/view3"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/view3" />
 
                 <TextView
@@ -166,13 +200,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="16dp"
                     android:text="$-"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:gravity="end"
+                    android:textAlignment="viewEnd"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/view3" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
@@ -216,13 +252,8 @@
                 android:text="Place Order"
                 android:textColor="@color/white"
                 android:textSize="15dp" />
-
-
-
-
         </LinearLayout>
     </ScrollView>
-    <!-- Voucher banner nằm dưới cùng -->
     <LinearLayout
         android:id="@+id/voucherBanner"
         android:layout_width="match_parent"
@@ -230,7 +261,6 @@
         android:layout_alignParentBottom="true"
         android:background="#FFFFFF"
         android:padding="8dp"
-
         android:orientation="vertical"
         android:layout_gravity="bottom">
 
