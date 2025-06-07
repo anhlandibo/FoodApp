@@ -23,7 +23,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class PaymentActivity extends AppCompatActivity {
-    private static final String BACKEND_URL = "https://foodappfcm.onrender.com/";
+    private static final String BACKEND_URL = "https://foodappbe-r5x8.onrender.com/";
     private final OkHttpClient httpClient = new OkHttpClient();
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private PaymentSheet paymentSheet;
@@ -88,6 +88,7 @@ public class PaymentActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     Toast.makeText(PaymentActivity.this, "Netword error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e("PaymentActivity", "Error when calling backend", e);
+                    Log.e("ERROR", e.getMessage());
                     setResult(RESULT_CANCELED);
                     finish();
                 });
