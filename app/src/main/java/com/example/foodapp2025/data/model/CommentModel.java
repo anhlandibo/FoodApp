@@ -1,4 +1,3 @@
-// CommentModel.java
 package com.example.foodapp2025.data.model;
 
 import java.util.HashMap;
@@ -10,15 +9,17 @@ public class CommentModel {
     private String text;
     private long timestamp;
     private float rating; // 1 - 5 sao
+    private String moderationStatus; // <-- THÊM TRƯỜNG NÀY
 
     public CommentModel() {}
 
-    public CommentModel(String userId, String userName, String text, long timestamp, float rating) {
+    public CommentModel(String userId, String userName, String text, long timestamp, float rating, String moderationStatus) {
         this.userId = userId;
         this.userName = userName;
         this.text = text;
         this.timestamp = timestamp;
         this.rating = rating;
+        this.moderationStatus = moderationStatus; // <-- CẬP NHẬT CONSTRUCTOR CÓ ĐẦY ĐỦ THAM SỐ
     }
 
     public String getUserId() {
@@ -61,6 +62,15 @@ public class CommentModel {
         this.rating = rating;
     }
 
+    // <-- THÊM GETTER VÀ SETTER CHO moderationStatus
+    public String getModerationStatus() {
+        return moderationStatus;
+    }
+
+    public void setModerationStatus(String moderationStatus) {
+        this.moderationStatus = moderationStatus;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
@@ -68,6 +78,7 @@ public class CommentModel {
         map.put("text", text);
         map.put("timestamp", timestamp);
         map.put("rating", rating);
+        map.put("moderationStatus", moderationStatus); // <-- THÊM TRƯỜNG VÀO MAP
         return map;
     }
 }

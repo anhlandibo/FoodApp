@@ -39,9 +39,32 @@
         android:orientation="vertical"
         android:background="@drawable/grey_background"
         android:layout_marginHorizontal="10dp"
-        android:elevation="5dp"
-        >
+        android:elevation="5dp">
 
+        <!-- Language Toggle Button -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Language"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="10dp"
+            android:textSize="15sp" />
+
+        <ToggleButton
+            android:id="@+id/languageToggle"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:textOn="VI"
+            android:textOff="EN"
+            android:checked="false"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="@drawable/toggle_selector"
+            android:textColor="@color/white"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="0dp"/>
+
+        <!-- Account Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,14 +76,13 @@
                 android:text="Account"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginVertical="10dp"
-                android:textSize="15sp"/>
+                android:textSize="15sp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
-                android:id="@+id/changePasswordBtn"
-                >
+                android:id="@+id/changePasswordBtn">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -73,15 +95,13 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
-                android:id="@+id/signOutBtn"
-                >
+                android:id="@+id/signOutBtn">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -94,15 +114,14 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:textColor="@color/red_accent"/>
-
+                    android:textColor="@color/red_accent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
+        <!-- App Info Section -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/versionText"
@@ -112,7 +131,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginVertical="10dp"/>
+                android:layout_marginVertical="10dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -121,10 +140,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/versionText" />
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
