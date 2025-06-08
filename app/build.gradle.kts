@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.play.services.maps)
     implementation(libs.core.animation)
+    implementation(libs.play.services.cast.tv)
+    implementation(libs.firebase.config)
 
     // Testing
     testImplementation(libs.junit)
@@ -178,6 +180,8 @@ dependencies {
     implementation("com.cloudinary:cloudinary-android:3.0.2")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation("com.google.code.gson:gson:2.10.1")
 
 //    // Spring Boot Starter Web
 //    implementation("org.springframework.boot:spring-boot-starter-web")

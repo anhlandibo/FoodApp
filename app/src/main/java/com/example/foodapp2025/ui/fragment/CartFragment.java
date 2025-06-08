@@ -200,7 +200,7 @@ public class CartFragment extends Fragment {
         cartVM.getDiscountAmount().observe(getViewLifecycleOwner(), discount -> {
             if (discount != null && discount > 0) {
                 binding.tvDiscountAmount.setVisibility(View.VISIBLE);
-                binding.tvDiscountAmount.setText(String.format("Giảm: %.0f$", discount));
+                binding.tvDiscountAmount.setText(String.format("Saved: %.0f$", discount));
             } else {
                 binding.tvDiscountAmount.setVisibility(View.GONE);
             }
