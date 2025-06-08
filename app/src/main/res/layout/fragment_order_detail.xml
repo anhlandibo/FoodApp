@@ -171,6 +171,98 @@
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:divider="#D1D5DB"
+                            android:dividerPadding="0dp"
+                            android:orientation="horizontal"
+                            android:paddingVertical="8dp"
+                            android:showDividers="end">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tax: "
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/orderTax"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@tax"
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:divider="#D1D5DB"
+                            android:dividerPadding="0dp"
+                            android:orientation="horizontal"
+                            android:paddingVertical="8dp"
+                            android:showDividers="end">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Subtotal: "
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/orderSubtotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@subtotal"
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:divider="#D1D5DB"
+                            android:dividerPadding="0dp"
+                            android:orientation="horizontal"
+                            android:paddingVertical="8dp"
+                            android:showDividers="end">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Discount: "
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/orderDiscount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@discountAmount"
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                        <!-- Add this LinearLayout right after the Discount LinearLayout and before the Total LinearLayout -->
+
+                        <!-- Applied Voucher Codes List -->
+                        <LinearLayout
+                            android:id="@+id/voucherCodesContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <!-- This LinearLayout will be populated dynamically with voucher codes -->
+
+                        </LinearLayout>
+
                         <!-- Tổng tiền hàng -->
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -185,7 +277,35 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Total:"
+                                android:text="Payment method: "
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/orderPaymentMethod"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@paymentMethod"
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+
+                        <!-- Tổng tiền hàng -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:divider="#D1D5DB"
+                            android:dividerPadding="0dp"
+                            android:orientation="horizontal"
+                            android:paddingVertical="8dp"
+                            android:showDividers="end">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total: "
                                 android:textColor="#4B5563"
                                 android:textSize="16sp" />
 
@@ -211,7 +331,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Paid:"
+                                android:text="Paid: "
                                 android:textColor="#4B5563"
                                 android:textSize="16sp" />
 
@@ -237,14 +357,15 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Remaining:"
+                                android:text="Remaining: "
                                 android:textColor="#EA580C"
                                 android:textSize="16sp" />
 
                             <TextView
+                                android:id="@+id/orderRemaining"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0đ"
+                                android:text="0$"
                                 android:textColor="#EA580C"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
@@ -253,6 +374,7 @@
                         <!--                        android:drawableEnd="@drawable/ic_chevron_up"-->
 
                     </LinearLayout>
+
                     <Button
                         android:id="@+id/collapseButton"
                         android:layout_width="wrap_content"

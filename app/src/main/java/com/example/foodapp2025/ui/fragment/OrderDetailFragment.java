@@ -7,6 +7,8 @@ import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,12 +56,35 @@ public class OrderDetailFragment extends Fragment {
             Long quantity = (Long) item.get("quantity");
             orderDetailAdapter.addItem(new CartModel(imageUrl, name, price, quantity));
         }
+
+        // Basic order info (already bound)
         binding.orderId.setText(order.getId());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         binding.orderedDate.setText(sdf.format(order.getOrderedDate()));
-        binding.orderTotal.setText(String.valueOf(order.getTotal())+ " $");
-        binding.orderPaid.setText(String.valueOf(order.getTotal())+ " $");
-        binding.backArrowOrderDetail.setOnClickListener( v-> {
+
+        // Payment summary - bind all missing fields
+        binding.orderTax.setText(order.getTax() + " $");
+        binding.orderSubtotal.setText(order.getSubtotal() + " $");
+
+        // Handle discount amount
+        binding.orderDiscount.setText("-" + order.getDiscountAmount() + " $");
+        if (order.getPaymentMethod().equals("cod")) {
+            binding.orderPaymentMethod.setText("Cash on delivery");
+        } else if (order.getPaymentMethod().equals("card")) {
+            binding.orderPaymentMethod.setText("Online payment");
+        }
+        binding.orderTotal.setText(order.getTotal() + " $");
+        if (order.getPaymentStatus().equals("paid")) {
+            binding.orderPaid.setText(order.getTotal() + " $");
+            binding.orderRemaining.setText("0 $");
+        } else {
+            binding.orderPaid.setText("0 $");
+            binding.orderRemaining.setText(order.getTotal() + " $");
+        }
+        // Display voucher codes
+        displayVoucherDetails(order);
+
+        binding.backArrowOrderDetail.setOnClickListener(v -> {
             requireActivity().onBackPressed();
         });
 
@@ -68,16 +93,76 @@ public class OrderDetailFragment extends Fragment {
             if (isCollapsed) {
                 binding.paymentSummaryContainer.setVisibility(View.VISIBLE);
                 binding.collapseButton.setText("Collapse"); // Collapse
-                // Optional: set icon if using compoundDrawables
-                // collapseButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_chevron_up, 0);
             } else {
                 binding.paymentSummaryContainer.setVisibility(View.GONE);
                 binding.collapseButton.setText("Expand"); // Expand
-                // collapseButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_chevron_down, 0);
             }
             isCollapsed = !isCollapsed;
         });
+    }
 
+    private void displayVoucherDetails(OrderModel order) {
+        // Handle voucher codes display
+        LinearLayout voucherCodesContainer = binding.voucherCodesContainer;
+
+        // Clear any existing voucher views
+        voucherCodesContainer.removeAllViews();
+
+        // Check if there's any voucher applied
+        String voucherCode = order.getVoucherCode();
+
+        if (voucherCode != null && !voucherCode.isEmpty()) {
+            // Show the container
+            voucherCodesContainer.setVisibility(View.VISIBLE);
+
+            // Add the voucher code to the list
+            addVoucherCodeView(voucherCodesContainer, voucherCode);
+
+            // If you have multiple vouchers in the future, you can loop through them here
+
+        } else {
+            // Hide voucher section if no voucher applied
+            voucherCodesContainer.setVisibility(View.GONE);
+        }
+    }
+
+    private void addVoucherCodeView(LinearLayout container, String voucherCode) {
+        // Create a new LinearLayout for this voucher
+        LinearLayout voucherRow = new LinearLayout(getContext());
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        rowParams.setMargins(0, 0, 0, dpToPx(4)); // 4dp bottom margin
+        voucherRow.setLayoutParams(rowParams);
+        voucherRow.setOrientation(LinearLayout.HORIZONTAL);
+        voucherRow.setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+
+        // Create TextView for "Voucher's code:"
+        TextView labelTextView = new TextView(getContext());
+        labelTextView.setText("Voucher's code: ");
+        labelTextView.setTextColor(getResources().getColor(android.R.color.black));
+        labelTextView.setTextSize(11);
+
+        // Create TextView for the actual code
+        TextView codeTextView = new TextView(getContext());
+        codeTextView.setText(voucherCode);
+        codeTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+        codeTextView.setTextSize(11);
+        codeTextView.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        // Add TextViews to the row
+        voucherRow.addView(labelTextView);
+        voucherRow.addView(codeTextView);
+
+        // Add the row to the container
+        container.addView(voucherRow);
+    }
+
+    // Helper method to convert dp to pixels
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 }
 
