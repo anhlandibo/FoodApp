@@ -6,6 +6,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.foodapp2025.R;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.stripe.android.PaymentConfiguration;
@@ -31,13 +32,14 @@ public class PaymentActivity extends AppCompatActivity {
     private double totalAmount;
     private String orderId;
     private String userId;
-
+    private FirebaseFirestore db;
     private static final double MIN_USD_AMOUNT_FOR_STRIPE = 0.50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
+        db = FirebaseFirestore.getInstance();
 
         if (getIntent().getExtras() != null){
             totalAmount = getIntent().getDoubleExtra("totalAmount", 0.0);
@@ -93,6 +95,7 @@ public class PaymentActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     Toast.makeText(PaymentActivity.this, "Network error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e("PaymentActivity", "Error from backend", e);
+                    deleteOrderFromFirestore(orderId);
                     setResult(RESULT_CANCELED);
                     finish();
                 });
@@ -124,6 +127,7 @@ public class PaymentActivity extends AppCompatActivity {
                     } else {
                         runOnUiThread(() -> {
                             Toast.makeText(PaymentActivity.this, "Unable to retrieve complete information from the backend (client secret, customer ID, or ephemeral key).", Toast.LENGTH_LONG).show();
+                            deleteOrderFromFirestore(orderId);
                             setResultAndFinish(RESULT_CANCELED);
                         });
                     }
@@ -132,6 +136,7 @@ public class PaymentActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         Toast.makeText(PaymentActivity.this, "Error from backend: " + response.code() + " - " + errorBody, Toast.LENGTH_LONG).show();
                         Log.e("PaymentActivity", "Error from backend: " + response.code() + " - " + errorBody);
+                        deleteOrderFromFirestore(orderId);
                         setResultAndFinish(RESULT_CANCELED);
                     });
                 }
@@ -147,10 +152,12 @@ public class PaymentActivity extends AppCompatActivity {
         } else if (paymentSheetResult instanceof PaymentSheetResult.Canceled) {
             Toast.makeText(this, "Payment canceled: ", Toast.LENGTH_SHORT).show();
             Log.d("PaymentActivity", "Payment canceled.");
+            deleteOrderFromFirestore(orderId);
             setResultAndFinish(RESULT_CANCELED);
         } else if (paymentSheetResult instanceof PaymentSheetResult.Failed) {
             Toast.makeText(this, "Payment failed: " + ((PaymentSheetResult.Failed) paymentSheetResult).getError().getMessage(), Toast.LENGTH_LONG).show();
             Log.e("PaymentActivity", "Payment failed", ((PaymentSheetResult.Failed) paymentSheetResult).getError());
+            deleteOrderFromFirestore(orderId);
             setResultAndFinish(RESULT_CANCELED);
         }
         finish();
@@ -160,5 +167,21 @@ public class PaymentActivity extends AppCompatActivity {
         resultIntent.putExtra("orderId", orderId);
         setResult(resultCode, resultIntent);
         finish();
+    }
+    private void deleteOrderFromFirestore(String orderIdToDelete) {
+        if (orderIdToDelete == null || orderIdToDelete.isEmpty()) {
+            Log.e("PaymentActivity", "Attempted to delete null or empty orderId.");
+            return;
+        }
+
+        db.collection("orders")
+                .document(orderIdToDelete)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("PaymentActivity", "Order " + orderIdToDelete + " successfully deleted from Firestore due to payment failure/cancellation.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("PaymentActivity", "Error deleting order " + orderIdToDelete + ": " + e.getMessage());
+                });
     }
 }

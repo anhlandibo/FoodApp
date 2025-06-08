@@ -372,7 +372,7 @@ public class CartViewModel extends ViewModel {
         }
     }
 
-    public void placeOrder(String paymentMethod) {
+    public void placeOrder(String paymentMethod, Double totalAmount) {
         if (userId == null || Objects.requireNonNull(cartItems.getValue()).isEmpty()) {
             Log.e(TAG, "Failed to place order: userId is null or cart is empty.");
             orderPlaced.setValue(false);
@@ -413,36 +413,66 @@ public class CartViewModel extends ViewModel {
         String status;
         String paymentStatus;
 
-        if ("card".equals(paymentMethod)) {
+        if ("cod".equals(paymentMethod)) {
             status = "pending";
             paymentStatus = "unpaid";
-        } else { // "cod"
-            status = "pending";
-            paymentStatus = "unpaid";
-        }
-
-        order.put("status", status);
-        order.put("paymentStatus", paymentStatus);
-        order.put("paymentMethod", paymentMethod);
-
-        db.collection("orders")
-                .add(order)
-                .addOnSuccessListener(ref -> {
-                    String newOrderId = ref.getId();
-                    Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " and method: " + paymentMethod);
-
-                    if ("cod".equals(paymentMethod)) {
+            order.put("paymentStatus", paymentStatus);
+            order.put("status", status);
+            order.put("paymentMethod", "cod");
+            db.collection("orders")
+                    .add(order)
+                    .addOnSuccessListener(ref -> {
+                        String newOrderId = ref.getId();
+                        Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " and method: " + paymentMethod);
                         clearCartInFirestoreAndLocal();
                         orderPlaced.setValue(true);
-                    } else { // "card"
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error placing COD order.", e);
+                        orderPlaced.setValue(false);
+                        lastCreatedOrderId.setValue(null);
+                    });
+        } else if ("card_low_amount".equals(paymentMethod) || "card_zero_amount".equals(paymentMethod)) {
+            status = "pending";
+            paymentStatus = "paid";
+            order.put("status", status);
+            order.put("paymentStatus", paymentStatus);
+            order.put("paymentMethod", "card");
+
+            db.collection("orders")
+                    .add(order)
+                    .addOnSuccessListener(ref -> {
+                        String newOrderId = ref.getId();
+                        Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " (zero/low amount).");
+                        clearCartInFirestoreAndLocal();
+                        orderPlaced.setValue(true);
+
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error placing zero/low amount card order.", e);
+                        orderPlaced.setValue(false);
+                        lastCreatedOrderId.setValue(null);
+                    });
+        } else {
+            status = "pending";
+            paymentStatus = "paid";
+            order.put("status", status);
+            order.put("paymentStatus", paymentStatus);
+            order.put("paymentMethod", paymentMethod);
+
+            db.collection("orders")
+                    .add(order)
+                    .addOnSuccessListener(ref -> {
+                        String newOrderId = ref.getId();
+                        Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " for card payment.");
                         lastCreatedOrderId.setValue(newOrderId);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error placing order.", e);
-                    orderPlaced.setValue(false);
-                    lastCreatedOrderId.setValue(null);
-                });
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error placing card order.", e);
+                        orderPlaced.setValue(false);
+                        lastCreatedOrderId.setValue(null);
+                    });
+        }
     }
 
     public void deleteOrder(String orderId) {

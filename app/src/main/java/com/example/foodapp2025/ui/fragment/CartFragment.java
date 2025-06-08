@@ -117,21 +117,39 @@ public class CartFragment extends Fragment {
                 Toast.makeText(requireContext(), "Invalid total amount. Please check your cart again.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            final double MIN_STRIPE_PAYMENT_AMOUNT = 0.50;
 
             if (selectedPaymentMethodId == R.id.radioCod) {
                 currentPaymentMethod = "cod";
-                cartVM.placeOrder("cod");
+                cartVM.placeOrder("cod", totalAmount);
                 binding.voucherBanner.setVisibility(View.GONE);
                 cartVM.applyVoucherObject(null);
                 Toast.makeText(requireContext(), "Placing order (COD)...", Toast.LENGTH_SHORT).show();
             } else if (selectedPaymentMethodId == R.id.radioCard) {
-                currentPaymentMethod = "card";
-                pendingTotalAmount = totalAmount;
-                pendingUserId = currentUserId;
-                cartVM.placeOrder("card");
-                binding.voucherBanner.setVisibility(View.GONE);
-                cartVM.applyVoucherObject(null);
-                Toast.makeText(requireContext(), "Processing your order for payment...", Toast.LENGTH_SHORT).show();
+                if (totalAmount <= MIN_STRIPE_PAYMENT_AMOUNT && totalAmount > 0){
+                    currentPaymentMethod = "card_low_amount";
+                    cartVM.placeOrder("card", totalAmount);
+                    binding.voucherBanner.setVisibility(View.GONE);
+                    cartVM.applyVoucherObject(null);
+                    Toast.makeText(requireContext(), "Order placed successfully", Toast.LENGTH_LONG).show();
+                }
+                else if (totalAmount <= 0){
+                    currentPaymentMethod = "card_zero_amount";
+                    cartVM.placeOrder("card_zero_amount", totalAmount);
+                    binding.voucherBanner.setVisibility(View.GONE);
+                    cartVM.applyVoucherObject(null);
+                    Toast.makeText(requireContext(), "Order placed successfully", Toast.LENGTH_LONG).show();
+
+                }
+                else {
+                    currentPaymentMethod = "card";
+                    pendingTotalAmount = totalAmount;
+                    pendingUserId = currentUserId;
+                    cartVM.placeOrder("card", totalAmount); // Thêm totalAmount
+                    binding.voucherBanner.setVisibility(View.GONE);
+                    cartVM.applyVoucherObject(null);
+                    Toast.makeText(requireContext(), "Processing your order for payment...", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(requireContext(), "Please select a payment method.", Toast.LENGTH_SHORT).show();
             }
