@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:orientation="vertical"
-    tools:context=".ui.fragment.ChatFragment">
+    tools:context=".ui.fragment.ChatFragment"
+    android:layout_marginTop="30dp">
 
     <!-- Toolbar for chat header -->
     <androidx.appcompat.widget.Toolbar

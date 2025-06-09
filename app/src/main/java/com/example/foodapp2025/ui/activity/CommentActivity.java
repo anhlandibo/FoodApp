@@ -115,7 +115,7 @@ public class CommentActivity extends AppCompatActivity {
 
             viewModel.postOrUpdateComment(foodId, comment).observe(this, success -> {
                 if (success) {
-                    Toast.makeText(this, "Comment sent", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(this, "Comment sent", Toast.LENGTH_SHORT).show();
                     etComment.setText("");
                     ratingBar.setRating(0);
                 } else {
