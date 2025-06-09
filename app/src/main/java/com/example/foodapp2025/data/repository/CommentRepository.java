@@ -99,4 +99,8 @@ public class CommentRepository {
         return result;
     }
 
+    public LiveData<Float> getAverageRatingLiveData(String foodId) {
+        return remoteDataSource.getAverageRatingLiveData(foodId);
+    }
+
 }

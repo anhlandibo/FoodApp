@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +24,7 @@ import com.example.foodapp2025.viewmodel.CommentViewModel;
 import com.example.foodapp2025.viewmodel.UserViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.auth.User;
 
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.List;
 public class CommentActivity extends AppCompatActivity {
 
     private RecyclerView rvComments;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private EditText etComment;
     private RatingBar ratingBar;
     private Button btnSend;
@@ -61,7 +64,17 @@ public class CommentActivity extends AppCompatActivity {
         observeComments();
 
         btnSend.setOnClickListener(v -> handleSendComment());
-        backBtn.setOnClickListener(v -> finish());
+        backBtn.setOnClickListener(v -> {
+            LiveData<Float> avgRatingLiveData = viewModel.getAverageRatingLiveData(foodId);
+
+            avgRatingLiveData.observe(this, avgRating -> {
+                db.collection("food")
+                        .document(foodId)
+                        .update("star", avgRating);
+            });
+
+            finish();
+        });
 
     }
 
@@ -125,12 +138,15 @@ public class CommentActivity extends AppCompatActivity {
                         Toast.makeText(this, "Comment sent successfully.", Toast.LENGTH_SHORT).show();
                         etComment.setText("");
                         ratingBar.setRating(0);
-                        // After successful comment, refresh the comments list
+
+//
+//                        avgRatingLiveData.observe(this, avgRating -> {
+//                            db.collection("foods")
+//                                    .document(foodId)
+//                                            .update("star", avgRating);
+//                                });
                         viewModel.getComments(foodId); // Refresh UI
                     } else {
-                        // This 'else' covers both failure to save and potential moderation block.
-                        // The ViewModel/Repository should ideally return a more specific error/status
-                        // if you want to differentiate between "failed to save" and "moderated".
                         Toast.makeText(this, "Failed to save comment. It may contain inappropriate words or a network error occurred.", Toast.LENGTH_LONG).show();
                     }
                 });

@@ -97,7 +97,7 @@ public class FoodDetailFragment extends Fragment {
         });
 
         // 2 decimal digits
-        LiveData<Float> avgRatingLiveData = getAverageRatingLiveData(selectedFood.getId());
+        LiveData<Float> avgRatingLiveData = commentViewModel.getAverageRatingLiveData(selectedFood.getId());
 
         avgRatingLiveData.observe(getViewLifecycleOwner(), avgRating -> {
             if (avgRating != null) {
@@ -112,6 +112,8 @@ public class FoodDetailFragment extends Fragment {
         binding.titleTxt.setText(selectedFood.getName());
         binding.priceTxt.setText(selectedFood.getPrice() + " $");
         binding.descriptionTxt.setText(selectedFood.getDescription());
+//        binding.rateTxt.setText(selectedFood.getStar() + " Rating");
+//        binding.ratingBar.setRating(Float.parseFloat(selectedFood.getStar().toString()));
 //        binding.rateTxt.setText(avgStarRating + " Rating");
 //        binding.ratingBar.setRating(avgStarRating);
         binding.totalTxt.setText(quantity * selectedFood.getPrice() + " $");
@@ -288,27 +290,27 @@ public class FoodDetailFragment extends Fragment {
         }
     }
 
-    public LiveData<Float> getAverageRatingLiveData(String foodId) {
-        LiveData<List<CommentModel>> commentsLiveData = commentViewModel.getComments(foodId);
-
-        // Using Transformations.map
-        return Transformations.map(commentsLiveData, comments -> {
-            if (comments == null || comments.isEmpty()) {
-                return 0.0f; // Default to 0 if no comments or list is null
-            }
-            float totalRating = 0;
-            int validCommentsCount = 0;
-            for (CommentModel cmt : comments) {
-                if (cmt != null) { // Good practice to check individual items too
-                    totalRating += cmt.getRating();
-                    validCommentsCount++;
-                }
-            }
-            if (validCommentsCount == 0) {
-                return 0.0f; // Avoid division by zero if all comments were null (unlikely but safe)
-            }
-            return totalRating / validCommentsCount;
-        });
-    }
+//    public LiveData<Float> getAverageRatingLiveData(String foodId) {
+//        LiveData<List<CommentModel>> commentsLiveData = commentViewModel.getComments(foodId);
+//
+//        // Using Transformations.map
+//        return Transformations.map(commentsLiveData, comments -> {
+//            if (comments == null || comments.isEmpty()) {
+//                return 0.0f; // Default to 0 if no comments or list is null
+//            }
+//            float totalRating = 0;
+//            int validCommentsCount = 0;
+//            for (CommentModel cmt : comments) {
+//                if (cmt != null) { // Good practice to check individual items too
+//                    totalRating += cmt.getRating();
+//                    validCommentsCount++;
+//                }
+//            }
+//            if (validCommentsCount == 0) {
+//                return 0.0f; // Avoid division by zero if all comments were null (unlikely but safe)
+//            }
+//            return totalRating / validCommentsCount;
+//        });
+//    }
 
 }

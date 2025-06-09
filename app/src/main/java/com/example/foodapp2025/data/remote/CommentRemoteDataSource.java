@@ -2,6 +2,7 @@
 package com.example.foodapp2025.data.remote;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.example.foodapp2025.data.model.CommentModel;
@@ -14,6 +15,7 @@ import com.google.firebase.firestore.*;
 import com.google.type.DateTime;
 
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.Map;
 public class CommentRemoteDataSource {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ListenerRegistration commentsListenerRegistration;
     private final String COMMENTS_COLLECTION = "comments";
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
 
@@ -106,4 +109,64 @@ public class CommentRemoteDataSource {
                 .collection("FoodComments")
                 .document(userId);
     }
+
+    public LiveData<Float> getAverageRatingLiveData(String foodId) {
+        MutableLiveData<List<CommentModel>> commentsInternalLiveData = new MutableLiveData<>();
+
+        // If there's an existing listener for this foodId or a general one, remove it first
+        if (commentsListenerRegistration != null) {
+            commentsListenerRegistration.remove();
+        }
+
+        commentsListenerRegistration = getCommentsQuery(foodId) // Assuming getCommentsQuery is in this class or accessible
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        androidx.media3.common.util.Log.e("ViewModel", "Error listening to comments", error);
+                        commentsInternalLiveData.setValue(new ArrayList<>()); // Post empty list on error
+                        return; // Return early on error
+                    }
+                    if (value != null) {
+                        List<CommentModel> list = new ArrayList<>();
+                        for (DocumentSnapshot doc : value.getDocuments()) {
+                            CommentModel comment = doc.toObject(CommentModel.class);
+                            if (comment != null && "approved".equals(comment.getModerationStatus())) {
+                                list.add(comment);
+                            }
+                        }
+                        commentsInternalLiveData.setValue(list);
+                    } else {
+                        // It's also good to handle the case where value is null but error is also null,
+                        // though less common for snapshot listeners.
+                        commentsInternalLiveData.setValue(new ArrayList<>());
+                    }
+                });
+
+        return Transformations.map(commentsInternalLiveData, comments -> {
+            // ... your existing transformation logic ...
+            if (comments == null || comments.isEmpty()) {
+                return 0.0f;
+            }
+            float totalRating = 0;
+            int validCommentsCount = 0;
+            for (CommentModel cmt : comments) {
+                if (cmt != null) {
+                    totalRating += cmt.getRating();
+                    validCommentsCount++;
+                }
+            }
+            if (validCommentsCount == 0) {
+                return 0.0f;
+            }
+            return totalRating / validCommentsCount;
+        });
+    }
+
+
+//    @Override
+//    protected void onCleared() {
+//        super.onCleared();
+//        if (commentsListenerRegistration != null) {
+//            commentsListenerRegistration.remove(); // IMPORTANT: Clean up listener
+//        }
+//    }
 }
