@@ -7,13 +7,13 @@ import java.util.Arrays;
 public class CartModel {
     private String imageUrl;
     private String name;
-    private Long price;
+    private Double price;
     private Long quantity;
     private static final double TAX_RATE = 0.1; // 10 % tax
-    private static final Integer DELIVERY_FEE = 20000; // Fixed delivery fee
+    private static final Integer DELIVERY_FEE = 5; // Fixed delivery fee
     private static final ArrayList<String> VOUCHER_CODE = new ArrayList<>(Arrays.asList("FREE2SHIP", "10DEAL"));
 
-    public CartModel(String imageUrl, String name, Long price, Long quantity) {
+    public CartModel(String imageUrl, String name, Double price, Long quantity) {
         this.imageUrl = imageUrl;
         this.name = name;
         this.price = price;
@@ -28,7 +28,7 @@ public class CartModel {
         return imageUrl;
     }
 
-    public Long getPrice() {
+    public Double getPrice() {
         return price;
     }
 

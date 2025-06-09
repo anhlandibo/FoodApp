@@ -50,15 +50,15 @@ public class OrderDetailFragment extends Fragment {
         for (Map<String, Object> item : items) {
             String imageUrl = (String) item.get("imageUrl");
             String name = (String) item.get("name");
-            Long price = (Long) item.get("price");
+            Double price = (Double) item.get("price");
             Long quantity = (Long) item.get("quantity");
             orderDetailAdapter.addItem(new CartModel(imageUrl, name, price, quantity));
         }
         binding.orderId.setText(order.getId());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         binding.orderedDate.setText(sdf.format(order.getOrderedDate()));
-        binding.orderTotal.setText(String.valueOf(order.getTotal())+ " VND");
-        binding.orderPaid.setText(String.valueOf(order.getTotal())+ " VND");
+        binding.orderTotal.setText(String.valueOf(order.getTotal())+ " $");
+        binding.orderPaid.setText(String.valueOf(order.getTotal())+ " $");
         binding.backArrowOrderDetail.setOnClickListener( v-> {
             requireActivity().onBackPressed();
         });

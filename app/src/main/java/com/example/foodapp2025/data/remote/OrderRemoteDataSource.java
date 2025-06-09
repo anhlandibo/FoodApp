@@ -25,7 +25,7 @@ public class OrderRemoteDataSource {
     }
 
     // Place an order
-    public void placeOrder(UserModel user, List<CartModel> cartItems) {
+    public void placeOrder(UserModel user, List<CartModel> cartItems, String paymentMethod) {
         if (cartItems.isEmpty()) {
             Log.e("OrderRemoteDataSource", "Cart is empty, cannot place order.");
             return;
@@ -50,6 +50,9 @@ public class OrderRemoteDataSource {
 
         orderData.put("items", itemList);
         orderData.put("totalPrice", totalPrice);
+        orderData.put("paymentMethod", paymentMethod);
+        orderData.put("paymentStatus", "unpaid");
+
         orderData.put("status", "pending");
 
         orderCollection.add(orderData)
@@ -112,5 +115,15 @@ public class OrderRemoteDataSource {
         return orderCollection.document(orderId)
                 .update("status", status);
     }
+
+    public Task<Void> updateOrderAndPaymentStatus(String orderId, String status, String paymentStatus){
+        Log.d("OrderRemoteDataSource", "Attempting to update order ID: " + orderId + " to orderStatus: " + status + " and paymentStatus: " + paymentStatus);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", status);
+        updates.put("paymentStatus", paymentStatus);
+        return orderCollection.document(orderId)
+                .update(updates);
+    }
+
 
 }

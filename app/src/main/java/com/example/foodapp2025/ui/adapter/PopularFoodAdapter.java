@@ -39,7 +39,7 @@ public class PopularFoodAdapter extends RecyclerView.Adapter<PopularFoodAdapter.
     public void onBindViewHolder(@NonNull PopularFoodViewHolder holder, int position) {
         FoodModel popularFood = popularFoodList.get(position);
         holder.popularFoodName.setText(popularFood.getName());
-        holder.popularFoodPrice.setText(popularFood.getPrice() + " VND");
+        holder.popularFoodPrice.setText(popularFood.getPrice() + " $");
         holder.popularFoodTime.setText(popularFood.getTime());
         holder.popularFoodStar.setText(String.valueOf(popularFood.getStar()));
 

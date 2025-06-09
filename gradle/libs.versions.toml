@@ -23,6 +23,8 @@ googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
 playServicesMaps = "19.1.0"
 coreAnimation = "1.0.0"
 firebaseMessaging = "24.1.1"
+playServicesCastTv = "21.1.1"
+firebaseConfig = "22.1.2"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -46,6 +48,8 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 core-animation = { group = "androidx.core", name = "core-animation", version.ref = "coreAnimation" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+play-services-cast-tv = { group = "com.google.android.gms", name = "play-services-cast-tv", version.ref = "playServicesCastTv" }
+firebase-config = { group = "com.google.firebase", name = "firebase-config", version.ref = "firebaseConfig" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

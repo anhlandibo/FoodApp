@@ -1,4 +1,3 @@
-// CommentRepository.java
 package com.example.foodapp2025.data.repository;
 
 import androidx.lifecycle.LiveData;
@@ -6,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.foodapp2025.data.model.CommentModel;
 import com.example.foodapp2025.data.remote.CommentRemoteDataSource;
+import com.example.foodapp2025.utils.CommentModerateUtils; // <-- THÊM IMPORT NÀY
 import com.google.firebase.firestore.*;
 
 import java.util.ArrayList;
@@ -14,9 +14,11 @@ import java.util.List;
 public class CommentRepository {
 
     private final CommentRemoteDataSource remoteDataSource;
+    private final CommentModerateUtils moderationUtil; // <-- THÊM DÒNG NÀY
 
     public CommentRepository() {
         this.remoteDataSource = new CommentRemoteDataSource();
+        this.moderationUtil = CommentModerateUtils.getInstance(); // <-- THÊM DÒNG NÀY
     }
 
     // Lấy danh sách comment của 1 món ăn
@@ -33,7 +35,8 @@ public class CommentRepository {
                         List<CommentModel> list = new ArrayList<>();
                         for (DocumentSnapshot doc : value.getDocuments()) {
                             CommentModel comment = doc.toObject(CommentModel.class);
-                            if (comment != null) {
+                            // <-- SỬA Ở ĐÂY: Chỉ hiển thị các comment đã được duyệt
+                            if (comment != null && "approved".equals(comment.getModerationStatus())) {
                                 list.add(comment);
                             }
                         }
@@ -67,6 +70,16 @@ public class CommentRepository {
     public LiveData<Boolean> postOrUpdateComment(String foodId, CommentModel comment) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
 
+        // <-- THÊM Ở ĐÂY: KIỂM DUYỆT BÌNH LUẬN TRƯỚC KHI LƯU
+        if (moderationUtil.containsBannedWord(comment.getText())) {
+            // Nếu bình luận chứa từ cấm, không cho phép post
+            result.setValue(false); // Trả về false để chỉ ra rằng không thành công
+            return result;
+        }
+
+        // Nếu bình luận không chứa từ cấm, đặt trạng thái moderationStatus là "approved"
+        comment.setModerationStatus("approved"); // <-- THÊM DÒNG NÀY: Cần CommentModel có setModerationStatus()
+
         remoteDataSource.postComment(foodId, comment)
                 .addOnSuccessListener(aVoid -> result.setValue(true))
                 .addOnFailureListener(e -> result.setValue(false));
@@ -75,7 +88,6 @@ public class CommentRepository {
     }
 
     // Xóa comment
-    // CommentRepository.java
     public LiveData<Boolean> deleteComment(String foodId, String userId) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
 
@@ -85,5 +97,4 @@ public class CommentRepository {
 
         return result;
     }
-
 }

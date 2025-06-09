@@ -12,7 +12,7 @@
         android:id="@+id/textViewPageTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Món ăn yêu thích"
+        android:text="Favourite Foods"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -27,7 +27,7 @@
         android:id="@+id/editTextSearchFavorites"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Tìm kiếm món ăn yêu thích..."
+        android:hint="Search..."
         android:drawableStart="@drawable/search" android:drawablePadding="8dp"
         android:padding="12dp"
         android:layout_marginHorizontal="16dp"
@@ -81,7 +81,7 @@
         app:layout_constraintBottom_toTopOf="@+id/textViewEmptyFavourites"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="Không có món ăn yêu thích nào"
+        android:contentDescription="No Favourite Food Found!"
         app:tint="@android:color/darker_gray" />
 
     <TextView

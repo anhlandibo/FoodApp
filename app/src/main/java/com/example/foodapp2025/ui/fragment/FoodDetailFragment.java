@@ -39,15 +39,12 @@ public class FoodDetailFragment extends Fragment {
     private FragmentFoodDetailBinding binding;
     private CartViewModel cartViewModel;
     private Long quantity = 1L;
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
     private boolean isFavourite = false;
 
-    // Tên cho SharedPreferences file và key
     private static final String PREFS_NAME = "FoodAppPrefs";
-    private static final String FAV_PREFS_KEY_PREFIX = "user_favorites_"; // Sẽ ghép với userId
+    private static final String FAV_PREFS_KEY_PREFIX = "user_favorites_";
 
 
     @Override
@@ -63,14 +60,12 @@ public class FoodDetailFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Initialize ViewModel
         cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
 
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setBottomNavigationVisibility(false);
         }
 
-        // Get selected food item
         FoodModel selectedFood = (FoodModel) getArguments().getSerializable("food");
 
         if (selectedFood == null) {
@@ -80,81 +75,70 @@ public class FoodDetailFragment extends Fragment {
             return;
         }
 
-        // --- Kiểm tra trạng thái yêu thích ban đầu (SỬA ĐỔI) ---
-        // Kiểm tra SharedPreferences trước để hiển thị icon tức thời
         checkFavouriteStatusLocal(selectedFood.getId());
-        // Sau đó, kiểm tra Firestore trong nền để đảm bảo đồng bộ
         checkFavouriteStatusFirestore(selectedFood.getId());
-        // --------------------------------------------------------
 
 
-        // Handle Comment Button click (Đã có)
         binding.commentBtn.setOnClickListener(v -> {
             Intent i = new Intent(requireContext(), CommentActivity.class);
             if (selectedFood.getId() != null && !selectedFood.getId().isEmpty()) {
                 i.putExtra("FOOD_ID", selectedFood.getId());
                 startActivity(i);
             } else {
-                Toast.makeText(getContext(), "ID món ăn không có sẵn để xem bình luận.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "No food found.", Toast.LENGTH_SHORT).show();
             }
         });
 
 
-        // Load food details (Đã có)
         Glide.with(this).load(selectedFood.getImageUrl()).into(binding.imageView7);
         binding.titleTxt.setText(selectedFood.getName());
-        binding.priceTxt.setText(selectedFood.getPrice() + " VND");
+        binding.priceTxt.setText(selectedFood.getPrice() + " $");
         binding.descriptionTxt.setText(selectedFood.getDescription());
         binding.rateTxt.setText(selectedFood.getStar() + " Rating");
         binding.ratingBar.setRating(Float.parseFloat(selectedFood.getStar().toString()));
-        binding.totalTxt.setText(quantity * selectedFood.getPrice() + " VND");
+        binding.totalTxt.setText(quantity * selectedFood.getPrice() + " $");
         binding.numTxt.setText(String.valueOf(quantity));
 
-        // Handle Add to Cart button click (Đã có)
         binding.addCartBtn.setOnClickListener(v -> {
             CartModel newItem = new CartModel(selectedFood.getImageUrl(), selectedFood.getName(), selectedFood.getPrice(), quantity);
             cartViewModel.addItem(newItem);
-            Toast.makeText(getContext(), "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Added to cart!", Toast.LENGTH_SHORT).show();
             cartViewModel.saveCartToFirestore();
         });
 
-        // Handle Increase and Decrease Quantity (Đã sửa lỗi ở lần trước)
-        // Giả sử bạn có nút plusBtn
         binding.plusBtn.setOnClickListener(v -> {
             quantity++;
             binding.numTxt.setText(String.valueOf(quantity));
-            binding.totalTxt.setText(quantity * selectedFood.getPrice() + " VND");
+            binding.totalTxt.setText(quantity * selectedFood.getPrice() + " $");
         });
 
         binding.minusBtn.setOnClickListener(v -> {
             if (quantity > 1) {
                 quantity--;
                 binding.numTxt.setText(String.valueOf(quantity));
-                binding.totalTxt.setText(quantity * selectedFood.getPrice() + " VND");
+                binding.totalTxt.setText(quantity * selectedFood.getPrice() + " $");
             } else {
-                Toast.makeText(getContext(), "Số lượng không thể nhỏ hơn 1", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Must order at least 1", Toast.LENGTH_SHORT).show();
             }
         });
 
 
-        // Handle Back Button (Đã có)
         binding.backBtn.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
             navController.popBackStack();
         });
 
-        // --- Handle favourite icon click  ---
         binding.favBtn.setOnClickListener(v -> {
             FirebaseUser currentUser = mAuth.getCurrentUser();
             if (currentUser == null) {
-                Toast.makeText(getContext(), "Vui lòng đăng nhập để quản lý mục yêu thích.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Login to see your favourite.", Toast.LENGTH_SHORT).show();
                 return;
             }
             String userId = currentUser.getUid();
             String foodId = selectedFood.getId();
 
             if (foodId == null || foodId.isEmpty()) {
-                Toast.makeText(getContext(), "ID món ăn không hợp lệ.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "ID is invalid.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -168,27 +152,27 @@ public class FoodDetailFragment extends Fragment {
             if (isFavourite) {
                 favoriteFoodRef.delete()
                         .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(getContext(), "Đã xóa khỏi mục yêu thích!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Deleted from favourite!", Toast.LENGTH_SHORT).show();
                             binding.favBtn.setImageResource(R.drawable.favorite_white);
-                            isFavourite = false; // Cập nhật trạng thái
+                            isFavourite = false;
                             removeFavouriteIdLocal(userId, foodId);
                             binding.favBtn.setEnabled(true);
                         })
                         .addOnFailureListener(e -> {
-                            Toast.makeText(getContext(), "Lỗi khi xóa khỏi mục yêu thích: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Error while removing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             binding.favBtn.setEnabled(true);
                         });
             } else {
                 favoriteFoodRef.set(selectedFood)
                         .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(getContext(), "Đã thêm vào mục yêu thích!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Added to favourite!", Toast.LENGTH_SHORT).show();
                             binding.favBtn.setImageResource(R.drawable.fav_filled);
                             isFavourite = true;
                             addFavouriteIdLocal(userId, foodId);
                             binding.favBtn.setEnabled(true);
                         })
                         .addOnFailureListener(e -> {
-                            Toast.makeText(getContext(), "Lỗi khi thêm vào mục yêu thích: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Error while adding: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             binding.favBtn.setEnabled(true);
                         });
             }
@@ -225,7 +209,6 @@ public class FoodDetailFragment extends Fragment {
         }
     }
 
-    // check status local với trên remote
     private void checkFavouriteStatusFirestore(String foodId) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
@@ -245,11 +228,11 @@ public class FoodDetailFragment extends Fragment {
                         if (existsInFirestore) {
                             binding.favBtn.setImageResource(R.drawable.fav_filled);
                             isFavourite = true;
-                            addFavouriteIdLocal(userId, foodId); // Đồng bộ cache
+                            addFavouriteIdLocal(userId, foodId);
                         } else {
                             binding.favBtn.setImageResource(R.drawable.favorite_white);
                             isFavourite = false;
-                            removeFavouriteIdLocal(userId, foodId); // Đồng bộ cache
+                            removeFavouriteIdLocal(userId, foodId);
                         }
                     }
                 } else {
@@ -260,7 +243,6 @@ public class FoodDetailFragment extends Fragment {
             binding.favBtn.setEnabled(true);
         }
     }
-    // ----------------------------------------------------------------------------------
 
     // SharedPreferences
     private SharedPreferences getPrefs(String userId) {
@@ -275,7 +257,7 @@ public class FoodDetailFragment extends Fragment {
     private void addFavouriteIdLocal(String userId, String foodId) {
         SharedPreferences prefs = getPrefs(userId);
         Set<String> favouriteIds = new HashSet<>(getFavouriteIdsLocal(userId));
-        if (favouriteIds.add(foodId)) { // Thử thêm ID mới
+        if (favouriteIds.add(foodId)) {
             prefs.edit().putStringSet("foodIds", favouriteIds).apply();
         }
     }

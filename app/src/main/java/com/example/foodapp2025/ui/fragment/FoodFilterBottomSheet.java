@@ -115,18 +115,18 @@ public class FoodFilterBottomSheet extends BottomSheetDialogFragment {
 
         //Lay minprice, maxprice
         foodViewModel.getMinPriceFood().observe(getViewLifecycleOwner(), minPrice -> {
-            binding.seekMinPrice.setProgress(Math.toIntExact(minPrice.getPrice()));
+            binding.seekMinPrice.setProgress(Math.toIntExact(Math.round(minPrice.getPrice())));
         });
 
         foodViewModel.getMaxPriceFood().observe(getViewLifecycleOwner(), maxPrice -> {
-            binding.seekMinPrice.setMax(Math.toIntExact(maxPrice.getPrice()));
-            binding.maxPriceTxt.setText(Math.toIntExact(maxPrice.getPrice()) + " VND");
+            binding.seekMinPrice.setMax(Math.toIntExact(Math.round(maxPrice.getPrice())));
+            binding.maxPriceTxt.setText(Math.toIntExact(Long.parseLong(Math.round(maxPrice.getPrice()) + " $")));
         });
 
         binding.seekMinPrice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                binding.minPriceTxt.setText(progress + " VND");
+                binding.minPriceTxt.setText(progress + " $");
             }
 
             @Override

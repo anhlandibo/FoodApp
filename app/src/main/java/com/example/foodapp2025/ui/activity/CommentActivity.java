@@ -92,40 +92,64 @@ public class CommentActivity extends AppCompatActivity {
         String commentText = etComment.getText().toString().trim();
         float stars = ratingBar.getRating();
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        userViewModel.getUserInformation(user.getUid()).observe(this, userModel -> {
-            userName = userModel.getName();
-            userId = userModel.getUid();
-        });
+        if (firebaseUser == null) {
+            Toast.makeText(this, "User not logged in. Please log in to comment.", Toast.LENGTH_SHORT).show();
+            return; // Exit if no user is logged in
+        }
 
-
-        if (commentText.isEmpty() || stars == 0)  {
-            Toast.makeText(this, "Describe your experience", Toast.LENGTH_SHORT).show();
+        // Ensure comment text and rating are provided before fetching user info (minor optimization)
+        if (commentText.isEmpty() || stars == 0) {
+            Toast.makeText(this, "Please describe your experience and provide a rating.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        viewModel.getUserComment(foodId).observe(this, existingComment -> {
-            CommentModel comment = new CommentModel();
-            comment.setText(commentText);
-            comment.setRating(stars);
-            comment.setTimestamp(System.currentTimeMillis());
-            comment.setUserId(userId);
-            comment.setUserName(userName);
+        // Observe user information
+        userViewModel.getUserInformation(firebaseUser.getUid()).observe(this, userModel -> {
+            if (userModel != null && userModel.getName() != null && userModel.getUid() != null) {
+                String currentUserName = userModel.getName();
+                String currentUserId = userModel.getUid();
 
-            viewModel.postOrUpdateComment(foodId, comment).observe(this, success -> {
-                if (success) {
-//                    Toast.makeText(this, "Comment sent", Toast.LENGTH_SHORT).show();
-                    etComment.setText("");
-                    ratingBar.setRating(0);
-                } else {
-                    Toast.makeText(this, "Failed to save comment", Toast.LENGTH_SHORT).show();
-                }
-            });
+                CommentModel comment = new CommentModel();
+                comment.setText(commentText);
+                comment.setRating(stars);
+                comment.setTimestamp(System.currentTimeMillis());
+                comment.setUserId(currentUserId); // Use the fetched userId
+                comment.setUserName(currentUserName); // Use the fetched userName
+                // ModerationStatus will be set in Repository
+
+                // Call postOrUpdateComment only ONCE
+                viewModel.postOrUpdateComment(foodId, comment).observe(this, success -> {
+                    if (Boolean.TRUE.equals(success)) { // Check for Boolean.TRUE to avoid NPE if LiveData emits null
+                        Toast.makeText(this, "Comment sent successfully.", Toast.LENGTH_SHORT).show();
+                        etComment.setText("");
+                        ratingBar.setRating(0);
+                        // After successful comment, refresh the comments list
+                        viewModel.getComments(foodId); // Refresh UI
+                    } else {
+                        // This 'else' covers both failure to save and potential moderation block.
+                        // The ViewModel/Repository should ideally return a more specific error/status
+                        // if you want to differentiate between "failed to save" and "moderated".
+                        Toast.makeText(this, "Failed to save comment. It may contain inappropriate words or a network error occurred.", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            } else {
+                // This 'else' means userModel was null or incomplete after the observe
+                Toast.makeText(this, "Failed to retrieve user details. Please try again.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     private void handleDeleteComment(String userId) {
-        viewModel.deleteComment(foodId, userId);
+        viewModel.deleteComment(foodId, userId).observe(this, success -> {
+            if (success) {
+                Toast.makeText(this, "Comment deleted.", Toast.LENGTH_SHORT).show();
+                viewModel.getComments(foodId); // Refresh comments after deletion
+            } else {
+                Toast.makeText(this, "Failed to delete comment.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

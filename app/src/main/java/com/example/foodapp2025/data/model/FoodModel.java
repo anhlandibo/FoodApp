@@ -8,7 +8,7 @@ public class FoodModel implements Serializable {
     private String id;
     private String name;
     private String imageUrl;
-    private Long price;
+    private Double price;
     private String categoryName;
     private String description;
     private String time;
@@ -84,15 +84,15 @@ public class FoodModel implements Serializable {
         this.description = description;
     }
 
-    public Long getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Long price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public FoodModel(String name, String id, String imageUrl, Long price, String categoryName, String description, String time, Double star, boolean isPopular) {
+    public FoodModel(String name, String id, String imageUrl, Double price, String categoryName, String description, String time, Double star, boolean isPopular) {
         this.name = name;
         this.id = id;
         this.imageUrl = imageUrl;

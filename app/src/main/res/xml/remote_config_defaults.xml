@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>banned_words_list</key>
+        <value>["tuc_tiu", "spam", "chet_tiet", "fuck", "sh*t", "lo_li", "do.ngu", "quang_cao", "lua_dao"]</value> </entry>
+</defaultsMap>

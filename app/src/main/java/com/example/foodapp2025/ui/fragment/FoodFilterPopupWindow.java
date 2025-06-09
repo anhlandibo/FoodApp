@@ -71,18 +71,18 @@ public class FoodFilterPopupWindow extends PopupWindow {
 
         // Lấy giá trị minPrice và maxPrice từ ViewModel
         foodViewModel.getMinPriceFood().observe((LifecycleOwner) contentView.getContext(), minPrice -> {
-            seekMinPrice.setProgress(Math.toIntExact(minPrice.getPrice()));
+            seekMinPrice.setProgress(Math.toIntExact(Math.round(minPrice.getPrice())));
         });
 
         foodViewModel.getMaxPriceFood().observe((LifecycleOwner) contentView.getContext(), maxPrice -> {
-            seekMinPrice.setMax(Math.toIntExact(maxPrice.getPrice()));
+            seekMinPrice.setMax(Math.toIntExact(Math.round(maxPrice.getPrice())));
         });
 
         // Cập nhật giá trị minPrice khi người dùng thay đổi SeekBar
         seekMinPrice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                minPriceTxt.setText(progress + " VND");
+                minPriceTxt.setText(progress + " $");
             }
 
             @Override
