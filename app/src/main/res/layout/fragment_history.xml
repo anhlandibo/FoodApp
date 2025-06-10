@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:orientation ="vertical"
     android:padding    ="16dp"
-    tools:context       =".ui.fragment.HistoryFragment">
+    tools:context       =".ui.fragment.HistoryFragment"
+    android:layout_marginTop="30dp">
 
     <!-- Header title -->
     <TextView

@@ -1,3 +1,4 @@
+// CommentActivity.java
 package com.example.foodapp2025.ui.activity;
 
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +24,7 @@ import com.example.foodapp2025.viewmodel.CommentViewModel;
 import com.example.foodapp2025.viewmodel.UserViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.auth.User;
 
 import java.util.List;
@@ -29,6 +32,7 @@ import java.util.List;
 public class CommentActivity extends AppCompatActivity {
 
     private RecyclerView rvComments;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private EditText etComment;
     private RatingBar ratingBar;
     private Button btnSend;
@@ -60,7 +64,17 @@ public class CommentActivity extends AppCompatActivity {
         observeComments();
 
         btnSend.setOnClickListener(v -> handleSendComment());
-        backBtn.setOnClickListener(v -> finish());
+        backBtn.setOnClickListener(v -> {
+            LiveData<Float> avgRatingLiveData = viewModel.getAverageRatingLiveData(foodId);
+
+            avgRatingLiveData.observe(this, avgRating -> {
+                db.collection("food")
+                        .document(foodId)
+                        .update("star", avgRating);
+            });
+
+            finish();
+        });
 
     }
 
@@ -91,54 +105,57 @@ public class CommentActivity extends AppCompatActivity {
         String commentText = etComment.getText().toString().trim();
         float stars = ratingBar.getRating();
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        // <-- LƯU Ý QUAN TRỌNG: getUserInformation là async.
-        // Bạn cần đảm bảo userId và userName đã có trước khi gọi postOrUpdateComment.
-        // Cách tốt nhất là chờ userModel.getName() và getUid() hoàn tất.
-        // Hoặc truyền user.getUid() trực tiếp nếu bạn muốn xử lý userId trong Repository.
-        // Hiện tại, code của bạn có thể gọi postOrUpdateComment với userId và userName là null
-        // nếu observe không kịp.
-        if (user != null) {
-            userViewModel.getUserInformation(user.getUid()).observe(this, userModel -> {
-                if (userModel != null) {
-                    userName = userModel.getName();
-                    userId = userModel.getUid();
-
-                    if (commentText.isEmpty() || stars == 0) {
-                        Toast.makeText(this, "Describe your experience", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // <-- SỬA Ở ĐÂY: Xử lý post/update comment sau khi có userId/userName
-                    // Loại bỏ observe(this, existingComment -> {}) lồng nhau vì nó không cần thiết cho logic post mới
-                    CommentModel comment = new CommentModel();
-                    comment.setText(commentText);
-                    comment.setRating(stars);
-                    comment.setTimestamp(System.currentTimeMillis());
-                    comment.setUserId(userId);
-                    comment.setUserName(userName);
-                    // ModerationStatus sẽ được đặt trong Repository
-
-                    viewModel.postOrUpdateComment(foodId, comment).observe(this, success -> {
-                        if (success) {
-                            Toast.makeText(this, "Comment sent", Toast.LENGTH_SHORT).show();
-                            etComment.setText("");
-                            ratingBar.setRating(0);
-                            // Sau khi comment thành công, làm mới danh sách bình luận
-                            viewModel.getComments(foodId); // Gọi lại để refresh UI
-                        } else {
-                            // <-- THÊM Ở ĐÂY: Thông báo rõ ràng hơn khi bị chặn bởi kiểm duyệt
-                            Toast.makeText(this, "Failed to save comment. Your comment may contain inappropriate words.", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    Toast.makeText(this, "Failed to get user info.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show();
+        if (firebaseUser == null) {
+            Toast.makeText(this, "User not logged in. Please log in to comment.", Toast.LENGTH_SHORT).show();
+            return; // Exit if no user is logged in
         }
+
+        // Ensure comment text and rating are provided before fetching user info (minor optimization)
+        if (commentText.isEmpty() || stars == 0) {
+            Toast.makeText(this, "Please describe your experience and provide a rating.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Observe user information
+        userViewModel.getUserInformation(firebaseUser.getUid()).observe(this, userModel -> {
+            if (userModel != null && userModel.getName() != null && userModel.getUid() != null) {
+                String currentUserName = userModel.getName();
+                String currentUserId = userModel.getUid();
+
+                CommentModel comment = new CommentModel();
+                comment.setText(commentText);
+                comment.setRating(stars);
+                comment.setTimestamp(System.currentTimeMillis());
+                comment.setUserId(currentUserId); // Use the fetched userId
+                comment.setUserName(currentUserName); // Use the fetched userName
+                // ModerationStatus will be set in Repository
+
+                // Call postOrUpdateComment only ONCE
+                viewModel.postOrUpdateComment(foodId, comment).observe(this, success -> {
+                    if (Boolean.TRUE.equals(success)) { // Check for Boolean.TRUE to avoid NPE if LiveData emits null
+                        Toast.makeText(this, "Comment sent successfully.", Toast.LENGTH_SHORT).show();
+                        etComment.setText("");
+                        ratingBar.setRating(0);
+
+//
+//                        avgRatingLiveData.observe(this, avgRating -> {
+//                            db.collection("foods")
+//                                    .document(foodId)
+//                                            .update("star", avgRating);
+//                                });
+                        viewModel.getComments(foodId); // Refresh UI
+                    } else {
+                        Toast.makeText(this, "Failed to save comment. It may contain inappropriate words or a network error occurred.", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            } else {
+                // This 'else' means userModel was null or incomplete after the observe
+                Toast.makeText(this, "Failed to retrieve user details. Please try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void handleDeleteComment(String userId) {

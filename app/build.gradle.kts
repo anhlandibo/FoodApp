@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.core.animation)
     implementation(libs.play.services.cast.tv)
     implementation(libs.firebase.config)
+    implementation(libs.media3.common)
 
     // Testing
     testImplementation(libs.junit)

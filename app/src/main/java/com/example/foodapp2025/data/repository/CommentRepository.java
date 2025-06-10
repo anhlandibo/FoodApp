@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.foodapp2025.data.model.CommentModel;
 import com.example.foodapp2025.data.remote.CommentRemoteDataSource;
 import com.example.foodapp2025.utils.CommentModerateUtils; // <-- THÊM IMPORT NÀY
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.*;
 
 import java.util.ArrayList;
@@ -97,4 +98,9 @@ public class CommentRepository {
 
         return result;
     }
+
+    public LiveData<Float> getAverageRatingLiveData(String foodId) {
+        return remoteDataSource.getAverageRatingLiveData(foodId);
+    }
+
 }

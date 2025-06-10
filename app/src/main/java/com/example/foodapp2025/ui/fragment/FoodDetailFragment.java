@@ -9,6 +9,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -22,17 +24,21 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.CartModel;
+import com.example.foodapp2025.data.model.CommentModel;
 import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.databinding.FragmentFoodDetailBinding;
 import com.example.foodapp2025.ui.activity.CommentActivity;
 import com.example.foodapp2025.ui.activity.MainActivity;
 import com.example.foodapp2025.viewmodel.CartViewModel;
+import com.example.foodapp2025.viewmodel.CommentViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashSet; // Import HashSet
+import java.util.List;
+import java.util.Objects;
 import java.util.Set; // Import Set
 
 public class FoodDetailFragment extends Fragment {
@@ -42,6 +48,7 @@ public class FoodDetailFragment extends Fragment {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private boolean isFavourite = false;
+    private CommentViewModel commentViewModel = new CommentViewModel();
 
     private static final String PREFS_NAME = "FoodAppPrefs";
     private static final String FAV_PREFS_KEY_PREFIX = "user_favorites_";
@@ -89,13 +96,26 @@ public class FoodDetailFragment extends Fragment {
             }
         });
 
+        // 2 decimal digits
+        LiveData<Float> avgRatingLiveData = commentViewModel.getAverageRatingLiveData(selectedFood.getId());
+
+        avgRatingLiveData.observe(getViewLifecycleOwner(), avgRating -> {
+            if (avgRating != null) {
+                // Update your UI with the avgRating
+                float roundedAvgRating = Math.round(avgRating * 100) / 100f;
+                binding.rateTxt.setText(roundedAvgRating + " Rating");
+                binding.ratingBar.setRating(roundedAvgRating);
+            }
+        });
 
         Glide.with(this).load(selectedFood.getImageUrl()).into(binding.imageView7);
         binding.titleTxt.setText(selectedFood.getName());
         binding.priceTxt.setText(selectedFood.getPrice() + " $");
         binding.descriptionTxt.setText(selectedFood.getDescription());
-        binding.rateTxt.setText(selectedFood.getStar() + " Rating");
-        binding.ratingBar.setRating(Float.parseFloat(selectedFood.getStar().toString()));
+//        binding.rateTxt.setText(selectedFood.getStar() + " Rating");
+//        binding.ratingBar.setRating(Float.parseFloat(selectedFood.getStar().toString()));
+//        binding.rateTxt.setText(avgStarRating + " Rating");
+//        binding.ratingBar.setRating(avgStarRating);
         binding.totalTxt.setText(quantity * selectedFood.getPrice() + " $");
         binding.numTxt.setText(String.valueOf(quantity));
 
@@ -269,5 +289,28 @@ public class FoodDetailFragment extends Fragment {
             prefs.edit().putStringSet("foodIds", favouriteIds).apply();
         }
     }
+
+//    public LiveData<Float> getAverageRatingLiveData(String foodId) {
+//        LiveData<List<CommentModel>> commentsLiveData = commentViewModel.getComments(foodId);
+//
+//        // Using Transformations.map
+//        return Transformations.map(commentsLiveData, comments -> {
+//            if (comments == null || comments.isEmpty()) {
+//                return 0.0f; // Default to 0 if no comments or list is null
+//            }
+//            float totalRating = 0;
+//            int validCommentsCount = 0;
+//            for (CommentModel cmt : comments) {
+//                if (cmt != null) { // Good practice to check individual items too
+//                    totalRating += cmt.getRating();
+//                    validCommentsCount++;
+//                }
+//            }
+//            if (validCommentsCount == 0) {
+//                return 0.0f; // Avoid division by zero if all comments were null (unlikely but safe)
+//            }
+//            return totalRating / validCommentsCount;
+//        });
+//    }
 
 }

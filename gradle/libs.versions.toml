@@ -25,6 +25,7 @@ coreAnimation = "1.0.0"
 firebaseMessaging = "24.1.1"
 playServicesCastTv = "21.1.1"
 firebaseConfig = "22.1.2"
+media3Common = "1.7.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -50,6 +51,7 @@ core-animation = { group = "androidx.core", name = "core-animation", version.ref
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 play-services-cast-tv = { group = "com.google.android.gms", name = "play-services-cast-tv", version.ref = "playServicesCastTv" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config", version.ref = "firebaseConfig" }
+media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3Common" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

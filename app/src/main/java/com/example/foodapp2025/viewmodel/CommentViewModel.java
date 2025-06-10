@@ -34,4 +34,9 @@ public class CommentViewModel extends ViewModel {
     public LiveData<Boolean> deleteComment(String foodId, String userId) {
         return repository.deleteComment(foodId, userId);
     }
+
+    public LiveData<Float> getAverageRatingLiveData(String foodId) {
+        return repository.getAverageRatingLiveData(foodId);
+    }
+
 }
