@@ -21,6 +21,10 @@ public class OrderModel implements Serializable {
     private String paymentMethod;
     private int discountAmount;
 
+    private int reportStatus; // 0 by default for not reported yet, 1 for not receiving, 2 for quality issue, 3 for wrong food, -1 for handled (meaning they can't report anymore)
+
+    private String reportAdditionalInfo;
+
     private Map<String, Object> appliedVoucherDetails; // New field for voucher details
 
     public String getPaymentMethod() {
@@ -169,5 +173,17 @@ public class OrderModel implements Serializable {
 
     public int getDiscountAmount() {
         return discountAmount;
+    }
+    public void setReportStatus(int reportStatus) {
+        this.reportStatus = reportStatus;
+    }
+    public int getReportStatus() {
+        return reportStatus;
+    }
+    public void setReportAdditionalInfo(String reportAdditionalInfo) {
+        this.reportAdditionalInfo = reportAdditionalInfo;
+    }
+    public String getReportAdditionalInfo() {
+        return reportAdditionalInfo;
     }
 }

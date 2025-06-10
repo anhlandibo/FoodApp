@@ -18,9 +18,11 @@ public class OrderRepository {
     public LiveData<ArrayList<OrderModel>> getCurrentUsersOrders(){
         return orderRemoteDataSource.getCurrentUsersOrders();
     }
-
     public Task<Void> updateOrderStatus(String orderId, String status){
         Log.d("OrderRemoteDataSource", "Attempting to update status for order ID: " + orderId + " to: " + status);
         return orderRemoteDataSource.updateOrderAndPaymentStatus(orderId, status, "paid");
+    }
+    public Task<Void> reportOrder(OrderModel orderModel){
+        return orderRemoteDataSource.reportOrder(orderModel);
     }
 }

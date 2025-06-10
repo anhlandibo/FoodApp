@@ -419,6 +419,7 @@ public class CartViewModel extends ViewModel {
             order.put("paymentStatus", paymentStatus);
             order.put("status", status);
             order.put("paymentMethod", "cod");
+            order.put("reportStatus", 0);
             db.collection("orders")
                     .add(order)
                     .addOnSuccessListener(ref -> {
@@ -438,7 +439,7 @@ public class CartViewModel extends ViewModel {
             order.put("status", status);
             order.put("paymentStatus", paymentStatus);
             order.put("paymentMethod", "card");
-
+            order.put("reportStatus", 0);
             db.collection("orders")
                     .add(order)
                     .addOnSuccessListener(ref -> {
@@ -459,7 +460,7 @@ public class CartViewModel extends ViewModel {
             order.put("status", status);
             order.put("paymentStatus", paymentStatus);
             order.put("paymentMethod", paymentMethod);
-
+            order.put("reportStatus", 0);
             db.collection("orders")
                     .add(order)
                     .addOnSuccessListener(ref -> {

@@ -107,7 +107,7 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         // 3) Tabs setup
         TabLayout tabs = binding.tabs;
         tabs.addTab(tabs.newTab().setText("All"));
-        tabs.addTab(tabs.newTab().setText("Pending"));
+        tabs.addTab(tabs.newTab().setText("Processing"));
         tabs.addTab(tabs.newTab().setText("Delivered"));
 
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -116,11 +116,12 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
                 ArrayList<OrderModel> filtered;
                 switch (tab.getPosition()) {
                     case 1: // Not Delivered
-                        filtered = filterByStatus(allOrders, "pending");
+                        filtered = filterByStatus(allOrders, "delivering");
+                        filtered.addAll(filterByStatus(allOrders, "pending"));
                         break;
                     case 2: // Delivered
                         filtered = filterByStatus(allOrders, "completed");
-                        filtered.addAll(filterByStatus(allOrders, "delivered"));
+//                        filtered.addAll(filterByStatus(allOrders, "delivered"));
                         break;
                     default: // 0: All
                         filtered = allOrders;
@@ -145,17 +146,14 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         }
         return result;
     }
-
-
     @Override
-    public void onConfirmReceivedClick(String orderId) {
-        Log.d("HistoryFragment", "Confirm received button clicked for Order ID: " + orderId);
+    public void onReportSubmitted(OrderModel orderModel, View itemView) {
         if (orderViewModel != null && getContext() != null){
-            Toast.makeText(getContext(), "Đang xác nhận đơn hàng...", Toast.LENGTH_SHORT).show();
-            orderViewModel.confirmOrderReceived(orderId);
+            Toast.makeText(getContext(), "Reporting order...", Toast.LENGTH_SHORT).show();
+            orderViewModel.reportOrder(orderModel, itemView);
         }
         else{
-            Log.e("HistoryFragment", "ViewModel or Context is null, cannot confirm order.");
+            Log.e("HistoryFragment", "ViewModel or Context is null, cannot report order.");
         }
     }
 }

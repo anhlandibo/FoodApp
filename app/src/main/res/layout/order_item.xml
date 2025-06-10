@@ -3,7 +3,8 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    card_view:cardElevation="4dp"> <LinearLayout
+    card_view:cardElevation="4dp">
+    <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
@@ -115,19 +116,37 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_confirm_order"
+                <!-- Report Link - looks like underlined text -->
+                <TextView
+                    android:id="@+id/btn_report_order"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="0"
-                    android:background="@drawable/orange_bg"
-                    android:backgroundTint="@color/buttonOrange"
-                    android:text="Confirm"
-                    android:textColor="@android:color/black"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="4dp"
+                    android:text="report"
+                    android:textColor="#EF4444"
+                    android:textSize="11sp"
+                    android:textStyle="normal"
+                    android:visibility="gone"
+                    android:layout_gravity="center_vertical"
+                    style="@style/TextAppearance.AppCompat.Body2"/>
+
+                <!-- Text shown when order is reported -->
+                <TextView
+                    android:id="@+id/txt_order_reported"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="order reported"
+                    android:textColor="#EF4444"
+                    android:textSize="10sp"
+                    android:textStyle="normal"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
         </LinearLayout>
