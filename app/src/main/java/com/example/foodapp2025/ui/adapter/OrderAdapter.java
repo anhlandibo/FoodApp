@@ -63,7 +63,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 txtOrderReported.setVisibility(View.GONE);
                 Log.d("OrderAdapter", "Called setVisibility(VISIBLE) for ID: " + orderModel.getId()); // <<< Log NGAY SAU setVisibility
                 btnReport.setOnClickListener(v -> {
-                    showReportDialog(v, orderModel); // Pass the full orderModel instead of just ID
+                    showReportDialog(holder.itemView, orderModel); // Pass the full orderModel instead of just ID
                 });
             }
             else {
@@ -77,6 +77,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             }
             if (orderModel.getReportStatus() != 0) {
                 txtOrderReported.setVisibility(View.VISIBLE);
+            }
+            else {
+                txtOrderReported.setVisibility(View.GONE);
             }
         }
 
