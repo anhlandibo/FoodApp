@@ -92,16 +92,23 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         binding.orderRecyclerView.setAdapter(orderAdapter);
         binding.orderRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
 
-        // 2) ViewModel + LiveData
+        // 2) ViewModel + LiveData with Loading Logic
         orderViewModel = new ViewModelProvider(this).get(OrderViewModel.class);
+
+        // Show loading before data fetch
+        binding.orderHistoryProgressBar.setVisibility(View.VISIBLE);
+
         orderViewModel.getCurrentUsersOrders().observe(getViewLifecycleOwner(), orderList -> {
             allOrders.clear();
             if (orderList != null) {
                 allOrders.addAll(orderList);
                 Log.d("HistoryFragment", "Received " + orderList.size() + " orders");
             }
-            // Always show the “All” tab data by default
+            // Always show the "All" tab data by default
             orderAdapter.setOrderList(allOrders);
+
+            // Hide loading after data fetch completes
+            binding.orderHistoryProgressBar.setVisibility(View.GONE);
         });
 
         // 3) Tabs setup
@@ -146,6 +153,7 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         }
         return result;
     }
+
     @Override
     public void onReportSubmitted(OrderModel orderModel, View itemView) {
         if (orderViewModel != null && getContext() != null){
