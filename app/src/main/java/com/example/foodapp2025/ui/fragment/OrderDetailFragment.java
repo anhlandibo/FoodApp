@@ -68,6 +68,7 @@ public class OrderDetailFragment extends Fragment {
 
         // Handle discount amount
         binding.orderDiscount.setText("-" + order.getDiscountAmount() + " $");
+        binding.orderDeliveryFee.setText(formatPrice(5.0));
         if (order.getPaymentMethod().equals("cod")) {
             binding.orderPaymentMethod.setText("Cash on delivery");
         } else if (order.getPaymentMethod().equals("card")) {
@@ -100,6 +101,11 @@ public class OrderDetailFragment extends Fragment {
             isCollapsed = !isCollapsed;
         });
     }
+
+    private String formatPrice(double v) {
+        return String.format("%,.0f $", v);
+    }
+
 
     private void displayVoucherDetails(OrderModel order) {
         // Handle voucher codes display

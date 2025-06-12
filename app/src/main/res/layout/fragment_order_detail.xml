@@ -238,6 +238,32 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:text="Delivery fee: "
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/orderDeliveryFee"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@deliveryFee"
+                                android:textColor="#4B5563"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:divider="#D1D5DB"
+                            android:dividerPadding="0dp"
+                            android:orientation="horizontal"
+                            android:paddingVertical="8dp"
+                            android:showDividers="end">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:text="Discount: "
                                 android:textColor="#4B5563"
                                 android:textSize="13sp" />
@@ -264,7 +290,6 @@
 
                         </LinearLayout>
 
-                        <!-- Tổng tiền hàng -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

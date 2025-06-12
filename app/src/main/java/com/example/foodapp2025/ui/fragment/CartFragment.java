@@ -191,7 +191,7 @@ public class CartFragment extends Fragment {
             if (voucher != null) {
                 binding.voucherBanner.setVisibility(View.VISIBLE);
                 // Khi voucher thay đổi, cập nhật mã và tên
-                binding.tvVoucherSelected.setText("Voucher: " + voucher.getCode() + "- saved " + voucher.getDescription());
+                binding.tvVoucherSelected.setText("Voucher: " + voucher.getCode() + " - " + voucher.getDescription());
             } else {
                 binding.voucherBanner.setVisibility(View.GONE);
             }
