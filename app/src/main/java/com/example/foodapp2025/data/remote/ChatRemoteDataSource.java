@@ -59,12 +59,12 @@ public class ChatRemoteDataSource {
                 Map<String, Object> senderInfo = new HashMap<>();
                 senderInfo.put("uid", senderId);
                 senderInfo.put("displayName", senderSnap.getString("name"));
-                senderInfo.put("photoURL", senderSnap.getString("photoURL"));
+                senderInfo.put("photoUrl", senderSnap.getString("photoUrl"));
 
                 Map<String, Object> receiverInfo = new HashMap<>();
                 receiverInfo.put("uid", receiverId);
                 receiverInfo.put("displayName", receiverSnap.getString("name"));
-                receiverInfo.put("photoURL", receiverSnap.getString("photoURL"));
+                receiverInfo.put("photoUrl", receiverSnap.getString("photoUrl"));
 
                 Map<String, Object> senderChat = new HashMap<>();
                 senderChat.put("userInfo", receiverInfo);

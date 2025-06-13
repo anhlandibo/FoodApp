@@ -53,14 +53,14 @@ public class ChatRepository {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(doc -> {
                     String name = doc.getString("name");
-                    String photo = doc.getString("photoURL");
+                    String photo = doc.getString("photoUrl");
                     if (name == null) name = "";
                     if (photo == null) photo = "";
 
                     Map<String, Object> userInfo = new HashMap<>();
                     userInfo.put("uid", userId);
                     userInfo.put("displayName", name);
-                    userInfo.put("photoURL", photo);
+                    userInfo.put("photoUrl", photo);
                     userInfo.put("lastMessage", Collections.singletonMap("text", message.getText()));
                     userInfo.put("date", FieldValue.serverTimestamp());
 
