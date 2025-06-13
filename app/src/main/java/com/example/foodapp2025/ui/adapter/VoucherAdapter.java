@@ -39,22 +39,22 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
     public void onBindViewHolder(@NonNull VoucherViewHolder holder, int position) {
         VoucherModel voucher = vouchers.get(position);
 
-        holder.codeText.setText("Mã: " + voucher.getCode());
+        holder.codeText.setText("Code: " + voucher.getCode());
         holder.descText.setText(voucher.getDescription());
 
         if ("percentage".equalsIgnoreCase(voucher.getDiscountType())) {
-            holder.discountText.setText("Giảm " + (int)voucher.getDiscountValue() + "%");
+            holder.discountText.setText("Discount " + (int)voucher.getDiscountValue() + "%");
         } else if ("fixed".equalsIgnoreCase(voucher.getDiscountType())) {
-            holder.discountText.setText("Giảm " + (int)voucher.getDiscountValue() + "K");
+            holder.discountText.setText("Discount " + (int)voucher.getDiscountValue() + "K");
         } else {
-            holder.discountText.setText("Giảm đặc biệt");
+            holder.discountText.setText("Special Discount");
         }
 
         if (voucher.getExpiryDate() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            holder.expiryText.setText("HSD: " + sdf.format(voucher.getExpiryDate()));
+            holder.expiryText.setText("Expiration: " + sdf.format(voucher.getExpiryDate()));
         } else {
-            holder.expiryText.setText("Không xác định hạn");
+            holder.expiryText.setText("Unlimited");
         }
 
         holder.itemView.setOnClickListener(v -> listener.onVoucherClick(voucher));

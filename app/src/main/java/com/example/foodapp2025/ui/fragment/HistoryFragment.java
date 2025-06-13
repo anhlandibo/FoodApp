@@ -92,22 +92,29 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         binding.orderRecyclerView.setAdapter(orderAdapter);
         binding.orderRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
 
-        // 2) ViewModel + LiveData
+        // 2) ViewModel + LiveData with Loading Logic
         orderViewModel = new ViewModelProvider(this).get(OrderViewModel.class);
+
+        // Show loading before data fetch
+        binding.orderHistoryProgressBar.setVisibility(View.VISIBLE);
+
         orderViewModel.getCurrentUsersOrders().observe(getViewLifecycleOwner(), orderList -> {
             allOrders.clear();
             if (orderList != null) {
                 allOrders.addAll(orderList);
                 Log.d("HistoryFragment", "Received " + orderList.size() + " orders");
             }
-            // Always show the “All” tab data by default
+            // Always show the "All" tab data by default
             orderAdapter.setOrderList(allOrders);
+
+            // Hide loading after data fetch completes
+            binding.orderHistoryProgressBar.setVisibility(View.GONE);
         });
 
         // 3) Tabs setup
         TabLayout tabs = binding.tabs;
         tabs.addTab(tabs.newTab().setText("All"));
-        tabs.addTab(tabs.newTab().setText("Pending"));
+        tabs.addTab(tabs.newTab().setText("Processing"));
         tabs.addTab(tabs.newTab().setText("Delivered"));
 
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -116,11 +123,12 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
                 ArrayList<OrderModel> filtered;
                 switch (tab.getPosition()) {
                     case 1: // Not Delivered
-                        filtered = filterByStatus(allOrders, "pending");
+                        filtered = filterByStatus(allOrders, "delivering");
+                        filtered.addAll(filterByStatus(allOrders, "pending"));
                         break;
                     case 2: // Delivered
                         filtered = filterByStatus(allOrders, "completed");
-                        filtered.addAll(filterByStatus(allOrders, "delivered"));
+//                        filtered.addAll(filterByStatus(allOrders, "delivered"));
                         break;
                     default: // 0: All
                         filtered = allOrders;
@@ -146,16 +154,14 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         return result;
     }
 
-
     @Override
-    public void onConfirmReceivedClick(String orderId) {
-        Log.d("HistoryFragment", "Confirm received button clicked for Order ID: " + orderId);
+    public void onReportSubmitted(OrderModel orderModel, View itemView) {
         if (orderViewModel != null && getContext() != null){
-            Toast.makeText(getContext(), "Đang xác nhận đơn hàng...", Toast.LENGTH_SHORT).show();
-            orderViewModel.confirmOrderReceived(orderId);
+            Toast.makeText(getContext(), "Reporting order...", Toast.LENGTH_SHORT).show();
+            orderViewModel.reportOrder(orderModel, itemView);
         }
         else{
-            Log.e("HistoryFragment", "ViewModel or Context is null, cannot confirm order.");
+            Log.e("HistoryFragment", "ViewModel or Context is null, cannot report order.");
         }
     }
 }

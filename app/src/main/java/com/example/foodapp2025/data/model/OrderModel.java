@@ -9,18 +9,6 @@ import com.google.firebase.Timestamp;
 
 public class OrderModel implements Serializable {
 
-    //Constants for Firebase Firestore
-    //Keys for an item's value
-    //Vouchers are a mystery for now, since it stores another array, not a string
-//    private static final String DELIVERY_FEE = "deliveryFee";
-//    private static final String IMAGE_URL = "imageUrl";
-//    private static final String NAME = "name";
-//    private static final String PRICE = "price";
-//    private static final String QUANTITY = "quantity";
-//    private static final String SUBTOTAL = "subtotal";
-//    private static final String TAX_AMOUNT = "taxAmount";
-//    private static final String TOTAL = "total";
-//    private static final String VOUCHER_CODE = "voucherCode";
     private String id;
     private ArrayList<Map<String, Object>> items;
     private int subtotal;
@@ -31,6 +19,13 @@ public class OrderModel implements Serializable {
     private String status;
     private String paymentStatus;
     private String paymentMethod;
+    private int discountAmount;
+
+    private int reportStatus; // 0 by default for not reported yet, 1 for not receiving, 2 for quality issue, 3 for wrong food, -1 for handled (meaning they can't report anymore)
+
+    private String reportAdditionalInfo;
+
+    private Map<String, Object> appliedVoucherDetails; // New field for voucher details
 
     public String getPaymentMethod() {
         return paymentMethod;
@@ -40,14 +35,11 @@ public class OrderModel implements Serializable {
         this.paymentMethod = paymentMethod;
     }
 
-    //not on database yet
-//    private Status status;
     public OrderModel() {
         items = new ArrayList<>();
     }
 
-    public OrderModel(String id, ArrayList<Map<String, Object>> items, int subtotal, int tax, long timestamp, int total, String userId, String paymentStatus, String paymentMethod) {
-        //initializing items as an empty ArrayList
+    public OrderModel(String id, ArrayList<Map<String, Object>> items, int subtotal, int tax, long timestamp, int total, String userId, String paymentStatus, String paymentMethod, int discountAmount) {
         items = new ArrayList<>();
         this.id = id;
         this.items = items;
@@ -58,6 +50,7 @@ public class OrderModel implements Serializable {
         this.userId = userId;
         this.paymentStatus = paymentStatus;
         this.paymentMethod = paymentMethod;
+        this.discountAmount = discountAmount;
     }
 
     // Getter and Setter for id
@@ -138,7 +131,59 @@ public class OrderModel implements Serializable {
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
+
     public String getPaymentStatus() {
         return paymentStatus;
+    }
+
+    // Getter and Setter for appliedVoucherDetails
+    public Map<String, Object> getAppliedVoucherDetails() {
+        return appliedVoucherDetails;
+    }
+
+    public void setAppliedVoucherDetails(Map<String, Object> appliedVoucherDetails) {
+        this.appliedVoucherDetails = appliedVoucherDetails;
+    }
+
+    // Helper methods to access voucher details easily
+    public String getVoucherCode() {
+        if (appliedVoucherDetails != null) {
+            return (String) appliedVoucherDetails.get("code");
+        }
+        return null;
+    }
+
+    public String getVoucherType() {
+        if (appliedVoucherDetails != null) {
+            return (String) appliedVoucherDetails.get("type");
+        }
+        return null;
+    }
+
+    public Object getVoucherValue() {
+        if (appliedVoucherDetails != null) {
+            return appliedVoucherDetails.get("value");
+        }
+        return null;
+    }
+
+    public void setDiscountAmount(int discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public int getDiscountAmount() {
+        return discountAmount;
+    }
+    public void setReportStatus(int reportStatus) {
+        this.reportStatus = reportStatus;
+    }
+    public int getReportStatus() {
+        return reportStatus;
+    }
+    public void setReportAdditionalInfo(String reportAdditionalInfo) {
+        this.reportAdditionalInfo = reportAdditionalInfo;
+    }
+    public String getReportAdditionalInfo() {
+        return reportAdditionalInfo;
     }
 }

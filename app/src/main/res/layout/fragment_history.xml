@@ -28,13 +28,36 @@
         app:tabSelectedTextColor="#FF5722"
         app:tabTextColor="#000000" />
 
-    <!-- Your order list -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/orderRecyclerView"
-        android:layout_width ="match_parent"
+    <!-- Container for RecyclerView and ProgressBar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        app:layoutManager ="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:layout_weight="1">
+
+        <!-- Your order list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/orderRecyclerView"
+            android:layout_width ="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            app:layoutManager ="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Loading ProgressBar -->
+        <ProgressBar
+            android:id="@+id/orderHistoryProgressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
