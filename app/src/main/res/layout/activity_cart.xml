@@ -8,14 +8,14 @@
 
     <ImageView
         android:id="@+id/backArrowOrderDetail"
-        android:layout_width="25dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/back_grey"
-        tools:srcCompat="@drawable/arrow" />
+        tools:src="@tools:sample/avatars" />
 
     <ScrollView
         android:layout_width="match_parent"
