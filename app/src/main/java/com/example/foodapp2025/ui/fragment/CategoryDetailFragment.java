@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -20,8 +21,10 @@ import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.databinding.FragmentCategoryDetailBinding;
 import com.example.foodapp2025.ui.adapter.FoodAdapter;
+import com.example.foodapp2025.viewmodel.CommentViewModel;
 import com.example.foodapp2025.viewmodel.FoodViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
@@ -31,8 +34,10 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class CategoryDetailFragment extends Fragment {
+    private FirebaseFirestore db;
     private FragmentCategoryDetailBinding binding;
     private FoodViewModel foodViewModel;
+    private CommentViewModel commentViewModel;
     private FoodAdapter foodAdapter;
 
     // TODO: Rename parameter arguments, choose names that match
@@ -118,7 +123,7 @@ public class CategoryDetailFragment extends Fragment {
             Toast.makeText(getContext(), "Category not found", Toast.LENGTH_SHORT).show();
             return;
         }
-        Log.e("IsPopular", "ispopular: "+ isPopular);
+        Log.e("IsPopular", "ispopular: " + isPopular);
 
         // Back button
         initToolbar(view, categoryName);
@@ -131,11 +136,15 @@ public class CategoryDetailFragment extends Fragment {
 
 
         //Khoi tao ViewModel va quan sat LiveData tu repository
+        db = FirebaseFirestore.getInstance();
         foodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
+        commentViewModel = new ViewModelProvider(this).get(CommentViewModel.class);
+
         int finalMinPrice = minPrice;
         boolean finalIsPopular = isPopular;
         foodViewModel.getMenuItems(categoryName).observe(getViewLifecycleOwner(), foodList -> {
             if (foodList != null && !foodList.isEmpty()) {
+//                setAvgStar(foodList);
                 ArrayList<FoodModel> filteredList = new ArrayList<>();
                 for (FoodModel food : foodList) {
                     Log.d("FoodItem", food.getName() + ": " + food.getPrice() + " - Popular: " + food.getIsPopular() + " min price: " + finalMinPrice);
@@ -157,6 +166,20 @@ public class CategoryDetailFragment extends Fragment {
             }
         });
 
+    }
+    public void setAvgStar(ArrayList<FoodModel> foodList) {
+        for (FoodModel food : foodList) {
+            LiveData<Float> avgRatingLiveData = commentViewModel.getAverageRatingLiveData(food.getId());
+
+            avgRatingLiveData.observe(getViewLifecycleOwner(), avgRating -> {
+                food.setStar((double) avgRating);
+                db.collection("food")
+                        .document(food.getId())
+                        .update("star", avgRating);
+            });
+
+        }
 
     }
+
 }

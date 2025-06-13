@@ -65,14 +65,6 @@ public class CommentActivity extends AppCompatActivity {
 
         btnSend.setOnClickListener(v -> handleSendComment());
         backBtn.setOnClickListener(v -> {
-            LiveData<Float> avgRatingLiveData = viewModel.getAverageRatingLiveData(foodId);
-
-            avgRatingLiveData.observe(this, avgRating -> {
-                db.collection("food")
-                        .document(foodId)
-                        .update("star", avgRating);
-            });
-
             finish();
         });
 
@@ -155,6 +147,14 @@ public class CommentActivity extends AppCompatActivity {
                 // This 'else' means userModel was null or incomplete after the observe
                 Toast.makeText(this, "Failed to retrieve user details. Please try again.", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        LiveData<Float> avgRatingLiveData = viewModel.getAverageRatingLiveData(foodId);
+
+        avgRatingLiveData.observe(this, avgRating -> {
+            db.collection("food")
+                    .document(foodId)
+                    .update("star", avgRating);
         });
     }
 
