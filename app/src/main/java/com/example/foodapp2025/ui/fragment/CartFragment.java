@@ -47,7 +47,6 @@ public class CartFragment extends Fragment {
                             VoucherModel selectedVoucher = (VoucherModel) result.getData().getSerializableExtra("selectedVoucher");
                             if (selectedVoucher != null) {
                                 cartVM.applyVoucherObject(selectedVoucher);
-                                //showVoucherBottomSheet(selectedVoucher);
                             }
                         }
                     }
@@ -119,23 +118,30 @@ public class CartFragment extends Fragment {
             }
             final double MIN_STRIPE_PAYMENT_AMOUNT = 0.50;
 
+            // **Lấy ghi chú tổng thể từ EditText**
+            String orderNote = binding.notesEditText.getText().toString().trim();
+
+
             if (selectedPaymentMethodId == R.id.radioCod) {
                 currentPaymentMethod = "cod";
-                cartVM.placeOrder("cod", totalAmount);
+                // **Truyền orderNote vào placeOrder**
+                cartVM.placeOrder("cod", totalAmount, orderNote);
                 binding.voucherBanner.setVisibility(View.GONE);
                 cartVM.applyVoucherObject(null);
                 Toast.makeText(requireContext(), "Placing order (COD)...", Toast.LENGTH_SHORT).show();
             } else if (selectedPaymentMethodId == R.id.radioCard) {
                 if (totalAmount <= MIN_STRIPE_PAYMENT_AMOUNT && totalAmount > 0){
                     currentPaymentMethod = "card_low_amount";
-                    cartVM.placeOrder("card", totalAmount);
+                    // **Truyền orderNote vào placeOrder**
+                    cartVM.placeOrder("card_low_amount", totalAmount, orderNote);
                     binding.voucherBanner.setVisibility(View.GONE);
                     cartVM.applyVoucherObject(null);
                     Toast.makeText(requireContext(), "Order placed successfully", Toast.LENGTH_LONG).show();
                 }
                 else if (totalAmount <= 0){
                     currentPaymentMethod = "card_zero_amount";
-                    cartVM.placeOrder("card_zero_amount", totalAmount);
+                    // **Truyền orderNote vào placeOrder**
+                    cartVM.placeOrder("card_zero_amount", totalAmount, orderNote);
                     binding.voucherBanner.setVisibility(View.GONE);
                     cartVM.applyVoucherObject(null);
                     Toast.makeText(requireContext(), "Order placed successfully", Toast.LENGTH_LONG).show();
@@ -145,7 +151,8 @@ public class CartFragment extends Fragment {
                     currentPaymentMethod = "card";
                     pendingTotalAmount = totalAmount;
                     pendingUserId = currentUserId;
-                    cartVM.placeOrder("card", totalAmount); // Thêm totalAmount
+                    // **Truyền orderNote vào placeOrder**
+                    cartVM.placeOrder("card", totalAmount, orderNote); // Thêm totalAmount
                     binding.voucherBanner.setVisibility(View.GONE);
                     cartVM.applyVoucherObject(null);
                     Toast.makeText(requireContext(), "Processing your order for payment...", Toast.LENGTH_SHORT).show();
@@ -191,7 +198,7 @@ public class CartFragment extends Fragment {
             if (voucher != null) {
                 binding.voucherBanner.setVisibility(View.VISIBLE);
                 // Khi voucher thay đổi, cập nhật mã và tên
-                binding.tvVoucherSelected.setText("Voucher: " + voucher.getCode() + " - " + voucher.getDescription());
+                binding.tvVoucherSelected.setText("Voucher: " + voucher.getCode() + "- saved " + voucher.getDescription());
             } else {
                 binding.voucherBanner.setVisibility(View.GONE);
             }
@@ -238,7 +245,12 @@ public class CartFragment extends Fragment {
 
         cartVM.getOrderPlaced().observe(getViewLifecycleOwner(), isOrderPlaced -> {
             if (isOrderPlaced != null && isOrderPlaced) {
-                Toast.makeText(requireContext(), "Your order has been placed successfully!", Toast.LENGTH_SHORT).show();                cartVM.resetOrderPlacedStatus();
+                Toast.makeText(requireContext(), "Your order has been placed successfully!", Toast.LENGTH_SHORT).show();
+                cartVM.resetOrderPlacedStatus();
+                // **Tùy chọn: Xóa văn bản ghi chú sau khi đặt hàng**
+                if (binding.notesEditText != null) {
+                    binding.notesEditText.setText("");
+                }
             }
         });
 
@@ -300,4 +312,3 @@ public class CartFragment extends Fragment {
         }
     }
 }
-

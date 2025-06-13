@@ -9,7 +9,7 @@ public class CartModel {
     private String name;
     private Double price;
     private Long quantity;
-    private String note;
+    private String note; // Giữ nguyên trường này
     private static final double TAX_RATE = 0.1; // 10 % tax
     private static final Integer DELIVERY_FEE = 5; // Fixed delivery fee
     private static final ArrayList<String> VOUCHER_CODE = new ArrayList<>(Arrays.asList("FREE2SHIP", "10DEAL"));

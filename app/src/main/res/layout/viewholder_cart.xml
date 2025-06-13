@@ -33,18 +33,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/avatars" /> <!-- Added for preview -->
-
-        <TextView
-            android:id="@+id/productName_textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:text="Tên sản phẩm"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/cartView"
-            app:layout_constraintTop_toTopOf="parent" />
+            tools:srcCompat="@tools:sample/avatars" /> <TextView
+        android:id="@+id/productName_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Tên sản phẩm"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/cartView"
+        app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/priceTextView"
@@ -55,38 +53,6 @@
             android:text="Giá: 120.000 VND"
             app:layout_constraintStart_toEndOf="@+id/cartView"
             app:layout_constraintTop_toBottomOf="@+id/productName_textView" />
-
-        <!-- GHI CHÚ: Nhãn cho phần ghi chú -->
-        <TextView
-            android:id="@+id/notesLabelTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="4dp"
-            android:text="Ghi chú:"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="12sp"
-            app:layout_constraintStart_toEndOf="@+id/cartView"
-            app:layout_constraintTop_toBottomOf="@+id/priceTextView" />
-
-        <!-- GHI CHÚ: Ô nhập liệu ghi chú -->
-        <EditText
-            android:id="@+id/notesEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="8dp"
-            android:background="@android:color/transparent"
-            android:hint="VD: không cay, thêm hành..."
-            android:maxLines="1"
-            android:paddingBottom="2dp"
-            android:singleLine="true"
-            android:textSize="12sp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/notesLabelTextView"
-            app:layout_constraintEnd_toStartOf="@+id/deleteBtn"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toEndOf="@+id/notesLabelTextView" />
-
 
         <TextView
             android:id="@+id/itemTotalTextView"
@@ -106,20 +72,18 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/notesLabelTextView">
-
-            <TextView
-                android:id="@+id/decreaseButton"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:background="@drawable/circle_button"
-                android:gravity="center"
-                android:text="-"
-                android:textSize="10dp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="@+id/priceTextView"> <TextView
+            android:id="@+id/decreaseButton"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@drawable/circle_button"
+            android:gravity="center"
+            android:text="-"
+            android:textSize="10dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/quantityTextView"

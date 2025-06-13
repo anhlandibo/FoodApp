@@ -35,21 +35,16 @@ public class CartViewModel extends ViewModel {
     private final MutableLiveData<Double> subtotal = new MutableLiveData<>(0.0); // Already a double
     private final MutableLiveData<Double> tax = new MutableLiveData<>(0.0);       // Already a double
     private final MutableLiveData<Double> total = new MutableLiveData<>(0.0);      // Already a double
-    private final MutableLiveData<String> note = new MutableLiveData<>(null);
     private final MutableLiveData<Boolean> orderPlaced = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> cartCleared = new MutableLiveData<>(false);
     private final MutableLiveData<String> lastCreatedOrderId = new MutableLiveData<>(null);
     private final MutableLiveData<Double> discountAmount = new MutableLiveData<>(0.0); // Already a double
-    private final MutableLiveData<String> userAddress = new MutableLiveData<>(null);
-
 
     public LiveData<Double> getDiscountAmount() {
         return discountAmount;
     }
 
-    public LiveData<String> getUserAddress() {
-        return userAddress;
-    }
+
     public LiveData<String> getLastCreatedOrderId() {
         return lastCreatedOrderId;
     }
@@ -97,7 +92,6 @@ public class CartViewModel extends ViewModel {
 
     public CartViewModel() {
         loadCartFromFirestore();
-        loadUserAddressFromFirestore();
     }
 
     public void resetLastCreatedOrderId() {
@@ -137,30 +131,6 @@ public class CartViewModel extends ViewModel {
         }
         cartItems.setValue(updated);
         recalculatePrices();
-    }
-    public void loadUserAddressFromFirestore() {
-        if (userId == null) {
-            Log.e(TAG, "Cannot load user address: userId is null.");
-            return;
-        }
-
-        db.collection("users")
-                .document(userId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String address = documentSnapshot.getString("address");
-                        userAddress.setValue(address);
-                        Log.d(TAG, "User address loaded: " + address);
-                    } else {
-                        Log.d(TAG, "User document does not exist for ID: " + userId);
-                        userAddress.setValue(null);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading user address from Firestore.", e);
-                    userAddress.setValue(null);
-                });
     }
 
     public void removeItem(CartModel item) {
@@ -326,7 +296,7 @@ public class CartViewModel extends ViewModel {
         discountAmount.setValue(discountAmt);
 
         // Lưu giỏ hàng vào Firestore (optional, as individual item saves are done in addItem/updateQuantity)
-         saveCartToFirestore(); // This can be removed if individual item saves are sufficient
+        // saveCartToFirestore(); // This can be removed if individual item saves are sufficient
     }
 
     public boolean isCartEmpty() {
@@ -384,10 +354,11 @@ public class CartViewModel extends ViewModel {
             itemsAsMaps.add(itemMap);
         }
         data.put("items", itemsAsMaps);
+
+
         data.put("subtotal", subtotal.getValue());
         data.put("tax", tax.getValue());
         data.put("total", total.getValue());
-        data.put("note", note.getValue());
         db.collection("carts")
                 .document(userId)
                 .set(data);
@@ -478,17 +449,19 @@ public class CartViewModel extends ViewModel {
      * Places a new order in Firestore.
      * @param paymentMethod The payment method (e.g., "cod", "card").
      * @param totalAmount The final total amount of the order (should match `total.getValue()`).
+     * @param orderNote An optional note for the entire order.
      */
-    public void placeOrder(String paymentMethod, Double totalAmount) {
+    public void placeOrder(String paymentMethod, Double totalAmount, String orderNote) {
         if (userId == null || Objects.requireNonNull(cartItems.getValue()).isEmpty()) {
             Log.e(TAG, "Failed to place order: userId is null or cart is empty.");
             orderPlaced.setValue(false);
-            lastCreatedOrderId.setValue(null);
+            //lastCreatedOrderId.setValue(null);
             return;
         }
 
         Map<String, Object> order = new HashMap<>();
         order.put("userId", userId);
+
         List<Map<String, Object>> itemsToSave = new ArrayList<>();
         for (CartModel item : Objects.requireNonNull(cartItems.getValue())) {
             Map<String, Object> itemMap = new HashMap<>();
@@ -501,19 +474,18 @@ public class CartViewModel extends ViewModel {
             itemsToSave.add(itemMap);
         }
         order.put("items", itemsToSave);
-        //order.put("note", note.getValue());
+
         order.put("subtotal", subtotal.getValue());
         order.put("tax", tax.getValue());
         order.put("total", total.getValue());
         order.put("discountAmount", discountAmount.getValue());
         order.put("timestamp", System.currentTimeMillis());
 
-        String deliveryAddress = userAddress.getValue();
-        if (deliveryAddress != null && !deliveryAddress.isEmpty()) {
-            order.put("deliveryAddress", deliveryAddress);
-        } else {
-            Log.w(TAG, "User address is null or empty when placing order.");
+        // **THÊM GHI CHÚ ĐƠN HÀNG VÀO ĐÂY**
+        if (orderNote != null && !orderNote.trim().isEmpty()) {
+            order.put("orderNote", orderNote.trim());
         }
+
         VoucherModel currentVoucher = voucher.getValue();
         if (currentVoucher != null && appliedVoucher.getValue() != null) {
             Map<String, Object> voucherDetails = new HashMap<>();
@@ -532,7 +504,6 @@ public class CartViewModel extends ViewModel {
             order.put("paymentStatus", paymentStatus);
             order.put("status", status);
             order.put("paymentMethod", "cod");
-            order.put("reportStatus", 0);
             db.collection("orders")
                     .add(order)
                     .addOnSuccessListener(ref -> {
@@ -540,12 +511,12 @@ public class CartViewModel extends ViewModel {
                         Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " and method: " + paymentMethod);
                         clearCartInFirestoreAndLocal(); // Clear cart after successful COD order
                         orderPlaced.setValue(true);
-                        // - Tisn here- maybelastCreatedOrderId.setValue(newOrderId); // Set the new order ID
+                        //lastCreatedOrderId.setValue(newOrderId); // Set the new order ID
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Error placing COD order.", e);
                         orderPlaced.setValue(false);
-                        lastCreatedOrderId.setValue(null);
+                        //lastCreatedOrderId.setValue(null);
                     });
         } else if ("card_low_amount".equals(paymentMethod) || "card_zero_amount".equals(paymentMethod)) {
             // This payment path usually means the payment is already handled by the app
@@ -554,7 +525,7 @@ public class CartViewModel extends ViewModel {
             order.put("status", status);
             order.put("paymentStatus", paymentStatus);
             order.put("paymentMethod", "card");
-            order.put("reportStatus", 0);
+
             db.collection("orders")
                     .add(order)
                     .addOnSuccessListener(ref -> {
@@ -562,12 +533,12 @@ public class CartViewModel extends ViewModel {
                         Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " (zero/low amount).");
                         clearCartInFirestoreAndLocal(); // Clear cart after successful card order
                         orderPlaced.setValue(true);
-                        // maybe here lastCreatedOrderId.setValue(newOrderId); // Set the new order ID
+                        //lastCreatedOrderId.setValue(newOrderId); // Set the new order ID
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Error placing zero/low amount card order.", e);
                         orderPlaced.setValue(false);
-                        lastCreatedOrderId.setValue(null);
+                        //lastCreatedOrderId.setValue(null);
                     });
         } else {
             // General card payment (assuming this needs external payment gateway)
@@ -576,20 +547,20 @@ public class CartViewModel extends ViewModel {
             order.put("status", status);
             order.put("paymentStatus", paymentStatus);
             order.put("paymentMethod", paymentMethod);
-            order.put("reportStatus", 0);
+
             db.collection("orders")
                     .add(order)
                     .addOnSuccessListener(ref -> {
                         String newOrderId = ref.getId();
                         Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " for card payment.");
                         // For this path, we set lastCreatedOrderId so UI can redirect to payment gateway
-                        lastCreatedOrderId.setValue(newOrderId);
+                        //lastCreatedOrderId.setValue(newOrderId);
                         // Do NOT clear cart here yet, wait for payment confirmation from gateway
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Error placing card order.", e);
                         orderPlaced.setValue(false);
-                        lastCreatedOrderId.setValue(null);
+                        //lastCreatedOrderId.setValue(null);
                     });
         }
     }
