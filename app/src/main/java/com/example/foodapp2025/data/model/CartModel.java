@@ -9,15 +9,24 @@ public class CartModel {
     private String name;
     private Double price;
     private Long quantity;
+    private String note;
     private static final double TAX_RATE = 0.1; // 10 % tax
     private static final Integer DELIVERY_FEE = 5; // Fixed delivery fee
     private static final ArrayList<String> VOUCHER_CODE = new ArrayList<>(Arrays.asList("FREE2SHIP", "10DEAL"));
 
+    public CartModel(){}
     public CartModel(String imageUrl, String name, Double price, Long quantity) {
         this.imageUrl = imageUrl;
         this.name = name;
         this.price = price;
         this.quantity = quantity;
+    }
+    public CartModel(String imageUrl, String name, Double price, Long quantity, String note) {
+        this.imageUrl = imageUrl;
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.note = note;
     }
 
     public String getName() {
@@ -63,5 +72,8 @@ public class CartModel {
     public double getTotal() {
         return getSubtotal() + getTaxAmount() + getDeliveryFee();
     }
+
+    // get note for each cart item
+    public String getNote() { return note; }
 
 }
