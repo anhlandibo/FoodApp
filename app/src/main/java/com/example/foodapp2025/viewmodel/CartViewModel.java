@@ -39,11 +39,13 @@ public class CartViewModel extends ViewModel {
     private final MutableLiveData<Boolean> cartCleared = new MutableLiveData<>(false);
     private final MutableLiveData<String> lastCreatedOrderId = new MutableLiveData<>(null);
     private final MutableLiveData<Double> discountAmount = new MutableLiveData<>(0.0); // Already a double
-
+    private final MutableLiveData<String> userAddress = new MutableLiveData<>(null);
     public LiveData<Double> getDiscountAmount() {
         return discountAmount;
     }
-
+    public LiveData<String> getUserAddress() {
+        return userAddress;
+    }
 
     public LiveData<String> getLastCreatedOrderId() {
         return lastCreatedOrderId;
@@ -91,7 +93,7 @@ public class CartViewModel extends ViewModel {
     }
 
     public CartViewModel() {
-        loadCartFromFirestore();
+        loadCartFromFirestore(); loadUserAddressFromFirestore();
     }
 
     public void resetLastCreatedOrderId() {
@@ -105,7 +107,30 @@ public class CartViewModel extends ViewModel {
     public void resetCartClearedStatus() {
         cartCleared.setValue(false);
     }
+    public void loadUserAddressFromFirestore() {
+        if (userId == null) {
+            Log.e(TAG, "Cannot load user address: userId is null.");
+            return;
+        }
 
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String address = documentSnapshot.getString("address");
+                        userAddress.setValue(address);
+                        Log.d(TAG, "User address loaded: " + address);
+                    } else {
+                        Log.d(TAG, "User document does not exist for ID: " + userId);
+                        userAddress.setValue(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading user address from Firestore.", e);
+                    userAddress.setValue(null);
+                });
+    }
     /**
      * Adds an item to the cart. If an item with the same name AND note already exists,
      * its quantity is updated. Otherwise, a new item is added.
@@ -480,6 +505,12 @@ public class CartViewModel extends ViewModel {
         order.put("total", total.getValue());
         order.put("discountAmount", discountAmount.getValue());
         order.put("timestamp", System.currentTimeMillis());
+        String deliveryAddress = userAddress.getValue();
+        if (deliveryAddress != null && !deliveryAddress.isEmpty()) {
+            order.put("deliveryAddress", deliveryAddress);
+        } else {
+            Log.w(TAG, "User address is null or empty when placing order.");
+        }
 
         // **THÊM GHI CHÚ ĐƠN HÀNG VÀO ĐÂY**
         if (orderNote != null && !orderNote.trim().isEmpty()) {
