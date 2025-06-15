@@ -16,6 +16,16 @@ public class FoodModel implements Serializable {
     private Double star;
 
     private boolean isPopular;
+    private boolean isDeleted;
+
+    public boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
     @PropertyName("isPopular")
 
     public boolean getIsPopular() {
