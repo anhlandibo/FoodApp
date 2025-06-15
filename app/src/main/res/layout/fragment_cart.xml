@@ -39,7 +39,7 @@
                 android:id="@+id/notesLabelTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ghi chú đơn hàng:"
+                android:text="Order's optional preference"
                 android:layout_marginTop="16dp"
                 android:textSize="16sp"
                 android:textStyle="bold"/>
