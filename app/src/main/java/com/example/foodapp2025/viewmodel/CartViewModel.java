@@ -585,7 +585,7 @@ public class CartViewModel extends ViewModel {
                         String newOrderId = ref.getId();
                         Log.d(TAG, "Order placed successfully with ID: " + newOrderId + " for card payment.");
                         // For this path, we set lastCreatedOrderId so UI can redirect to payment gateway
-                        //lastCreatedOrderId.setValue(newOrderId);
+                        lastCreatedOrderId.setValue(newOrderId);
                         // Do NOT clear cart here yet, wait for payment confirmation from gateway
                     })
                     .addOnFailureListener(e -> {
