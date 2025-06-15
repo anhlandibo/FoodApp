@@ -237,10 +237,12 @@
     </ScrollView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottom_cart_bar"  android:layout_width="0dp"
+        android:id="@+id/bottom_cart_bar"
+        android:layout_width="0dp"
         android:layout_height="75dp"
         android:background="@color/lightGrey"
-        app:layout_constraintBottom_toBottomOf="parent"  app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatButton
