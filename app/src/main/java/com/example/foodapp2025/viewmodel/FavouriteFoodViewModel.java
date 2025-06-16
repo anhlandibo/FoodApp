@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration; // <-- THÊM IMPORT NÀY
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -30,13 +31,14 @@ public class FavouriteFoodViewModel extends ViewModel {
     public final LiveData<List<FoodModel>> favFoodListFiltered = _favFoodListFiltered; // Expose LiveData
 
     private final MutableLiveData<Boolean> _isLoading = new MutableLiveData<>(false); // LiveData cho trạng thái loading
-    public final LiveData<Boolean> isLoading = _isLoading; // Expose LiveData
+    public final LiveData<Boolean> isLoading = _isLoading;
 
-    private DocumentSnapshot lastDocument = null; // Dùng cho pagination
     public boolean isLastPage = false;
     public String currentSearchQuery = "";
     private final MutableLiveData<Boolean> _isUserLoggedIn = new MutableLiveData<>(false);
     public final LiveData<Boolean> isUserLoggedIn = _isUserLoggedIn;
+
+    private ListenerRegistration favFoodsListenerRegistration;
 
     // Constructor
     public FavouriteFoodViewModel() {
@@ -49,31 +51,36 @@ public class FavouriteFoodViewModel extends ViewModel {
         if (Boolean.TRUE.equals(_isUserLoggedIn.getValue()) != isLoggedIn) {
             _isUserLoggedIn.setValue(isLoggedIn);
             if (!isLoggedIn) {
-                // Nếu user đăng xuất, xóa dữ liệu và reset trạng thái pagination/search
+                // Nếu user đăng xuất, xóa dữ liệu và reset trạng thái
                 favFoodListAllLoaded.clear();
                 filterList(""); // Clear filter và cập nhật LiveData
-                lastDocument = null;
+                // lastDocument = null; // Không cần nữa
                 isLastPage = false;
                 currentSearchQuery = "";
                 _isLoading.setValue(false); // Dừng loading
+                detachFavouriteFoodsListener();
             } else {
-                // Nếu user đăng nhập (hoặc đã đăng nhập), bắt đầu tải trang đầu tiên nếu chưa có dữ liệu
-                if (favFoodListAllLoaded.isEmpty() && !_isLoading.getValue()) {
-                    loadFavouriteFoodPage();
+                // Nếu user đăng nhập (hoặc đã đăng nhập), bắt đầu lắng nghe dữ liệu nếu chưa có listener
+                if (favFoodsListenerRegistration == null && !_isLoading.getValue()) {
+                    attachFavouriteFoodsListener();
                 }
             }
         }
     }
-    // Hàm tải trang dữ liệu yêu thích từ Firestore
-    public void loadFavouriteFoodPage(){
+
+    private void attachFavouriteFoodsListener() {
         if (!Boolean.TRUE.equals(_isUserLoggedIn.getValue())) {
-            // Không tải nếu user chưa đăng nhập
+            Log.d(TAG, "Not attaching listener: user not logged in.");
+            return;
+        }
+        if (mAuth.getCurrentUser() == null) {
+            Log.d(TAG, "Not attaching listener: current user is null.");
             return;
         }
 
-        if (_isLoading.getValue() == Boolean.TRUE || isLastPage) {
-            // Không tải nếu đang loading hoặc đã hết trang
-            return;
+        if (favFoodsListenerRegistration != null) {
+            favFoodsListenerRegistration.remove(); // Gỡ bỏ listener cũ nếu tồn tại
+            Log.d(TAG, "Existing listener removed.");
         }
 
         _isLoading.setValue(true); // Bật trạng thái loading
@@ -83,60 +90,55 @@ public class FavouriteFoodViewModel extends ViewModel {
                 .document(userId)
                 .collection("favourites");
 
-        Query query = ref.orderBy("name") // Đảm bảo dùng orderBy để pagination hoạt động
-                .limit(PAGE_SIZE);
-
-        if (lastDocument != null) {
-            query = query.startAfter(lastDocument);
-        }
-
-        query.get() // Lấy dữ liệu một lần
-                .addOnCompleteListener(task -> {
+        favFoodsListenerRegistration = ref.orderBy("name") // Đảm bảo dùng orderBy để có thứ tự ổn định
+                .addSnapshotListener((snapshots, e) -> {
                     _isLoading.setValue(false); // Tắt trạng thái loading
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed.", e);
+                        // TODO: Cập nhật LiveData trạng thái lỗi nếu cần
+                        return;
+                    }
 
-                    if (task.isSuccessful()) {
-                        List<FoodModel> newItems = new ArrayList<>();
-                        DocumentSnapshot lastDoc = null;
-
-                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                    if (snapshots != null) {
+                        Log.d(TAG, "Favorite foods snapshot received. Changes: " + snapshots.getDocumentChanges().size());
+                        favFoodListAllLoaded.clear();
+                        for (DocumentSnapshot doc : snapshots) {
                             FoodModel food = doc.toObject(FoodModel.class);
                             if (food != null) {
-                                // Gán Document ID vào FoodModel nếu cần cho các thao tác sau này (xóa)
-                                // food.setId(doc.getId()); // Cần setter trong FoodModel
-                                newItems.add(food);
-                                lastDoc = doc;
+                                food.setId(doc.getId());
+                                favFoodListAllLoaded.add(food);
                             } else {
                                 Log.w(TAG, "Failed to parse FoodModel for doc: " + doc.getId());
                             }
                         }
+                        isLastPage = true;
 
-                        if (!newItems.isEmpty()) {
-                            favFoodListAllLoaded.addAll(newItems); // Thêm vào danh sách tổng
-                            lastDocument = lastDoc; // Cập nhật last document
-                            if (newItems.size() < PAGE_SIZE) {
-                                isLastPage = true;
-                            }
-                        } else {
-                            isLastPage = true; // Không có item mới -> hết trang
-                        }
-
-                        // Áp dụng lại bộ lọc/tìm kiếm trên danh sách tổng đã cập nhật
                         filterList(currentSearchQuery);
-
-                    } else {
-                        Log.e(TAG, "Error fetching favourite foods: ", task.getException());
-                        // TODO: Cập nhật LiveData trạng thái lỗi nếu cần
                     }
                 });
+        Log.d(TAG, "Favorite foods listener attached.");
     }
-    // Hàm lọc danh sách đã tải theo search query
+
+    private void detachFavouriteFoodsListener() {
+        if (favFoodsListenerRegistration != null) {
+            favFoodsListenerRegistration.remove();
+            favFoodsListenerRegistration = null;
+            Log.d(TAG, "Favorite foods listener detached.");
+        }
+    }
+
+
+    public void loadFavouriteFoodPage(){
+        Log.w(TAG, "loadFavouriteFoodPage() called. This method is likely redundant when using real-time listener for the entire collection.");
+    }
+
     private void filterList(String query) {
-        currentSearchQuery = query; // Cập nhật query hiện tại
+        currentSearchQuery = query;
         List<FoodModel> filteredList = new ArrayList<>();
         String lowerCaseQuery = query.toLowerCase(Locale.getDefault()).trim();
 
         if (lowerCaseQuery.isEmpty()) {
-            filteredList.addAll(favFoodListAllLoaded); // Nếu rỗng thì dùng toàn bộ danh sách đã load
+            filteredList.addAll(favFoodListAllLoaded);
         } else {
             for (FoodModel food : favFoodListAllLoaded) {
                 if (food.getName() != null && food.getName().toLowerCase(Locale.getDefault()).contains(lowerCaseQuery)) {
@@ -144,24 +146,27 @@ public class FavouriteFoodViewModel extends ViewModel {
                 }
             }
         }
-        _favFoodListFiltered.setValue(filteredList); // Cập nhật LiveData danh sách đã lọc
+        _favFoodListFiltered.setValue(filteredList);
     }
 
-    // Phương thức để Fragment gọi khi search text thay đổi
     public void setSearchQuery(String query) {
         filterList(query);
     }
+
     public void loadMore() {
-        loadFavouriteFoodPage();
+        Log.d(TAG, "loadMore() called. With real-time listener for all, this might not be needed.");
     }
+
     private FirebaseAuth.AuthStateListener authStateListener = firebaseAuth -> {
-        checkLoginStatus(); // Gọi lại kiểm tra khi trạng thái auth thay đổi
+        checkLoginStatus();
     };
 
     @Override
     protected void onCleared() {
         super.onCleared();
         mAuth.removeAuthStateListener(authStateListener);
+        detachFavouriteFoodsListener();
+        Log.d(TAG, "FavouriteFoodViewModel onCleared. Listener detached.");
     }
     { // Initializer block
         mAuth.addAuthStateListener(authStateListener);

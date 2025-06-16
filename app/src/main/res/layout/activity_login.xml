@@ -168,21 +168,6 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/facebookBtn"
-                    style="@android:style/Widget.Button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:background="@drawable/facebook_bg"
-                    android:drawableStart="@drawable/facebook"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:text="Continue with Facebook"
-                    android:textColor="@color/black"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
                 <ProgressBar
                     android:id="@+id/progressBar"
                     style="?android:attr/progressBarStyle"
