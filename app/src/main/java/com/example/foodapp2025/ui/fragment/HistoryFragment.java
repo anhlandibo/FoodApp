@@ -158,6 +158,7 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
     public void onReportSubmitted(OrderModel orderModel, View itemView) {
         if (orderViewModel != null && getContext() != null){
             Toast.makeText(getContext(), "Reporting order...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please initiate a chat with us so we can confirm the issue and compensate fairly.", Toast.LENGTH_SHORT).show();
             orderViewModel.reportOrder(orderModel, itemView);
         }
         else{
