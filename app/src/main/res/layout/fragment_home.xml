@@ -78,6 +78,7 @@
                     android:drawableStart="@drawable/search"
                     android:drawablePadding="8dp"
                     android:ems="10"
+                    android:imeOptions="actionSearch"
                     android:hint="What would you like to eat?"
                     android:inputType="text"
                     android:paddingHorizontal="8dp"

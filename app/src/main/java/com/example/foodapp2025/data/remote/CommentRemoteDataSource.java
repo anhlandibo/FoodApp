@@ -1,9 +1,11 @@
 // CommentRemoteDataSource.java
 package com.example.foodapp2025.data.remote;
 
+import androidx.annotation.OptIn;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+import androidx.media3.common.util.UnstableApi;
 
 import com.example.foodapp2025.data.model.CommentModel;
 import com.google.android.gms.tasks.Task;
@@ -110,6 +112,7 @@ public class CommentRemoteDataSource {
                 .document(userId);
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     public LiveData<Float> getAverageRatingLiveData(String foodId) {
         MutableLiveData<List<CommentModel>> commentsInternalLiveData = new MutableLiveData<>();
 

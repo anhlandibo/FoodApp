@@ -31,8 +31,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:numStars="5"
+                android:progressTint="@android:color/holo_orange_light"
                 style="@style/Widget.AppCompat.RatingBar.Indicator"
-                android:stepSize="1.0"
+                android:stepSize="1"
                 android:isIndicator="true" />
 
             <TextView

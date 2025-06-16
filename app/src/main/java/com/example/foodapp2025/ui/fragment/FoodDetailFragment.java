@@ -8,6 +8,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
@@ -196,6 +198,17 @@ public class FoodDetailFragment extends Fragment {
                             binding.favBtn.setEnabled(true);
                         });
             }
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomCartBar, (v, insets) -> {
+            int navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom;
+
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+
+            params.bottomMargin = navigationBarHeight;
+            v.setLayoutParams(params);
+
+            return insets;
         });
     }
 

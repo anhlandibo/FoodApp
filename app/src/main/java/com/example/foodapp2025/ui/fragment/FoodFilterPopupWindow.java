@@ -18,10 +18,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.CategoryModel;
+import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.viewmodel.CategoryViewModel;
 import com.example.foodapp2025.viewmodel.FoodViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FoodFilterPopupWindow extends PopupWindow {
     private View contentView;
@@ -68,8 +70,8 @@ public class FoodFilterPopupWindow extends PopupWindow {
                 spinnerCategory.setAdapter(categoryAdapter);
             }
         });
-
         // Lấy giá trị minPrice và maxPrice từ ViewModel
+        FoodModel test = foodViewModel.getMinPriceFood().getValue();
         foodViewModel.getMinPriceFood().observe((LifecycleOwner) contentView.getContext(), minPrice -> {
             seekMinPrice.setProgress(Math.toIntExact(Math.round(minPrice.getPrice())));
         });

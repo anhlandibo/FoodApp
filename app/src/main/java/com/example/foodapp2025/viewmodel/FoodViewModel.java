@@ -30,8 +30,4 @@ public class FoodViewModel extends ViewModel {
     public LiveData<FoodModel> getMaxPriceFood(){
         return foodRepository.getMaxPriceFood();
     }
-
-    public void filterFood(String selectedCategory, int minPrice, boolean isPopularOnly) {
-
-    }
 }
