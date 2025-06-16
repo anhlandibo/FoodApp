@@ -14,6 +14,7 @@ import com.example.foodapp2025.utils.discount.Discount;
 import com.example.foodapp2025.utils.discount.DiscountRegistry;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
@@ -254,7 +255,8 @@ public class CartViewModel extends ViewModel {
         boolean valid = v.isActive()
                 && (v.getStartDate() == null || !now.before(v.getStartDate()))
                 && (v.getExpiryDate() == null || !now.after(v.getExpiryDate()))
-                && curSub >= v.getMinOrderValue();
+                && curSub >= v.getMinOrderValue()
+                && v.getUsedCount() < v.getUsageLimit();
         Log.d("CartVM", "isVoucherValid=" + valid
                 + " subtotal=" + curSub + " minOrder=" + v.getMinOrderValue());
         return valid;
@@ -609,6 +611,21 @@ public class CartViewModel extends ViewModel {
             appliedVoucher.setValue(vm.getCode());
             voucher.setValue(vm);
             voucherError.setValue(null);
+            db.collection("vouchers")
+                    .whereEqualTo("code", vm.getCode())
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        if (!querySnapshot.isEmpty()) {
+                            String voucherDocId = querySnapshot.getDocuments().get(0).getId();
+                            db.collection("vouchers").document(voucherDocId)
+                                    .update("usedCount", FieldValue.increment(1))
+                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Voucher usedCount incremented successfully via applyVoucherObject."))
+                                    .addOnFailureListener(e -> Log.e(TAG, "Error incrementing voucher usedCount via applyVoucherObject", e));
+                        } else {
+                            Log.e(TAG, "Voucher document not found for code: " + vm.getCode() + " during usedCount increment.");
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.e(TAG, "Error querying for voucher document to increment usedCount.", e));
         }
 
         recalculatePrices();

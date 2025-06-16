@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.play.services.cast.tv)
     implementation(libs.firebase.config)
     implementation(libs.media3.common)
+    implementation(libs.recyclerview)
 
     // Testing
     testImplementation(libs.junit)

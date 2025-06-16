@@ -45,9 +45,14 @@
         tools:targetApi="31"
         android:windowSoftInputMode="adjustResize">
         <activity
+            android:name=".ui.activity.MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            />
+        <activity
             android:name=".ui.activity.PaymentActivity"
-            android:exported="false" />
-
+            android:exported="false"
+            />
         <activity
             android:name=".ui.activity.CommentActivity"
             android:exported="false" />
@@ -77,9 +82,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.VoucherSelectionActivity" />
-        <activity
-            android:name=".ui.activity.MainActivity"
-            android:exported="true" />
 
         <service
             android:name=".data.remote.FirebaseMessagingService"
