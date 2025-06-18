@@ -299,8 +299,9 @@ public class CartViewModel extends ViewModel {
                             voucher.setValue(vm);
                             voucherError.setValue(null);
 
-                            // Increment usedCount in Firestore (this still counts total uses across all users)
-                            // We will mark user-specific usage on order placement.
+                            // ***** REMOVED BLOCK START *****
+                            // This logic is now moved to placeOrder
+                            /*
                             db.collection("vouchers")
                                     .whereEqualTo("code", vm.getCode())
                                     .get()
@@ -316,6 +317,8 @@ public class CartViewModel extends ViewModel {
                                         }
                                     })
                                     .addOnFailureListener(e -> Log.e(TAG, "Error querying for voucher document to increment usedCount.", e));
+                            */
+                            // ***** REMOVED BLOCK END *****
                         }
                         recalculatePrices();
                     }
@@ -336,7 +339,7 @@ public class CartViewModel extends ViewModel {
                 && (v.getStartDate() == null || !now.before(v.getStartDate()))
                 && (v.getExpiryDate() == null || !now.after(v.getExpiryDate()))
                 && curSub >= v.getMinOrderValue()
-                && v.getUsedCount() < v.getUsageLimit();
+                && v.getUsedCount() < v.getUsageLimit(); // Keep this check for initial application validity
         Log.d(TAG, "isVoucherValid=" + valid
                 + " subtotal=" + curSub + " minOrder=" + v.getMinOrderValue()
                 + " usedCount=" + v.getUsedCount() + " usageLimit=" + v.getUsageLimit());
@@ -550,8 +553,28 @@ public class CartViewModel extends ViewModel {
             voucherDetails.put("type", currentVoucher.getDiscountType());
             voucherDetails.put("value", currentVoucher.getDiscountValue());
             order.put("appliedVoucherDetails", voucherDetails);
-            // NEW: Call markVoucherAsUsedByUser here
+            // Mark the voucher as used by the current user when the order is successfully placed.
             markVoucherAsUsedByUser(currentVoucher.getCode());
+
+            // ***** ADDED BLOCK START *****
+            // Increment usedCount in the main 'vouchers' collection ONLY when the order is placed.
+            String voucherCodeToIncrement = currentVoucher.getCode();
+            db.collection("vouchers")
+                    .whereEqualTo("code", voucherCodeToIncrement)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        if (!querySnapshot.isEmpty()) {
+                            String voucherDocId = querySnapshot.getDocuments().get(0).getId();
+                            db.collection("vouchers").document(voucherDocId)
+                                    .update("usedCount", FieldValue.increment(1))
+                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Voucher usedCount incremented successfully for code: " + voucherCodeToIncrement))
+                                    .addOnFailureListener(e -> Log.e(TAG, "Error incrementing voucher usedCount for code: " + voucherCodeToIncrement, e));
+                        } else {
+                            Log.e(TAG, "Voucher document not found for code: " + voucherCodeToIncrement + " during usedCount increment in placeOrder.");
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.e(TAG, "Error querying for voucher document to increment usedCount in placeOrder.", e));
+            // ***** ADDED BLOCK END *****
         }
 
         String status;
