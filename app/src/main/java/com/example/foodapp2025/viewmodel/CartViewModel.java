@@ -285,7 +285,7 @@ public class CartViewModel extends ViewModel {
                             voucher.setValue(null);
                         } else if (currentSubtotalValue < vm.getMinOrderValue()) {
                             Log.d(TAG, "Voucher minOrderValue not met. Current subtotal: " + currentSubtotalValue + ", Required: " + vm.getMinOrderValue());
-                            voucherError.setValue("Order total does not meet the minimum required for this voucher (Min: " + String.format("%,.0f$", vm.getMinOrderValue()) + ")");
+                            voucherError.setValue("Order total does not meet the minimum required for this voucher (Min: " + String.format("%,.2f$", vm.getMinOrderValue()) + ")");
                             appliedVoucher.setValue(null);
                             voucher.setValue(null);
                         } else if (vm.getUsedCount() >= vm.getUsageLimit()) {
@@ -423,8 +423,8 @@ public class CartViewModel extends ViewModel {
                         String url = doc.getString("imageUrl");
                         Double price = doc.getDouble("price");
                         if (price == null) {
-                            Long priceLong = doc.getLong("price");
-                            price = priceLong != null ? priceLong.doubleValue() : 0.0;
+                            double priceDouble = doc.getDouble("price");
+                            price = priceDouble != 0.0 ? priceDouble : 0.0;
                         }
                         Long qty = doc.getLong("quantity");
                         String note = doc.getString("note");

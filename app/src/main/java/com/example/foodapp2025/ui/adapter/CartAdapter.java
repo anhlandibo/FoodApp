@@ -80,9 +80,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         public void bind(CartModel cartItem) {
             binding.productNameTextView.setText(cartItem.getName());
             // Đảm bảo hiển thị giá dưới dạng double (nếu price là Double)
-            binding.priceTextView.setText(String.format("%,.0f $", cartItem.getPrice()));
+            binding.priceTextView.setText(String.format("%,.2f $", cartItem.getPrice()));
             binding.quantityTextView.setText(String.valueOf(cartItem.getQuantity()));
-            binding.itemTotalTextView.setText(String.format("%,.0f $", (cartItem.getPrice() * cartItem.getQuantity())));
+            binding.itemTotalTextView.setText(String.format("%,.2f $", (cartItem.getPrice() * cartItem.getQuantity())));
 
             Glide.with(binding.getRoot().getContext())
                     .load(cartItem.getImageUrl())
