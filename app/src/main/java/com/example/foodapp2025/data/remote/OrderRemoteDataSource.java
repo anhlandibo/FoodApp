@@ -10,6 +10,7 @@ import com.example.foodapp2025.data.model.OrderModel;
 import com.example.foodapp2025.data.model.UserModel;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.*;
 
 import java.util.ArrayList;
@@ -53,41 +54,59 @@ public class OrderRemoteDataSource {
         return listMutableLiveData;
     }
 
-
     /**
-     * Loads the current shipper's assigned orders/shipments from the 'shipments' subcollection
-     * under their user document in Firestore.
+     * Loads the current shipper's assigned orders/shipments from the 'orders' collection
+     * by first finding the shipper's document ID in 'users' collection using their email,
+     * then matching orders where shipperId equals that document ID.
      *
      * @return LiveData containing an ArrayList of OrderModel for the current shipper.
      */
     public LiveData<ArrayList<OrderModel>> getCurrentShippersOrders() {
         MutableLiveData<ArrayList<OrderModel>> listMutableLiveData = new MutableLiveData<>();
 
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null
-                ? FirebaseAuth.getInstance().getCurrentUser().getUid()
-                : null;
-        orderCollection.whereEqualTo("shipperId", currentUserId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        ArrayList<OrderModel> orderModelArrayList = new ArrayList<>();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null || currentUser.getEmail() == null) {
+            listMutableLiveData.setValue(new ArrayList<>());
+            return listMutableLiveData;
+        }
 
-                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            OrderModel orderModel = queryDocumentSnapshot.toObject(OrderModel.class);
-                            orderModel.setId(queryDocumentSnapshot.getId());
-                            orderModelArrayList.add(orderModel);
-                        }
-                        listMutableLiveData.setValue(orderModelArrayList);
+        String currentUserEmail = currentUser.getEmail();
+
+        // First, find the shipper's document ID in 'users' collection using email
+        FirebaseFirestore.getInstance().collection("users")
+                .whereEqualTo("email", currentUserEmail)
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful() && userTask.getResult() != null && !userTask.getResult().isEmpty()) {
+                        // Get the document ID of the shipper in the 'users' collection
+                        String shipperDocId = userTask.getResult().getDocuments().get(0).getId();
+
+                        // Now query orders using the shipper's document ID
+                        orderCollection.whereEqualTo("shipperId", shipperDocId)
+                                .orderBy("timestamp", Query.Direction.DESCENDING)
+                                .get().addOnCompleteListener(task -> {
+                                    if (task.isSuccessful() && task.getResult() != null) {
+                                        ArrayList<OrderModel> orderModelArrayList = new ArrayList<>();
+
+                                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                                            OrderModel orderModel = queryDocumentSnapshot.toObject(OrderModel.class);
+                                            orderModel.setId(queryDocumentSnapshot.getId());
+                                            orderModelArrayList.add(orderModel);
+                                        }
+                                        listMutableLiveData.setValue(orderModelArrayList);
+                                    } else {
+                                        listMutableLiveData.setValue(new ArrayList<>());
+                                        Log.e("FirestoreError", "Error getting orders: ", task.getException());
+                                    }
+                                });
                     } else {
                         listMutableLiveData.setValue(new ArrayList<>());
-
-                        Log.e("FirestoreError", "Error getting documents: ", task.getException());
-
+                        Log.e("FirestoreError", "Error finding shipper document by email: ", userTask.getException());
                     }
                 });
+
         return listMutableLiveData;
     }
-
     public Task<Void> updateOrderAndPaymentStatus(String orderId, String status, String paymentStatus){
         Log.d("OrderRemoteDataSource", "Attempting to update order ID: " + orderId + " to orderStatus: " + status + " and paymentStatus: " + paymentStatus);
         Map<String, Object> updates = new HashMap<>();
