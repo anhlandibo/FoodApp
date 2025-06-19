@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,15 +42,39 @@ public class OrderViewModel extends ViewModel {
         orderRepository.reportOrder(orderModel)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("OrderReport", "Report submitted successfully");
-                    // Update UI - hide report link, show "reported" text
+                    // Update UI - hide report link, set text and show "reported" text
                     TextView reportLink = itemView.findViewById(R.id.btn_report_order);
-                    TextView reportedText = itemView.findViewById(R.id.txt_order_reported);
+                    TextView orderStatusInfo = itemView.findViewById(R.id.txt_order_status_info); // Using the consolidated TextView
 
-                    reportLink.setVisibility(View.GONE);
-                    reportedText.setVisibility(View.VISIBLE);
+                    orderModel.setReportStatus(1); // Set to a non-zero value indicating reported
+
+                    if (reportLink != null) reportLink.setVisibility(View.GONE);
+                    if (orderStatusInfo != null) {
+                        orderStatusInfo.setText("order reported"); // <-- THÊM DÒNG NÀY
+                        orderStatusInfo.setVisibility(View.VISIBLE);
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Log.e("OrderReport", "Error submitting report", e);
+                });
+    }
+
+    public void retrieveOrder(OrderModel orderModel, View itemView) {
+        orderRepository.retrieveOrder(orderModel)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("OrderRetrieve", "Order retrieved successfully");
+                    TextView retrieveButton = itemView.findViewById(R.id.btn_retrieve_order);
+                    TextView orderStatusInfo = itemView.findViewById(R.id.txt_order_status_info); // Using the consolidated TextView
+
+                    if (retrieveButton != null) retrieveButton.setVisibility(View.GONE);
+                    if (orderStatusInfo != null) {
+                        orderStatusInfo.setText("retrieved");
+                        orderStatusInfo.setVisibility(View.VISIBLE);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("OrderRetrieve", "Error retrieving order", e);
+                    Toast.makeText(itemView.getContext(), "Error retrieving order: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

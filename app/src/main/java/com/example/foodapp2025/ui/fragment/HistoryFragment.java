@@ -116,6 +116,7 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         tabs.addTab(tabs.newTab().setText("All"));
         tabs.addTab(tabs.newTab().setText("Processing"));
         tabs.addTab(tabs.newTab().setText("Delivered"));
+        tabs.addTab(tabs.newTab().setText("Retrieved"));
 
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -129,6 +130,9 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
                     case 2: // Delivered
                         filtered = filterByStatus(allOrders, "completed");
 //                        filtered.addAll(filterByStatus(allOrders, "delivered"));
+                        break;
+                    case 3:
+                        filtered = filterByStatus(allOrders, "retrieved");
                         break;
                     default: // 0: All
                         filtered = allOrders;
@@ -164,5 +168,25 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
         else{
             Log.e("HistoryFragment", "ViewModel or Context is null, cannot report order.");
         }
+    }
+
+    @Override
+    public void onOrderRetrieveRequested(OrderModel orderModel, View itemView) {
+        if (orderViewModel != null && getContext() != null){
+            Toast.makeText(getContext(), "Retrieving order...", Toast.LENGTH_SHORT).show();
+            Log.d("HistoryFragment", "Before setting status: Order ID: " + orderModel.getId() + ", Status: " + orderModel.getStatus());
+            orderModel.setStatus("retrieved");
+            Log.d("HistoryFragment", "After setting status: Order ID: " + orderModel.getId() + ", Status: " + orderModel.getStatus());
+            orderViewModel.retrieveOrder(orderModel, itemView);
+            Toast.makeText(getContext(), "Order status updated to retrieved.", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Log.e("HistoryFragment", "ViewModel or Context is null, cannot retrieve order.");
+        }
+    }
+
+    @Override
+    public void onItemClicked(OrderModel orderModel) {
+
     }
 }

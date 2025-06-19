@@ -22,6 +22,7 @@ public class OrderModel implements Serializable {
     private int discountAmount;
 
     private int reportStatus; // 0 by default for not reported yet, 1 for not receiving, 2 for quality issue, 3 for wrong food, -1 for handled (meaning they can't report anymore)
+    private int retrieveStatus; // 0 by default for not retrieve, 1 is for retrieve
 
     private String reportAdditionalInfo;
 
@@ -179,6 +180,12 @@ public class OrderModel implements Serializable {
     }
     public int getReportStatus() {
         return reportStatus;
+    }
+    public void setRetrieveStatus(int retrieveStatus) {
+        this.retrieveStatus = retrieveStatus;
+    }
+    public int getRetrieveStatus() {
+        return retrieveStatus;
     }
     public void setReportAdditionalInfo(String reportAdditionalInfo) {
         this.reportAdditionalInfo = reportAdditionalInfo;

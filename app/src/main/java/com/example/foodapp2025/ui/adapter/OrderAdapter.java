@@ -24,13 +24,18 @@ import com.example.foodapp2025.data.model.OrderModel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Date; // Make sure to import java.util.Date if OrderModel.getOrderedDate() returns Date
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
     private ArrayList<OrderModel> orderModels = new ArrayList<>();
+    private OnOrderActionListener listener; // Declare listener here
+
     public OrderAdapter(){}
+
     public OrderAdapter(ArrayList<OrderModel> orderModels){
         this.orderModels = orderModels;
     }
+
     @SuppressLint("NotifyDataSetChanged")
     public void setOrderList(ArrayList<OrderModel> orderModels) {
         this.orderModels = orderModels;
@@ -50,39 +55,76 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         OrderModel orderModel = orderModels.get(position);
         holder.orderId.setText(orderModel.getId());
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        holder.orderTime.setText(sdf.format(orderModel.getOrderedDate()));
+        // Handle potential null date
+        if (orderModel.getOrderedDate() != null) {
+            holder.orderTime.setText(sdf.format(orderModel.getOrderedDate()));
+        } else {
+            holder.orderTime.setText("N/A"); // Default text if date is null
+        }
         holder.orderStatus.setText(String.valueOf(orderModel.getStatus()));
 
+        // --- DECLARE AND INITIALIZE VIEWS ---
+        TextView btnRetrieve = holder.buttonRetrieveOrder;
         TextView btnReport = holder.buttonReportOrder;
-        TextView txtOrderReported = holder.txtOrderReported;
-        if ("completed".equals(orderModel.getStatus()) && orderModel.getReportStatus() == 0){
-            Log.d("OrderAdapter", "Status is 'completed'. Checking if button is null for ID: " + orderModel.getId() + " -> " + (btnReport == null)); // Kiểm tra lại null lần cuối trước khi dùng
-            if (btnReport != null){
-                Log.d("OrderAdapter", "Status is 'completed'. About to set button VISIBLE for ID: " + orderModel.getId()); // <<< Log NGAY TRƯỚC setVisibility
-                btnReport.setVisibility(View.VISIBLE);
-                txtOrderReported.setVisibility(View.GONE);
-                Log.d("OrderAdapter", "Called setVisibility(VISIBLE) for ID: " + orderModel.getId()); // <<< Log NGAY SAU setVisibility
-                btnReport.setOnClickListener(v -> {
-                    showReportDialog(holder.itemView, orderModel); // Pass the full orderModel instead of just ID
-                });
-            }
-            else {
-                Log.e("OrderAdapter", "Confirm button is NULL despite successful find in ViewHolder for ID: " + orderModel.getId());
+        TextView txtOrderStatusInfo = holder.txtOrderStatusInfo; // Use the consolidated TextView
+
+        // 1. Initialize all relevant views in the FrameLayout to GONE and clear listeners
+        if (btnReport != null) {
+            btnReport.setVisibility(View.GONE);
+            btnReport.setOnClickListener(null); // Clear click listener
+            btnReport.setPaintFlags(btnReport.getPaintFlags() & (~Paint.UNDERLINE_TEXT_FLAG)); // Remove underline
+        }
+        if (btnRetrieve != null) {
+            btnRetrieve.setVisibility(View.GONE);
+            btnRetrieve.setOnClickListener(null); // Clear click listener
+            btnRetrieve.setPaintFlags(btnRetrieve.getPaintFlags() & (~Paint.UNDERLINE_TEXT_FLAG)); // Remove underline
+        }
+        if (txtOrderStatusInfo != null) {
+            txtOrderStatusInfo.setVisibility(View.GONE);
+            txtOrderStatusInfo.setText(""); // Clear text content
+        }
+
+        // --- Apply visibility logic for the FrameLayout contents ---
+        // Prioritize showing 'retrieved' status text if order has been retrieved
+        if (orderModel.getRetrieveStatus() == 1) { // Assuming getRetrieveStatus() exists in OrderModel
+            if (txtOrderStatusInfo != null) {
+                txtOrderStatusInfo.setText("retrieved");
+                txtOrderStatusInfo.setVisibility(View.VISIBLE);
             }
         }
-        else{
-            if (btnReport != null) {
-                btnReport.setVisibility(View.GONE);
-                btnReport.setOnClickListener(null);
+        // Else, if order has been reported (and not retrieved)
+        else if (orderModel.getReportStatus() != 0) { // Assuming getReportStatus() exists in OrderModel
+            if (txtOrderStatusInfo != null) {
+                txtOrderStatusInfo.setText("order reported");
+                txtOrderStatusInfo.setVisibility(View.VISIBLE);
             }
-            if (orderModel.getReportStatus() != 0) {
-                txtOrderReported.setVisibility(View.VISIBLE);
-            }
-            else {
-                txtOrderReported.setVisibility(View.GONE);
+        }
+        // Else (order is neither reported nor retrieved), show action buttons based on current status
+        else {
+            String currentStatus = orderModel.getStatus();
+            if ("completed".equals(currentStatus)) { // Show 'report' button for completed orders
+                if (btnReport != null) {
+                    btnReport.setVisibility(View.VISIBLE);
+                    btnReport.setPaintFlags(btnReport.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG); // Apply underline
+                    btnReport.setOnClickListener(v -> {
+                        showReportDialog(holder.itemView, orderModel);
+                    });
+                }
+            } else if ("pending".equals(currentStatus) || "cancelled".equals(currentStatus) || "returned".equals(currentStatus)) {
+                // Show 'retrieve' button for pending, cancelled, or returned orders
+                if (btnRetrieve != null) {
+                    btnRetrieve.setVisibility(View.VISIBLE);
+                    btnRetrieve.setPaintFlags(btnRetrieve.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG); // Apply underline
+                    btnRetrieve.setOnClickListener(v -> {
+                        if (listener != null) {
+                            listener.onOrderRetrieveRequested(orderModel, holder.itemView);
+                        }
+                    });
+                }
             }
         }
 
+        // --- Handle general item click ---
         holder.itemView.setOnClickListener(v -> {
             OrderModel selectedOrder = orderModels.get(position);
             NavController navController = Navigation.findNavController(v);
@@ -90,7 +132,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             bundle.putSerializable("order", selectedOrder); // assuming OrderModel implements Serializable
             navController.navigate(R.id.orderDetailFragment, bundle); // make sure this ID matches your nav_graph
         });
-
     }
 
     @Override
@@ -99,28 +140,35 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     }
 
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView orderId, orderStatus, orderTime, buttonReportOrder, txtOrderReported;
+        TextView orderId, orderStatus, orderTime;
+        TextView buttonReportOrder;
+        TextView buttonRetrieveOrder;
+        TextView txtOrderStatusInfo; // Consolidated TextView for status info
 
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
             orderId = itemView.findViewById(R.id.orderId);
             orderStatus = itemView.findViewById(R.id.orderStatus);
             orderTime = itemView.findViewById(R.id.orderTime);
+
             buttonReportOrder = itemView.findViewById(R.id.btn_report_order);
-            buttonReportOrder.setPaintFlags(buttonReportOrder.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            txtOrderReported = itemView.findViewById(R.id.txt_order_reported);
+            buttonRetrieveOrder = itemView.findViewById(R.id.btn_retrieve_order);
+            txtOrderStatusInfo = itemView.findViewById(R.id.txt_order_status_info); // Initialize the consolidated TextView
         }
     }
 
+    // --- Interface for actions ---
     public interface OnOrderActionListener {
-        void onReportSubmitted(OrderModel orderModel, View itemView); // Add View parameter
-
+        void onReportSubmitted(OrderModel orderModel, View itemView);
+        void onOrderRetrieveRequested(OrderModel orderModel, View itemView);
+        void onItemClicked(OrderModel orderModel);
     }
-    private OnOrderActionListener listener;
 
     public void setOnOrderActionListener(OnOrderActionListener listener){
         this.listener = listener;
     }
+
+    // --- Report Dialog Implementation (remains unchanged) ---
     private void showReportDialog(View view, OrderModel orderModel) {
         View dialogView = LayoutInflater.from(view.getContext()).inflate(R.layout.dialog_report_order, null);
 
@@ -129,43 +177,35 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
                 .setCancelable(true)
                 .create();
 
-        // Get references to dialog elements
         RadioGroup radioGroupIssues = dialogView.findViewById(R.id.radioGroupIssues);
         EditText editTextDetails = dialogView.findViewById(R.id.editTextDetails);
         Button btnCancel = dialogView.findViewById(R.id.btnCancel);
         Button btnSendReport = dialogView.findViewById(R.id.btnSendReport);
 
-        // Handle Cancel button
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        // Handle Send Report button
         btnSendReport.setOnClickListener(v -> {
             int selectedRadioId = radioGroupIssues.getCheckedRadioButtonId();
 
             if (selectedRadioId == -1) {
-                // No radio button selected - show error
-                // You might want to show a Toast or highlight the radio group
+                // No radio button selected - handle error (e.g., show Toast)
                 return;
             }
 
-            // Determine report status based on selected radio button
             int reportStatus = 0;
             if (selectedRadioId == R.id.radioNotDelivered) {
-                reportStatus = 1; // not receiving
+                reportStatus = 1;
             } else if (selectedRadioId == R.id.radioFaulty) {
-                reportStatus = 2; // quality issue
+                reportStatus = 2;
             } else if (selectedRadioId == R.id.radioWrongItem) {
-                reportStatus = 3; // wrong food
+                reportStatus = 3;
             }
 
-            // Get additional details
             String additionalInfo = editTextDetails.getText().toString().trim();
 
-            // Update the order model
             orderModel.setReportStatus(reportStatus);
-            orderModel.setReportAdditionalInfo(additionalInfo);
+            orderModel.setReportAdditionalInfo(additionalInfo); // Assuming this method exists in OrderModel
 
-            // Call interface method to handle Firestore update
             if (listener != null) {
                 listener.onReportSubmitted(orderModel, view);
             }
@@ -174,4 +214,5 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         });
 
         dialog.show();
-    }}
+    }
+}

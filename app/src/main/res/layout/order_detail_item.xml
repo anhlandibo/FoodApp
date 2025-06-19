@@ -22,7 +22,7 @@
             android:layout_marginEnd="12dp"
             android:background="@android:color/darker_gray"
             android:scaleType="centerCrop" />
-<!--            android:src="@drawable/item2" />-->
+        <!--            android:src="@drawable/item2" />-->
 
         <LinearLayout
             android:layout_width="0dp"
