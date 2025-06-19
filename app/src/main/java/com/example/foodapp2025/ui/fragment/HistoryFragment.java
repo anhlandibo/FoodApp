@@ -178,7 +178,7 @@ public class HistoryFragment extends Fragment implements OrderAdapter.OnOrderAct
             orderModel.setStatus("retrieved");
             Log.d("HistoryFragment", "After setting status: Order ID: " + orderModel.getId() + ", Status: " + orderModel.getStatus());
             orderViewModel.retrieveOrder(orderModel, itemView);
-            Toast.makeText(getContext(), "Order status updated to retrieved.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Order has been retrieved.", Toast.LENGTH_SHORT).show();
         }
         else{
             Log.e("HistoryFragment", "ViewModel or Context is null, cannot retrieve order.");
