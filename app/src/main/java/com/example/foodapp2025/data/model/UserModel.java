@@ -12,7 +12,7 @@ public class UserModel {
     private String dateOfBirth;
     private String photoUrl;
     private GeoPoint location;
-
+    private String role;
     public UserModel() {}
 
     public UserModel(String email, String name, String uid) {
@@ -101,5 +101,11 @@ public class UserModel {
 
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+    public String getRole() {
+        return role;
+    }
+    public void setRole(String role) {
+        this.role = role;
     }
 }

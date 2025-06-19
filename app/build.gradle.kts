@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 
@@ -104,9 +105,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:21.0.3")
     implementation("com.google.firebase:firebase-firestore:24.8.1")
 
-    implementation ("com.google.android.gms:play-services-auth:21.3.0")
-    implementation ("com.google.firebase:firebase-auth:21.0.3")
-    implementation ("com.google.firebase:firebase-firestore:24.8.1")
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.firebase:firebase-auth:21.0.3")
+    implementation("com.google.firebase:firebase-firestore:24.8.1")
     // Unit and UI tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
@@ -185,15 +186,5 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.10.1")
 
-//    // Spring Boot Starter Web
-//    implementation("org.springframework.boot:spring-boot-starter-web")
-//
-//    // Spring Boot Starter Data JPA
-//    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-//
-//    // Spring Boot Starter Security
-//    implementation("org.springframework.boot:spring-boot-starter-security")
-//
-//    // Spring Boot Starter Thymeleaf
-//    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation(libs.kotlinx.serialization.json)
 }

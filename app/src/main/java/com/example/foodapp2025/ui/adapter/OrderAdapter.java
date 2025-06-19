@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.OrderModel;
+import com.example.foodapp2025.viewmodel.OrderViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,10 +28,13 @@ import java.util.Locale;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
     private ArrayList<OrderModel> orderModels = new ArrayList<>();
-    public OrderAdapter(){}
-    public OrderAdapter(ArrayList<OrderModel> orderModels){
-        this.orderModels = orderModels;
+    private String userRole;
+    private OrderViewModel orderViewModel;
+    public OrderAdapter(String userRole, OrderViewModel orderViewModel) {
+        this.userRole = userRole;
+        this.orderViewModel = orderViewModel;
     }
+
     @SuppressLint("NotifyDataSetChanged")
     public void setOrderList(ArrayList<OrderModel> orderModels) {
         this.orderModels = orderModels;
@@ -55,34 +59,52 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
         TextView btnReport = holder.buttonReportOrder;
         TextView txtOrderReported = holder.txtOrderReported;
-        if ("completed".equals(orderModel.getStatus()) && orderModel.getReportStatus() == 0){
-            Log.d("OrderAdapter", "Status is 'completed'. Checking if button is null for ID: " + orderModel.getId() + " -> " + (btnReport == null)); // Kiểm tra lại null lần cuối trước khi dùng
-            if (btnReport != null){
-                Log.d("OrderAdapter", "Status is 'completed'. About to set button VISIBLE for ID: " + orderModel.getId()); // <<< Log NGAY TRƯỚC setVisibility
-                btnReport.setVisibility(View.VISIBLE);
-                txtOrderReported.setVisibility(View.GONE);
-                Log.d("OrderAdapter", "Called setVisibility(VISIBLE) for ID: " + orderModel.getId()); // <<< Log NGAY SAU setVisibility
-                btnReport.setOnClickListener(v -> {
-                    showReportDialog(holder.itemView, orderModel); // Pass the full orderModel instead of just ID
+        Button btnConfirm = holder.btnConfirm;
+        if (userRole.equals("shipper")) {
+            btnReport.setVisibility(View.GONE);
+            txtOrderReported.setVisibility(View.GONE);
+            if ("delivering".equals(orderModel.getStatus()))
+            {
+                btnConfirm.setVisibility(View.VISIBLE);
+                btnConfirm.setOnClickListener(v -> {
+                    orderViewModel.confirmOrderReceived(orderModel.getId())
+                    .addOnCompleteListener(task -> { // Lắng nghe kết quả từ Task
+                        if (task.isSuccessful()) {
+                            btnConfirm.setVisibility(View.GONE);
+                        }
+                    });
                 });
             }
             else {
-                Log.e("OrderAdapter", "Confirm button is NULL despite successful find in ViewHolder for ID: " + orderModel.getId());
+                btnConfirm.setVisibility(View.GONE);
+            }
+        } else {
+            btnConfirm.setVisibility(View.GONE);
+            if ("completed".equals(orderModel.getStatus()) && orderModel.getReportStatus() == 0) {
+                Log.d("OrderAdapter", "Status is 'completed'. Checking if button is null for ID: " + orderModel.getId() + " -> " + (btnReport == null)); // Kiểm tra lại null lần cuối trước khi dùng
+                if (btnReport != null) {
+                    Log.d("OrderAdapter", "Status is 'completed'. About to set button VISIBLE for ID: " + orderModel.getId()); // <<< Log NGAY TRƯỚC setVisibility
+                    btnReport.setVisibility(View.VISIBLE);
+                    txtOrderReported.setVisibility(View.GONE);
+                    Log.d("OrderAdapter", "Called setVisibility(VISIBLE) for ID: " + orderModel.getId()); // <<< Log NGAY SAU setVisibility
+                    btnReport.setOnClickListener(v -> {
+                        showReportDialog(holder.itemView, orderModel); // Pass the full orderModel instead of just ID
+                    });
+                } else {
+                    Log.e("OrderAdapter", "Confirm button is NULL despite successful find in ViewHolder for ID: " + orderModel.getId());
+                }
+            } else {
+                if (btnReport != null) {
+                    btnReport.setVisibility(View.GONE);
+                    btnReport.setOnClickListener(null);
+                }
+                if (orderModel.getReportStatus() != 0) {
+                    txtOrderReported.setVisibility(View.VISIBLE);
+                } else {
+                    txtOrderReported.setVisibility(View.GONE);
+                }
             }
         }
-        else{
-            if (btnReport != null) {
-                btnReport.setVisibility(View.GONE);
-                btnReport.setOnClickListener(null);
-            }
-            if (orderModel.getReportStatus() != 0) {
-                txtOrderReported.setVisibility(View.VISIBLE);
-            }
-            else {
-                txtOrderReported.setVisibility(View.GONE);
-            }
-        }
-
         holder.itemView.setOnClickListener(v -> {
             OrderModel selectedOrder = orderModels.get(position);
             NavController navController = Navigation.findNavController(v);
@@ -100,7 +122,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
         TextView orderId, orderStatus, orderTime, buttonReportOrder, txtOrderReported;
-
+        Button btnConfirm;
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
             orderId = itemView.findViewById(R.id.orderId);
@@ -109,6 +131,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             buttonReportOrder = itemView.findViewById(R.id.btn_report_order);
             buttonReportOrder.setPaintFlags(buttonReportOrder.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             txtOrderReported = itemView.findViewById(R.id.txt_order_reported);
+            btnConfirm = itemView.findViewById(R.id.btn_confirm_order);
         }
     }
 
@@ -116,11 +139,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         void onReportSubmitted(OrderModel orderModel, View itemView); // Add View parameter
 
     }
+
     private OnOrderActionListener listener;
 
-    public void setOnOrderActionListener(OnOrderActionListener listener){
+    public void setOnOrderActionListener(OnOrderActionListener listener) {
         this.listener = listener;
     }
+
     private void showReportDialog(View view, OrderModel orderModel) {
         View dialogView = LayoutInflater.from(view.getContext()).inflate(R.layout.dialog_report_order, null);
 
@@ -174,4 +199,5 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         });
 
         dialog.show();
-    }}
+    }
+}

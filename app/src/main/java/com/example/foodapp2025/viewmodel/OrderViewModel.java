@@ -14,6 +14,7 @@ import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.OrderModel;
 import com.example.foodapp2025.data.remote.OrderRemoteDataSource;
 import com.example.foodapp2025.data.repository.OrderRepository;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 
@@ -23,11 +24,14 @@ public class OrderViewModel extends ViewModel {
     public LiveData<ArrayList<OrderModel>> getCurrentUsersOrders() {
         return orderRepository.getCurrentUsersOrders();
     }
+    public LiveData<ArrayList<OrderModel>> getCurrentShippersOrders() {
+        return orderRepository.getCurrentShippersOrders();
+    }
 
-    public void confirmOrderReceived(String orderId) {
+    public Task<Void> confirmOrderReceived(String orderId) {
         Log.d("OrderViewModel", "Confirming order received for ID: " + orderId);
         // Gọi phương thức update trong Repository
-        orderRepository.updateOrderStatus(orderId, "delivered") // Truyền trạng thái mới
+        return orderRepository.updateOrderStatus(orderId, "completed") // Truyền trạng thái mới
                 .addOnCompleteListener(task -> { // Lắng nghe kết quả từ Task
                     if (task.isSuccessful()) {
                         Log.d("OrderViewModel", "Order status updated successfully via ViewModel.");

@@ -53,11 +53,39 @@ public class OrderRemoteDataSource {
         return listMutableLiveData;
     }
 
-    //
-    public Task<Void> updateOrderStatus(String orderId, String status){
-        Log.d("OrderRemoteDataSource", "Attempting to update status for order ID: " + orderId + " to: " + status);
-        return orderCollection.document(orderId)
-                .update("status", status);
+
+    /**
+     * Loads the current shipper's assigned orders/shipments from the 'shipments' subcollection
+     * under their user document in Firestore.
+     *
+     * @return LiveData containing an ArrayList of OrderModel for the current shipper.
+     */
+    public LiveData<ArrayList<OrderModel>> getCurrentShippersOrders() {
+        MutableLiveData<ArrayList<OrderModel>> listMutableLiveData = new MutableLiveData<>();
+
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+                : null;
+        orderCollection.whereEqualTo("shipperId", currentUserId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        ArrayList<OrderModel> orderModelArrayList = new ArrayList<>();
+
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            OrderModel orderModel = queryDocumentSnapshot.toObject(OrderModel.class);
+                            orderModel.setId(queryDocumentSnapshot.getId());
+                            orderModelArrayList.add(orderModel);
+                        }
+                        listMutableLiveData.setValue(orderModelArrayList);
+                    } else {
+                        listMutableLiveData.setValue(new ArrayList<>());
+
+                        Log.e("FirestoreError", "Error getting documents: ", task.getException());
+
+                    }
+                });
+        return listMutableLiveData;
     }
 
     public Task<Void> updateOrderAndPaymentStatus(String orderId, String status, String paymentStatus){
