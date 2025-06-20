@@ -33,6 +33,8 @@ import com.example.foodapp2025.R;
 import com.example.foodapp2025.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -51,15 +53,53 @@ public class MainActivity extends AppCompatActivity {
         NON_CUSTOMER_ALLOWED_DESTINATIONS.add(R.id.nav_profile);
         NON_CUSTOMER_ALLOWED_DESTINATIONS.add(R.id.nav_history);
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Try to get user_role from intent
         userRole = getIntent().getStringExtra("user_role");
+
+        // If null, try to get it from Firestore via email
         if (userRole == null) {
-            userRole = "customer";
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser != null && currentUser.getEmail() != null) {
+                String email = currentUser.getEmail();
+
+                FirebaseFirestore.getInstance().collection("users")
+                        .whereEqualTo("email", email)
+                        .limit(1)
+                        .get()
+                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                            if (!queryDocumentSnapshots.isEmpty()) {
+                                DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
+                                userRole = doc.getString("role");
+                                if (userRole == null) userRole = "customer";
+                            } else {
+                                userRole = "customer";
+                            }
+
+                            // Everything continues here after role is fetched
+                            Log.d("MainActivity", "Logged in user role: " + userRole);
+                            finishOnCreate();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("MainActivity", "Failed to fetch user role", e);
+                            userRole = "customer";
+                            finishOnCreate();
+                        });
+
+                return; // Wait for async role fetch before proceeding
+            } else {
+                userRole = "customer";
+            }
         }
-        Log.d("MainActivity", "Logged in user role: " + userRole); // For debugging
+
+        // If role already known (intent or fallback), continue immediately
+        finishOnCreate();
+    }
+
+    private void finishOnCreate() {
         EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -70,53 +110,25 @@ public class MainActivity extends AppCompatActivity {
         if (navHostFragment != null) {
             navController = navHostFragment.getNavController();
 
-            // Load the navigation graph using the NavController's own inflater
             NavGraph navGraph = navController.getNavInflater().inflate(R.navigation.nav_graph);
-
             Bundle startDestinationArgs = new Bundle();
             startDestinationArgs.putString("user_role", userRole);
 
-
-            // Set the start destination based on role
             if ("customer".equalsIgnoreCase(userRole)) {
                 navGraph.setStartDestination(R.id.nav_home);
             } else {
-                // For non-customers, start at profile
                 navGraph.setStartDestination(R.id.nav_profile);
             }
             navController.setGraph(navGraph, startDestinationArgs);
 
-            // Dynamically configure the bottom navigation menu
             configureBottomNavigationMenu(binding.bottomNavigation);
-
             NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
 
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                 if (arguments != null && arguments.getString("user_role") == null) {
                     arguments.putString("user_role", userRole);
                 }
-            });
 
-        }
-        requestNotificationPermission();
-
-
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            updateFcmTokenToFirestore();
-        }
-
-        if ("customer".equalsIgnoreCase(userRole)) {
-            setupMessageBubble();
-        } else {
-            // If not a customer, ensure the message bubble is hidden
-            ImageView bubble = findViewById(R.id.messageBubble);
-            if (bubble != null) {
-                bubble.setVisibility(View.GONE);
-            }
-        }
-
-        if (navController != null) {
-            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                 if (destination.getId() == R.id.ChatFragment) {
                     setBottomNavigationVisibility(false);
                 } else {
@@ -125,9 +137,23 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        requestNotificationPermission();
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            updateFcmTokenToFirestore();
+        }
+
+        if ("customer".equalsIgnoreCase(userRole)) {
+            setupMessageBubble();
+        } else {
+            ImageView bubble = findViewById(R.id.messageBubble);
+            if (bubble != null) {
+                bubble.setVisibility(View.GONE);
+            }
+        }
+
         handleNotificationIntent(getIntent());
     }
-
     /**
      * Configures the BottomNavigationView menu items based on the user's role.
      *
