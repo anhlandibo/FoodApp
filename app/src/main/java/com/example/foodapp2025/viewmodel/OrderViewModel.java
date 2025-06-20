@@ -56,4 +56,23 @@ public class OrderViewModel extends ViewModel {
                     Log.e("OrderReport", "Error submitting report", e);
                 });
     }
+
+    public void retrieveOrder(OrderModel orderModel, View itemView) {
+        orderRepository.retrieveOrder(orderModel)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("OrderRetrieve", "Order retrieved successfully");
+                    TextView retrieveButton = itemView.findViewById(R.id.btn_retrieve_order);
+                    TextView report = itemView.findViewById(R.id.txt_order_reported); // Using the consolidated TextView
+
+                    if (retrieveButton != null) retrieveButton.setVisibility(View.GONE);
+                    if (report != null) {
+                        report.setText("retrieved");
+                        report.setVisibility(View.VISIBLE);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("OrderRetrieve", "Error retrieving order", e);
+                    Toast.makeText(itemView.getContext(), "Error retrieving order: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
 }

@@ -135,4 +135,21 @@ public class OrderRemoteDataSource {
                 });
     }
 
+    public Task<Void> retrieveOrder(OrderModel orderModel) {
+        DocumentReference orderRef = orderCollection.document(orderModel.getId());
+        Log.d("DEBUG_RETRIEVE", "Order ID: " + orderModel.getId() + ", New Status: " + orderModel.getStatus());
+        // Create a map for updates
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", orderModel.getStatus()); // This is the key change!
+        updates.put("retrieveStatus", orderModel.getRetrieveStatus()); // Keep if you still need retrieveStatus for other logic
+
+        return orderRef.update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("OrderRetrieve", "Order status updated to 'retrieved' successfully for ID: " + orderModel.getId());
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("OrderRetrieve", "Error updating order status to 'retrieved' for ID: " + orderModel.getId(), e);
+                });
+    }
+
 }

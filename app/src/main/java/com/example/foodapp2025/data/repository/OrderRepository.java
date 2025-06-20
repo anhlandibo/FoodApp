@@ -29,4 +29,8 @@ public class OrderRepository {
     public Task<Void> reportOrder(OrderModel orderModel){
         return orderRemoteDataSource.reportOrder(orderModel);
     }
+
+    public Task<Void> retrieveOrder(OrderModel orderModel){
+        return orderRemoteDataSource.retrieveOrder(orderModel);
+    }
 }
