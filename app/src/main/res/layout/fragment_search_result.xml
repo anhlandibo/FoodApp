@@ -20,7 +20,15 @@
             app:navigationIcon="@drawable/back"
             app:navigationIconTint="@color/white"
             android:layout_marginTop="16dp"
-            app:titleTextColor="@android:color/white"/>
+            app:titleTextColor="@android:color/white">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Search Result"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchFoodRecyclerView"

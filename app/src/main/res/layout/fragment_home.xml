@@ -79,7 +79,7 @@
                     android:drawablePadding="8dp"
                     android:ems="10"
                     android:imeOptions="actionSearch"
-                    android:hint="What would you like to eat?"
+                    android:hint="How are you feeling today?"
                     android:inputType="text"
                     android:paddingHorizontal="8dp"
                     android:textStyle="italic" />

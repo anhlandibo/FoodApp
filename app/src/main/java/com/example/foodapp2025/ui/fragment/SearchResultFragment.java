@@ -1,5 +1,7 @@
 package com.example.foodapp2025.ui.fragment;
 
+import static androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,6 +12,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +21,26 @@ import android.widget.Toast;
 import com.example.foodapp2025.R;
 import com.example.foodapp2025.data.model.FoodModel;
 import com.example.foodapp2025.databinding.FragmentSearchResultBinding;
+import com.example.foodapp2025.ui.activity.PaymentActivity;
 import com.example.foodapp2025.ui.adapter.FoodAdapter;
 import com.example.foodapp2025.viewmodel.FoodViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 
+import org.json.JSONException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,6 +51,8 @@ public class SearchResultFragment extends Fragment {
     private FragmentSearchResultBinding binding;
     private FoodAdapter foodAdapter;
     private FoodViewModel foodViewModel;
+    private final OkHttpClient httpClient = new OkHttpClient();
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -96,7 +115,7 @@ public class SearchResultFragment extends Fragment {
         initToolbar(view);
     }
 
-    private void initToolbar(View view){
+    private void initToolbar(View view) {
         MaterialToolbar toolbar = view.findViewById(R.id.searchFoodToobar);
 
         toolbar.setNavigationOnClickListener(v -> {
@@ -106,16 +125,21 @@ public class SearchResultFragment extends Fragment {
     }
 
     private void loadAllFoodAndFilter(String keyword) {
-        foodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
-
-        foodViewModel.getFoodByKeyword(keyword).observe(getViewLifecycleOwner(), filteredFoodList -> {
-            if (filteredFoodList != null && !filteredFoodList.isEmpty()){
-                foodAdapter.setFoodList(filteredFoodList);
-            }
-            else {
-                Toast.makeText(getContext(), "No food item found", Toast.LENGTH_SHORT).show();
-            }
-        });
+        searchWithNLP(keyword);
+//        // Nếu keyword có emotional context, dùng NLP
+//        if (hasEmotionalKeywords(keyword)) {
+//            searchWithNLP(keyword);
+//        } else {
+//            // Dùng search thông thường
+//            foodViewModel = new ViewModelProvider(this).get(FoodViewModel.class);
+//            foodViewModel.getFoodByKeyword(keyword).observe(getViewLifecycleOwner(), filteredFoodList -> {
+//                if (filteredFoodList != null && !filteredFoodList.isEmpty()){
+//                    foodAdapter.setFoodList(filteredFoodList);
+//                } else {
+//                    Toast.makeText(getContext(), "No food item found", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//        }
     }
 
     private void setUpRecylerView() {
@@ -124,5 +148,113 @@ public class SearchResultFragment extends Fragment {
         binding.searchFoodRecyclerView.setAdapter(foodAdapter);
     }
 
+    private void searchWithNLP(String keyword) {
+        // Tạo JSON request body
+        String json = "{"
+                + "\"query\":\"" + keyword + "\""
+                + "}";
 
+        RequestBody requestBody = RequestBody.create(
+                json,
+                MediaType.get("application/json; charset=utf-8")
+        );
+
+        Request request = new Request.Builder()
+                .url("localhost:5000/search") // Using server URL later
+                .post(requestBody)
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                // Chạy trên UI thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(),
+                                "Network error: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        Log.e("SearchResultFragment", "NLP API Error", e);
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+                String responseBody = response.body().string();
+
+               if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (response.isSuccessful()) {
+                            // Parse JSON response
+                            parseNLPResponse(responseBody);
+                        } else {
+                            Toast.makeText(getContext(),
+                                    "Server error: " + response.code(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    // Method để parse JSON response từ Python API
+    private void parseNLPResponse(String jsonResponse) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            JSONArray resultArray = jsonObject.getJSONArray("result");
+
+            ArrayList<FoodModel> nlpResults = new ArrayList<>();
+
+            for (int i = 0; i < resultArray.length(); i++) {
+                JSONObject dishJson = resultArray.getJSONObject(i);
+
+                // Convert JSON sang FoodModel
+                FoodModel food = new FoodModel();
+                String id = dishJson.getString("id");
+
+
+                food.setId(id);
+                food.setName(dishJson.getString("name"));
+                food.setDescription(dishJson.getString("description"));
+                food.setImageUrl(dishJson.getString("imageUrl"));
+                food.setPrice(dishJson.getDouble("price"));
+                food.setStar(dishJson.getDouble("star"));
+                food.setTime(dishJson.getString("time"));
+                food.setCategoryName(dishJson.getString("categoryName"));
+
+                nlpResults.add(food);
+            }
+
+            // Cập nhật RecyclerView
+            if (!nlpResults.isEmpty()) {
+                foodAdapter.setFoodList(nlpResults);
+//                Toast.makeText(getContext(),
+//                        "Found " + nlpResults.size() + " smart recommendations!",
+//                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "No recommendations found", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (JSONException e) {
+            Log.e("SearchResultFragment", "JSON Parse Error", e);
+            Toast.makeText(getContext(), "Response parse error", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    private boolean hasEmotionalKeywords(String keyword) {
+        String[] emotionalWords = {
+                "stressed", "tired", "sad", "happy", "jumpy", "restless",
+                "energetic", "comfort", "celebration", "anxious"
+        };
+
+        String lowerKeyword = keyword.toLowerCase();
+        for (String word : emotionalWords) {
+            if (lowerKeyword.contains(word)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
