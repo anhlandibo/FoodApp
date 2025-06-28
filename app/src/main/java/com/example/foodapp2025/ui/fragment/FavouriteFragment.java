@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout; // Import này
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -62,7 +63,6 @@ public class FavouriteFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Khởi tạo ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(FavouriteFoodViewModel.class);
 
         favFoodAdapter = new FavouriteFoodAdapter(getContext(), new ArrayList<>());
@@ -70,69 +70,61 @@ public class FavouriteFragment extends Fragment {
         binding.recyclerViewFavouriteFoods.setLayoutManager(layoutManager);
         binding.recyclerViewFavouriteFoods.setAdapter(favFoodAdapter);
 
-        binding.recyclerViewFavouriteFoods.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                if (dy > 0) {
-                    int visibleItemCount = layoutManager.getChildCount();
-                    int totalItemCount = layoutManager.getItemCount();
-                    int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
-
-                    if (Boolean.FALSE.equals(viewModel.isLoading.getValue()) && !viewModel.isLastPage &&
-                            (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 5) {
-                        Log.d("FavouriteFragment", "Detected end of list, requesting load more from ViewModel (might be redundant).");
-                        viewModel.loadMore();
-                    }
-                }
-            }
+        // Thiết lập SwipeRefreshLayout
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+            Log.d("FavouriteFragment", "Swipe-to-refresh triggered.");
+            viewModel.forceRefreshFavourites(); // Yêu cầu ViewModel làm mới dữ liệu
         });
-
-
 
         viewModel.favFoodListFiltered.observe(getViewLifecycleOwner(), favoriteFoods -> {
             Log.d("FavouriteFragment", "Observed filtered foods update. Count: " + favoriteFoods.size());
             favFoodAdapter.setData(favoriteFoods);
-
-            // Cập nhật trạng thái rỗng dựa trên danh sách hiện tại
+            // Tắt biểu tượng loading của SwipeRefreshLayout khi dữ liệu đã được tải
+            binding.swipeRefreshLayout.setRefreshing(false);
             updateEmptyState(favoriteFoods.isEmpty());
         });
 
-        // Quan sát trạng thái loading từ ViewModel
         viewModel.isLoading.observe(getViewLifecycleOwner(), isLoading -> {
             Log.d("FavouriteFragment", "Observed loading state: " + isLoading);
             if (isLoading) {
                 binding.progressBar2.setVisibility(View.VISIBLE);
+                // Nếu đang loading và không có item nào, ẩn thông báo rỗng tạm thời
                 if (favFoodAdapter.getItemCount() == 0) {
                     binding.textViewEmptyFavourites.setVisibility(View.GONE);
                 }
+                // Nếu đang loading, hiển thị biểu tượng loading của SwipeRefreshLayout
+                if (!binding.swipeRefreshLayout.isRefreshing()) {
+                    binding.swipeRefreshLayout.setRefreshing(true);
+                }
             } else {
                 binding.progressBar2.setVisibility(View.GONE);
+                binding.swipeRefreshLayout.setRefreshing(false); // Tắt biểu tượng refresh
                 updateEmptyState(favFoodAdapter.getItemCount() == 0);
             }
         });
 
-        // Quan sát trạng thái đăng nhập để hiển thị message phù hợp
         viewModel.isUserLoggedIn.observe(getViewLifecycleOwner(), isLoggedIn -> {
             Log.d("FavouriteFragment", "Observed user logged in state: " + isLoggedIn);
             if (!isLoggedIn) {
-                favFoodAdapter.setData(new ArrayList<>()); // Xóa dữ liệu cũ
-                binding.editTextSearchFavorites.setText(""); // Xóa search query
+                favFoodAdapter.setData(new ArrayList<>());
+                binding.editTextSearchFavorites.setText("");
                 updateEmptyState(true, "Please login to see your favorite food.");
-                binding.progressBar2.setVisibility(View.GONE); // Ẩn loading
+                binding.progressBar2.setVisibility(View.GONE);
+                binding.swipeRefreshLayout.setRefreshing(false); // Đảm bảo tắt refresh khi đăng xuất
             } else {
+                binding.editTextSearchFavorites.setText("");
                 // Khi người dùng đăng nhập, ViewModel sẽ tự động gắn listener và tải/cập nhật dữ liệu.
-                binding.editTextSearchFavorites.setText(""); // Reset search box
-                // Không cần tự gọi tải ở đây, ViewModel sẽ tự xử lý qua listener
+                // Do đó, nếu list rỗng và không đang tải, có thể hiển thị loading ban đầu
+                // để người dùng biết data đang được fetch.
                 if (favFoodAdapter.getItemCount() == 0 && Boolean.FALSE.equals(viewModel.isLoading.getValue())) {
-                    binding.progressBar2.setVisibility(View.VISIBLE);
-                    updateEmptyState(false, "");
+                    // Cố gắng hiển thị loading ngay lập tức nếu chưa có data
+                    binding.swipeRefreshLayout.setRefreshing(true);
+                    // Có thể tạm thời ẩn empty state để tránh nhấp nháy nếu đang loading
+                    binding.textViewEmptyFavourites.setVisibility(View.GONE);
                 }
             }
         });
 
-        // Cập nhật TextWatcher để gọi ViewModel khi search text thay đổi
         binding.editTextSearchFavorites.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

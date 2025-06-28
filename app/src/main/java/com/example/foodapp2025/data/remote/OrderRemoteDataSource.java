@@ -10,6 +10,7 @@ import com.example.foodapp2025.data.model.OrderModel;
 import com.example.foodapp2025.data.model.UserModel;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.*;
 
 import java.util.ArrayList;
@@ -53,13 +54,59 @@ public class OrderRemoteDataSource {
         return listMutableLiveData;
     }
 
-    //
-    public Task<Void> updateOrderStatus(String orderId, String status){
-        Log.d("OrderRemoteDataSource", "Attempting to update status for order ID: " + orderId + " to: " + status);
-        return orderCollection.document(orderId)
-                .update("status", status);
-    }
+    /**
+     * Loads the current shipper's assigned orders/shipments from the 'orders' collection
+     * by first finding the shipper's document ID in 'users' collection using their email,
+     * then matching orders where shipperId equals that document ID.
+     *
+     * @return LiveData containing an ArrayList of OrderModel for the current shipper.
+     */
+    public LiveData<ArrayList<OrderModel>> getCurrentShippersOrders() {
+        MutableLiveData<ArrayList<OrderModel>> listMutableLiveData = new MutableLiveData<>();
 
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null || currentUser.getEmail() == null) {
+            listMutableLiveData.setValue(new ArrayList<>());
+            return listMutableLiveData;
+        }
+
+        String currentUserEmail = currentUser.getEmail();
+
+        // First, find the shipper's document ID in 'users' collection using email
+        FirebaseFirestore.getInstance().collection("users")
+                .whereEqualTo("email", currentUserEmail)
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful() && userTask.getResult() != null && !userTask.getResult().isEmpty()) {
+                        // Get the document ID of the shipper in the 'users' collection
+                        String shipperDocId = userTask.getResult().getDocuments().get(0).getId();
+
+                        // Now query orders using the shipper's document ID
+                        orderCollection.whereEqualTo("shipperId", shipperDocId)
+                                .orderBy("timestamp", Query.Direction.DESCENDING)
+                                .get().addOnCompleteListener(task -> {
+                                    if (task.isSuccessful() && task.getResult() != null) {
+                                        ArrayList<OrderModel> orderModelArrayList = new ArrayList<>();
+
+                                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                                            OrderModel orderModel = queryDocumentSnapshot.toObject(OrderModel.class);
+                                            orderModel.setId(queryDocumentSnapshot.getId());
+                                            orderModelArrayList.add(orderModel);
+                                        }
+                                        listMutableLiveData.setValue(orderModelArrayList);
+                                    } else {
+                                        listMutableLiveData.setValue(new ArrayList<>());
+                                        Log.e("FirestoreError", "Error getting orders: ", task.getException());
+                                    }
+                                });
+                    } else {
+                        listMutableLiveData.setValue(new ArrayList<>());
+                        Log.e("FirestoreError", "Error finding shipper document by email: ", userTask.getException());
+                    }
+                });
+
+        return listMutableLiveData;
+    }
     public Task<Void> updateOrderAndPaymentStatus(String orderId, String status, String paymentStatus){
         Log.d("OrderRemoteDataSource", "Attempting to update order ID: " + orderId + " to orderStatus: " + status + " and paymentStatus: " + paymentStatus);
         Map<String, Object> updates = new HashMap<>();
@@ -85,6 +132,23 @@ public class OrderRemoteDataSource {
                 .addOnFailureListener(e -> {
                     Log.e("OrderReport", "Error submitting report", e);
                     // Show error message
+                });
+    }
+
+    public Task<Void> retrieveOrder(OrderModel orderModel) {
+        DocumentReference orderRef = orderCollection.document(orderModel.getId());
+        Log.d("DEBUG_RETRIEVE", "Order ID: " + orderModel.getId() + ", New Status: " + orderModel.getStatus());
+        // Create a map for updates
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", orderModel.getStatus()); // This is the key change!
+        updates.put("retrieveStatus", orderModel.getRetrieveStatus()); // Keep if you still need retrieveStatus for other logic
+
+        return orderRef.update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("OrderRetrieve", "Order status updated to 'retrieved' successfully for ID: " + orderModel.getId());
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("OrderRetrieve", "Error updating order status to 'retrieved' for ID: " + orderModel.getId(), e);
                 });
     }
 

@@ -186,4 +186,11 @@ public class OrderModel implements Serializable {
     public String getReportAdditionalInfo() {
         return reportAdditionalInfo;
     }
+    private int retrieveStatus; // 0 by default for not retrieve, 1 is for retrieve
+    public void setRetrieveStatus(int retrieveStatus) {
+        this.retrieveStatus = retrieveStatus;
+    }
+    public int getRetrieveStatus() {
+        return retrieveStatus;
+    }
 }

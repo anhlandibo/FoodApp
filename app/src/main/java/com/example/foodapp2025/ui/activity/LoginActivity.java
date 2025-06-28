@@ -22,6 +22,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -87,7 +88,12 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     showLoading(false);
                     if (task.isSuccessful()) {
-                        navigateToMainActivity();
+                        FirebaseUser user = auth.getCurrentUser();
+                        if (user != null) {
+                            fetchUserRoleOrDefault(user.getUid()); // <--- Renamed and modified
+                        } else {
+                            showToast("Login successful, but user not found.");
+                        }
                     } else {
                         Log.e(TAG, "Email login failed: ", task.getException());
                         showToast("Error: " + task.getException().getMessage());
@@ -130,7 +136,12 @@ public class LoginActivity extends AppCompatActivity {
                     showLoading(false);
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
-                        checkAndCreateUser(user);
+                        if (user != null) {
+                            // After successful Firebase Auth with Google, ensure user data in Firestore
+                            ensureUserDocumentAndFetchRole(user);
+                        } else {
+                            showToast("Google Sign-In successful, but user not found.");
+                        }
                     } else {
                         Log.e(TAG, "Google sign-in with Firebase failed: ", task.getException());
                         showToast("Google Sign-In Failed: " + task.getException().getMessage());
@@ -138,7 +149,12 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private void checkAndCreateUser(FirebaseUser user) {
+    /**
+     * Ensures a user document exists in Firestore and then fetches their role, defaulting if missing.
+     *
+     * @param user The authenticated FirebaseUser.
+     */
+    private void ensureUserDocumentAndFetchRole(FirebaseUser user) {
         if (user == null) return;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -146,28 +162,95 @@ public class LoginActivity extends AppCompatActivity {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
+                        // User does not exist in Firestore, create with default role
                         createUserInFirestore(user, db);
                     } else {
-                        Log.d(TAG, "User already exists. No new record added.");
-                        navigateToMainActivity();
+                        // User exists, proceed to fetch their role (will default if non-existent)
+                        fetchUserRoleOrDefault(userId);
                     }
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error checking user existence", e));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error checking user document existence", e);
+                    showToast("Error checking user data. Please try again.");
+                    showLoading(false);
+                });
     }
 
+    /**
+     * Creates a new user document in Firestore with a default 'customer' role.
+     *
+     * @param user The authenticated FirebaseUser.
+     * @param db   The FirebaseFirestore instance.
+     */
     private void createUserInFirestore(FirebaseUser user, FirebaseFirestore db) {
         Map<String, Object> userData = new HashMap<>();
         userData.put("userId", user.getUid());
         userData.put("email", user.getEmail());
         userData.put("name", user.getDisplayName());
         userData.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
+        userData.put("role", "customer"); // Assign default role for new users
 
         db.collection("users").document(user.getUid()).set(userData)
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "New user created in Firestore");
-                    navigateToMainActivity();
+                    Log.d(TAG, "New user created in Firestore with default role: customer");
+                    fetchUserRoleOrDefault(user.getUid()); // Fetch role for the newly created user
                 })
-                .addOnFailureListener(e -> Log.e(TAG, "Error creating user", e));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error creating user document", e);
+                    showToast("Error setting up user profile. Please try again.");
+                    showLoading(false);
+                });
+    }
+
+    /**
+     * Fetches the user's role from Firestore. If the 'role' field is missing, it defaults to 'customer'.
+     * Then decides navigation based on the role.
+     *
+     * @param userId The UID of the authenticated Firebase user.
+     */
+    private void fetchUserRoleOrDefault(String userId) {
+        showLoading(true);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    showLoading(false);
+                    // We trust that the user document exists based on previous logic (ensureUserDocumentAndFetchRole)
+                    // If, for some edge case, it doesn't, we'll log it but proceed to default.
+                    String role = "customer"; // Default role
+
+                    if (documentSnapshot.exists()) {
+                        String fetchedRole = documentSnapshot.getString("role");
+                        if (fetchedRole != null && !fetchedRole.isEmpty()) {
+                            role = fetchedRole; // Use the fetched role if it exists and is not empty
+                            Log.d(TAG, "User role fetched: " + role);
+                        } else {
+                            Log.w(TAG, "User document exists, but 'role' field is missing or empty. Defaulting to 'customer'.");
+                            // Optionally, you could update the document here to set the role,
+                            // but for now, we just use the default for this session.
+                        }
+                    } else {
+                        Log.e(TAG, "User document not found for UID: " + userId + ". This should not happen if ensureUserDocumentAndFetchRole worked correctly. Defaulting to 'customer'.");
+                    }
+
+                    // Now, decide navigation based on the determined role
+                    decideNavigationBasedOnRole(role);
+                })
+                .addOnFailureListener(e -> {
+                    showLoading(false);
+                    Log.e(TAG, "Error fetching user role for UID: " + userId, e);
+                    showToast("Error retrieving user data. Please try again.");
+                    // In case of error, we can still default to customer or show an error
+                    // For now, let's just show an error as we couldn't even retrieve the document.
+                });
+    }
+
+    /**
+     * Decides where to navigate based on the user's role.
+     *
+     * @param role The determined role of the logged-in user.
+     */
+    private void decideNavigationBasedOnRole(String role) {
+        navigateToMainActivity(role);
     }
 
     @Override
@@ -175,12 +258,20 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
-            navigateToMainActivity();
+            // If already logged in, directly fetch role (which will default if missing) and navigate
+            fetchUserRoleOrDefault(user.getUid());
         }
     }
 
-    private void navigateToMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
+    /**
+     * Navigates to MainActivity, optionally passing the user's role.
+     *
+     * @param role The role of the logged-in user ("customer", "shipper", etc.).
+     */
+    private void navigateToMainActivity(String role) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("user_role", role); // Pass the role to MainActivity
+        startActivity(intent);
         finish();
     }
 
@@ -191,5 +282,8 @@ public class LoginActivity extends AppCompatActivity {
     private void showLoading(boolean isLoading) {
         binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         binding.loginBtn.setEnabled(!isLoading);
+        binding.emailLoginEdt.setEnabled(!isLoading);
+        binding.passwordEdt.setEnabled(!isLoading);
+        binding.googleBtn.setEnabled(!isLoading);
     }
 }

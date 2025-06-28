@@ -147,6 +147,37 @@
                     android:textStyle="normal"
                     android:visibility="gone" />
 
+                <TextView
+                    android:id="@+id/btn_retrieve_order"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="4dp"
+                    android:text="retrieve"
+                    android:textColor="#2196F3"
+                    android:textSize="11sp"
+                    android:textStyle="normal"
+                    android:visibility="gone"
+                    style="@style/TextAppearance.AppCompat.Body2"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_confirm_order"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="CONFIRM DELIVERY"
+                    android:background="@drawable/orange_bg"
+                    android:layout_weight="0"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:backgroundTint="@color/red_accent"
+                    android:padding="5dp"
+                    android:textColor="@android:color/black"
+                android:visibility="gone" />
+
+
             </LinearLayout>
 
         </LinearLayout>

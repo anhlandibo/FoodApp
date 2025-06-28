@@ -207,7 +207,8 @@ public class CartFragment extends Fragment {
         cartVM.getDiscountAmount().observe(getViewLifecycleOwner(), discount -> {
             if (discount != null && discount > 0) {
                 binding.tvDiscountAmount.setVisibility(View.VISIBLE);
-                binding.tvDiscountAmount.setText(String.format("Saved: %.0f$", discount));
+                // Highlighted change: Using "%.2f$" for two decimal places
+                binding.tvDiscountAmount.setText(String.format("Saved: %.2f$", discount)); // CHANGED
             } else {
                 binding.tvDiscountAmount.setVisibility(View.GONE);
             }
@@ -264,12 +265,14 @@ public class CartFragment extends Fragment {
         });
     }
 
+    // Highlighted change: Using "%,.2f $" for two decimal places
     private String formatPrice(double v) {
-        return String.format("%,.0f $", v);
+        return String.format("%,.2f $", v); // CHANGED
     }
 
+    // Highlighted change: Using "%,.2f $" for two decimal places
     private String formatDiscount(double v) {
-        return String.format("- %,.0f $", v);
+        return String.format("- %,.2f $", v); // CHANGED
     }
 
     @Override

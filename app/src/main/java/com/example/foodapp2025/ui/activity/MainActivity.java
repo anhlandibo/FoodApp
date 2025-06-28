@@ -9,8 +9,10 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,6 +24,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
+import androidx.navigation.NavGraph;
+import androidx.navigation.NavInflater;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
@@ -29,39 +33,102 @@ import com.example.foodapp2025.R;
 import com.example.foodapp2025.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private static final int POST_NOTIFICATIONS_REQUEST_CODE = 101;
     private NavController navController;
+    private String userRole;
+    private static final Set<Integer> NON_CUSTOMER_ALLOWED_DESTINATIONS = new HashSet<>();
 
+    static {
+        NON_CUSTOMER_ALLOWED_DESTINATIONS.add(R.id.nav_profile);
+        NON_CUSTOMER_ALLOWED_DESTINATIONS.add(R.id.nav_history);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Try to get user_role from intent
+        userRole = getIntent().getStringExtra("user_role");
+
+        // If null, try to get it from Firestore via email
+        if (userRole == null) {
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser != null && currentUser.getEmail() != null) {
+                String email = currentUser.getEmail();
+
+                FirebaseFirestore.getInstance().collection("users")
+                        .whereEqualTo("email", email)
+                        .limit(1)
+                        .get()
+                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                            if (!queryDocumentSnapshots.isEmpty()) {
+                                DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
+                                userRole = doc.getString("role");
+                                if (userRole == null) userRole = "customer";
+                            } else {
+                                userRole = "customer";
+                            }
+
+                            // Everything continues here after role is fetched
+                            Log.d("MainActivity", "Logged in user role: " + userRole);
+                            finishOnCreate();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("MainActivity", "Failed to fetch user role", e);
+                            userRole = "customer";
+                            finishOnCreate();
+                        });
+
+                return; // Wait for async role fetch before proceeding
+            } else {
+                userRole = "customer";
+            }
+        }
+
+        // If role already known (intent or fallback), continue immediately
+        finishOnCreate();
+    }
+
+    private void finishOnCreate() {
         EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
         if (navHostFragment != null) {
             navController = navHostFragment.getNavController();
+
+            NavGraph navGraph = navController.getNavInflater().inflate(R.navigation.nav_graph);
+            Bundle startDestinationArgs = new Bundle();
+            startDestinationArgs.putString("user_role", userRole);
+
+            if ("customer".equalsIgnoreCase(userRole)) {
+                navGraph.setStartDestination(R.id.nav_home);
+            } else {
+                navGraph.setStartDestination(R.id.nav_profile);
+            }
+            navController.setGraph(navGraph, startDestinationArgs);
+
+            configureBottomNavigationMenu(binding.bottomNavigation);
             NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
-        }
 
-        requestNotificationPermission();
-
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            updateFcmTokenToFirestore();
-        }
-
-        setupMessageBubble();
-
-        if (navController != null) {
             navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                if (arguments != null && arguments.getString("user_role") == null) {
+                    arguments.putString("user_role", userRole);
+                }
+
                 if (destination.getId() == R.id.ChatFragment) {
                     setBottomNavigationVisibility(false);
                 } else {
@@ -70,7 +137,40 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        requestNotificationPermission();
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            updateFcmTokenToFirestore();
+        }
+
+        if ("customer".equalsIgnoreCase(userRole)) {
+            setupMessageBubble();
+        } else {
+            ImageView bubble = findViewById(R.id.messageBubble);
+            if (bubble != null) {
+                bubble.setVisibility(View.GONE);
+            }
+        }
+
         handleNotificationIntent(getIntent());
+    }
+    /**
+     * Configures the BottomNavigationView menu items based on the user's role.
+     *
+     * @param bottomNavigationView The BottomNavigationView instance.
+     */
+    private void configureBottomNavigationMenu(BottomNavigationView bottomNavigationView) {
+        Menu menu = bottomNavigationView.getMenu();
+
+        menu.clear();
+        getMenuInflater().inflate(R.menu.bottom_nav_menu, menu); // Inflate the full menu
+
+        if (!"customer".equalsIgnoreCase(userRole)) {
+            menu.removeItem(R.id.nav_home);
+            menu.removeItem(R.id.nav_favourite);
+            menu.removeItem(R.id.nav_cart);
+            // nav_history and nav_profile are kept
+        }
     }
 
     @Override
@@ -191,7 +291,8 @@ public class MainActivity extends AppCompatActivity {
                         if (newX < 0) newX = 0;
                         if (newX > screenWidth - v.getWidth()) newX = screenWidth - v.getWidth();
                         if (newY < 0) newY = 0;
-                        if (newY > screenHeight - v.getHeight()) newY = screenHeight - v.getHeight();
+                        if (newY > screenHeight - v.getHeight())
+                            newY = screenHeight - v.getHeight();
                         v.setX(newX);
                         v.setY(newY);
                         isDragging = true;
@@ -253,5 +354,15 @@ public class MainActivity extends AppCompatActivity {
     public void setBottomNavigationVisibility(boolean isVisible) {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigation);
         bottomNavigationView.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    // Add this method inside your MainActivity class
+    public String getUserRole() {
+        // Ensure userRole is never null when returned, provide a default if it somehow isn't set.
+        if (userRole == null) {
+            Log.w("MainActivity", "getUserRole() called before userRole was fully initialized, defaulting to customer.");
+            return "customer";
+        }
+        return userRole;
     }
 }
