@@ -160,7 +160,7 @@ public class SearchResultFragment extends Fragment {
         );
 
         Request request = new Request.Builder()
-                .url("localhost:5000/search") // Using server URL later
+                .url("http://10.0.231.175:5000/search") // Using server URL later
                 .post(requestBody)
                 .build();
 
@@ -213,15 +213,16 @@ public class SearchResultFragment extends Fragment {
                 FoodModel food = new FoodModel();
                 String id = dishJson.getString("id");
 
-
-                food.setId(id);
-                food.setName(dishJson.getString("name"));
-                food.setDescription(dishJson.getString("description"));
-                food.setImageUrl(dishJson.getString("imageUrl"));
-                food.setPrice(dishJson.getDouble("price"));
-                food.setStar(dishJson.getDouble("star"));
-                food.setTime(dishJson.getString("time"));
-                food.setCategoryName(dishJson.getString("categoryName"));
+                if (!id.equals("unknown")) {
+                    food.setId(id);
+                    food.setName(dishJson.getString("name"));
+                    food.setDescription(dishJson.getString("description"));
+                    food.setImageUrl(dishJson.getString("imageUrl"));
+                    food.setPrice(dishJson.getDouble("price"));
+                    food.setStar(dishJson.getDouble("star"));
+                    food.setTime(dishJson.getString("time"));
+                    food.setCategoryName(dishJson.getString("categoryName"));
+                }
 
                 nlpResults.add(food);
             }
